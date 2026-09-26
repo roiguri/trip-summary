@@ -691,16 +691,19 @@ function timelineItems(d: Day): TimelineItem[] {
  * Coordinates are relative to the diamond centre (x right, y down).
  */
 const DOT_SPACING = 12;
+const CURVE_RISE = 24;
 const laneCurves = new Map<number, { dots: [number, number][]; rise: number; padBottom: number }>();
 function laneCurve(lane: number) {
   const cached = laneCurves.get(lane);
   if (cached) return cached;
   const dx = 9 * (lane + 1);
-  const rise = 36 + 12 * lane;
+  // Leaves the lane vertically `rise` px above the diamond and arrives diagonally (45°) at the
+  // diamond's centre, so the last visible dots point at the middle of the diamond.
+  const rise = CURVE_RISE + 6 * lane;
   const P = [
     [dx, -rise],
     [dx, -rise * 0.45],
-    [0, -rise * 0.5],
+    [dx * 0.55, -dx * 0.55],
     [0, 0],
   ];
   const at = (t: number) =>
