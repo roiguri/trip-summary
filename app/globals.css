@@ -1,0 +1,104 @@
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:#fffdfa;color:#26382e;font-family:Arial,Helvetica,sans-serif}button{font:inherit;cursor:pointer}button:disabled{opacity:.3;cursor:default}.shell{height:100dvh;overflow:hidden}.header{height:62px;border-bottom:1px solid #e0e6dd;background:#fafaf7;display:flex;align-items:center;justify-content:space-between;padding:0 34px;position:relative;z-index:4}.brand{font-size:15px;letter-spacing:.17em;font-weight:800}.brand-mark{font-size:20px;margin-right:10px;color:#426451}.nav{position:absolute;left:50%;transform:translateX(-50%);display:flex;gap:31px;font-weight:700;font-size:10px;color:#8b9c8b;letter-spacing:.03em}.nav-active{color:#283b32}.status{font-size:10px;color:#91a193}.left{height:calc(100dvh - 62px);width:min(870px,calc(100vw - 480px));position:relative}.intro{position:absolute;top:46px;left:60px}.kicker{font-size:11px;letter-spacing:.16em;font-weight:800;margin-bottom:11px}.intro h1{font-size:38px;letter-spacing:-.055em;line-height:1.15;margin:0;font-weight:750}.intro p{font-size:11px;color:#92998c;margin-top:17px}.rail{position:absolute;top:220px;bottom:0;left:0;right:0;overflow:auto;scrollbar-width:thin;scrollbar-color:#d7dcd1 transparent;padding:0 0 120px}.day-section{position:relative;min-height:600px}.day-section:nth-of-type(2){min-height:540px}.day-section:nth-of-type(3){min-height:470px}.day-banner{position:relative;left:calc(55.5% - 168px);width:260px;border:0;background:#dbe9d6;color:#273d30;padding:11px 14px 10px;text-align:left;transform:rotate(-1.8deg);box-shadow:3px 4px 0 #c8d6c5;z-index:2;font-size:18px;font-weight:750;letter-spacing:-.035em;white-space:nowrap}.day-section:nth-of-type(even) .day-banner{background:#f3d1bb;box-shadow:3px 4px 0 #e5b99e;transform:rotate(1deg)}.day-banner small{display:block;position:absolute;top:calc(100% - 2px);left:10px;background:#f1f4e9;border:1px solid #d1dcc9;border-radius:14px;padding:4px 9px;color:#70806b;font-size:10px;letter-spacing:0;font-weight:500;transform:rotate(2deg)}.entries{position:relative;margin-left:55.5%;border-left:3px solid #bfd1c1;min-height:520px;padding-top:26px}.entry{display:block;position:relative;border:0;background:transparent;color:#293d30;width:355px;min-height:124px;padding:8px 0 16px 62px;text-align:left}.entry:focus-visible,.day-banner:focus-visible{outline:2px solid #ac7658}.entry-left{left:-355px;padding:8px 62px 16px 0;text-align:right}.entry-right{left:0}.entry-node{position:absolute;top:15px;left:-8px;border:2px solid #c67c57;color:#c67c57;background:#fffdfa;border-radius:50%;width:13px;height:13px;font-size:18px;line-height:6px;text-align:center}.entry-left .entry-node{left:auto;right:-8px}.entry.type-transit .entry-node{border:0;background:#dcefe8;border-radius:50%;width:33px;height:33px;left:-17px;top:8px;font-size:17px;line-height:32px;color:#397b78}.entry.type-note .entry-node{display:none}.entry-content{display:block}.entry-content:before{content:"";position:absolute;top:21px;left:0;width:56px;border-top:2px solid #c88865}.entry-left .entry-content:before{left:auto;right:0}.entry-content strong{font-size:20px;font-weight:750;letter-spacing:-.04em;display:block;line-height:1.08;text-decoration:underline;text-decoration-color:#8eb59b;text-decoration-thickness:2px;text-underline-offset:4px}.entry-content small{display:block;margin-top:5px;font-size:10px;font-weight:700;color:#78927d}.entry.active .entry-content strong{color:#ba704c}.stack{height:95px;display:block;position:relative;margin:21px 0 12px;width:245px}.entry-left .stack{margin-left:auto}.stack img{position:absolute;width:100px;height:85px;object-fit:cover;top:4px;left:calc(var(--i)*67px);box-shadow:0 6px 10px #3b403322;border-radius:3px;transform:rotate(calc((var(--i) - 1)*4deg));border:1px solid #e7e5db}.entry.type-note{min-height:112px;padding-top:0}.entry.type-note .entry-content{background:#fff8ec;border:1px solid #edddc8;padding:15px 18px;box-shadow:4px 4px 0 #e5d8c4;transform:rotate(.7deg)}.entry.type-note .entry-content:before{display:none}.entry.type-note strong{font-size:13px;text-decoration:none}.entry-note{display:block;font-size:10px;margin-top:7px}.entry.type-transit{min-height:100px}.entry.type-transit .entry-content:before{display:none}.shell.collapsed .left{width:min(900px,100%);margin:auto}.reopen{position:fixed;right:45px;top:95px;border:1px solid #cddccf;border-radius:50%;background:#fdfcf8;color:#426451;width:48px;height:48px;box-shadow:0 8px 20px #3332}.right{position:fixed;z-index:3;right:max(40px,calc((100vw - 1370px)/2 + 88px));top:74px;bottom:16px;width:400px;display:flex;flex-direction:column;gap:12px;pointer-events:none}.right>*{pointer-events:auto}.map-card,.panel{background:#fffdf8;border:1px solid #d5e0d3;border-radius:24px;box-shadow:0 9px 23px #28382e22,0 2px 6px #28382e12;overflow:hidden}.map-card{height:var(--map-height);min-height:165px;display:flex;flex-direction:column;flex:none}.card-head{height:51px;display:flex;align-items:center;justify-content:space-between;padding:10px 20px;flex:none}.card-head small{display:block;font-size:8px;font-weight:800;letter-spacing:.16em;color:#8aa58d}.card-head strong{display:block;font-size:14px;margin-top:3px}.card-close{width:28px;height:28px;border-radius:50%;border:1px solid #d5e1d4;background:#fffdf8;color:#5b7b65;font-size:21px;line-height:16px}.map-wrap{flex:1;position:relative;min-height:0}.map{height:100%;width:100%;background:#d8e8e1}.whole-chip{position:absolute;left:13px;top:12px;border:1px solid #d6e2d7;border-radius:30px;background:#fffdf8;padding:7px 13px;color:#516b59;font-weight:750;font-size:10px;box-shadow:0 2px 4px #25352a22}.map-foot{height:28px;flex:none;padding:8px 15px;display:flex;justify-content:space-between;align-items:center;font-size:8px;font-weight:750;letter-spacing:.13em;color:#a1b6a3}.map-foot span:first-child{color:#7f9c82}.map-foot span:first-letter{color:#c78261}.maplibregl-control-container .maplibregl-ctrl-bottom-left{display:none}.map-pin{border-radius:50%;height:27px;width:27px;border:2px solid #c67b55;color:#be714d;background:#fffdf8;box-shadow:0 1px 5px #3334;font-weight:700;font-size:12px;padding:0}.map-pin.dim-pin{opacity:.5}.map-pin.day-pin{opacity:1}.map-pin.chosen-pin{background:#c67b55;color:#fff;transform:scale(1.13)}.photo-pin{background:#a0d4c5;border:2px solid white;color:#426a62;border-radius:50%;width:28px;height:28px;display:grid;place-items:center}.maplibregl-ctrl-top-right{top:auto!important;bottom:12px!important;right:10px!important}.panel{flex:1;min-height:0}.panel-body{height:100%;overflow:hidden;padding:20px 22px 15px;display:flex;flex-direction:column;min-height:0}.panel-body h2{font-size:24px;letter-spacing:-.045em;margin:0 0 11px;line-height:1.1;flex:none}.meta{font-size:10px;color:#819887;font-weight:700;margin-bottom:14px;flex:none}.meta span{padding:0 4px}.meta em{font-size:9px;font-style:normal;background:#edf4e9;border:1px solid #d4e2cf;border-radius:15px;padding:4px 7px;color:#6d866f;margin-left:5px}.photos{flex:1;min-height:0;display:grid;gap:5px}.photo{padding:0;border:0;border-radius:5px;min-width:0;min-height:0;overflow:hidden;background:#e2e7db;position:relative}.photo img{width:100%;height:100%;object-fit:cover;display:block}.photo span{display:none}.photo-active{outline:3px solid #c7805c;outline-offset:-3px}.photos.count-1{grid-template-columns:1fr;grid-template-rows:1fr}.photos.count-2{grid-template-columns:repeat(2,1fr);grid-template-rows:1fr}.photos.count-3{grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(2,minmax(0,1fr))}.photos.count-3 .photo:first-child{grid-row:span 2}.photos.count-4{grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(2,minmax(0,1fr))}.photos.count-5{grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(2,minmax(0,1fr))}.photos.count-5 .photo{grid-column:span 2}.photos.count-5 .photo:nth-child(-n+2){grid-column:span 3}.photos.count-6{grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,minmax(0,1fr))}.photos.count-7,.photos.count-8{grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(2,minmax(0,1fr))}.photos.count-7 .photo:first-child{grid-column:span 2}.photos.count-9{grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,minmax(0,1fr))}.photos.count-10{grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(2,minmax(0,1fr))}.photos.count-11,.photos.count-12{grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(3,minmax(0,1fr))}.photos.count-11 .photo:last-child{grid-column:span 2}.pagination{height:30px;flex:none;display:flex;align-items:center;justify-content:space-between;color:#9bab9c}.pagination small{font-size:10px}.pagination div{display:flex;align-items:center;gap:9px;font-size:10px}.pagination button{width:22px;height:22px;border:0;background:transparent;color:#648b70;font-size:23px;line-height:18px}.pagination-b div span{padding:5px 9px;border-radius:15px;background:#eef2e9}.pagination-c{position:relative}.pagination-c button{background:#fffcf4;border:1px solid #d8e3d5;border-radius:50%;height:27px;width:27px;box-shadow:0 2px 7px #3333;font-size:17px}.pagination-c button:last-child{position:absolute;right:5px;bottom:39px}.pagination-c button:first-child{position:absolute;left:5px;bottom:39px}.pagination-c div span{position:absolute;right:35px;bottom:1px}.note{font-size:11px;line-height:1.4;border-left:2px solid #d39978;background:#fcf5e9;padding:10px 12px;margin:7px 0 5px;max-height:55px;overflow:hidden;flex:none}.maps-link{font-size:10px;color:#739477;text-decoration:none;margin-top:3px;flex:none}.stay-info{display:flex;gap:25px;font-size:9px;color:#94a696;border-top:1px solid #e3e9df;padding-top:12px;margin-bottom:14px}.stay-info b{font-size:11px;color:#334837}.lightbox{position:fixed;z-index:10;inset:0;background:#17251ce8;display:flex;align-items:center;justify-content:center}.lightbox img{max-width:80vw;max-height:78vh;object-fit:contain}.lightbox button{background:transparent;border:0;color:white}.close{position:absolute;right:35px;top:30px;font-size:12px;letter-spacing:.12em}.lightnav{font-size:35px;position:absolute;top:50%}.lightnav.prev{left:35px}.lightnav.next{right:35px}.lightcaption{position:absolute;bottom:30px;color:#fff;font-size:14px}.lightcaption span{margin-left:15px;font-size:11px}
+.shell.collapsed .left{width:100%;margin:0}.shell.collapsed .rail{left:50%;right:auto;width:min(900px,100%);transform:translateX(-50%)}
+/* Minimal pager: a single vector path is mirrored, with no disabled opacity shift. */
+.pagination-a div{height:30px;align-items:center;gap:7px}
+.pagination-a div span{height:24px;display:flex;align-items:center;justify-content:center;line-height:1}
+.pagination-a button{display:flex;align-items:center;justify-content:center;height:24px;width:24px;font-size:0;line-height:0;padding:0}
+.pagination-a button:disabled{opacity:1}
+.pagination-a .pager-chevron{display:block;width:16px;height:16px;fill:none;stroke:#648b70;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex:none;translate:0 -1px}
+.pagination-a .prev-chevron{transform:rotate(180deg)}
+/* Timeline labels are plain type in the locked WAYFARER design. */
+.entry-content strong,.entry:hover .entry-content strong,.entry:focus-visible .entry-content strong{text-decoration:none}
+
+/* Entry connectors share one geometry: rail center, single dot, and a 56px arm. */
+.entry:not(.type-note):not(.type-transit) .entry-node{left:-8px;right:auto;top:15px;width:13px;height:13px;border:1.5px solid #c67c57;background:#fffdfa;color:transparent;line-height:0;font-size:0;z-index:2}
+.entry-left:not(.type-note):not(.type-transit) .entry-node{left:auto;right:-8px}
+.entry:not(.type-note):not(.type-transit) .entry-node::after{content:"";position:absolute;left:4px;top:4px;width:2px;height:2px;border-radius:50%;background:#c67c57}
+.entry:not(.type-note):not(.type-transit) .entry-content:before{left:-1.5px;right:auto;top:21px;width:58px;border-top:1.5px solid #c88865}
+.entry-left:not(.type-note):not(.type-transit) .entry-content:before{left:auto;right:-1.5px}
+.entry.type-transit{min-height:100px}
+.entry.type-transit .entry-content{padding-top:0}
+.entry.type-transit .entry-content strong{font-size:16px}
+.entry.type-transit .entry-content small,.transit-route{display:block;font-size:10px;font-weight:600;color:#78927d;margin-top:3px}
+.entry.type-transit .entry-content:before{display:none}
+.entry.type-transit .entry-node{left:-17px;right:auto;top:8px}
+.entry-left.type-transit .entry-node{left:auto;right:-17px}
+.entry.type-note .entry-content{position:relative;direction:inherit;text-align:start;padding:15px 18px}
+.entry.type-note .entry-content::after{content:"";position:absolute;top:-7px;left:41%;width:48px;height:11px;background:#c8d9c8bd;transform:rotate(-4deg);box-shadow:0 1px 1px #49644a14}
+.entry.type-note .entry-content strong,.entry.type-note .entry-note{text-align:start}
+.entry.type-note .entry-note{direction:inherit}
+.entry.type-note .entry-content[dir="rtl"]{direction:rtl;text-align:right}
+.entry.type-note .entry-content[dir="ltr"]{direction:ltr;text-align:left}
+.entry.type-note .entry-note[dir="rtl"]{direction:rtl;text-align:right}
+.entry.type-note .entry-note[dir="ltr"]{direction:ltr;text-align:left}
+.entry.type-note .entry-content[dir="ltr"] .entry-note{direction:ltr;text-align:left}
+.entry.type-note .entry-content[dir="rtl"] .entry-note{direction:rtl;text-align:right}
+
+/* Transit is a quiet, compact rail stop, not a place-entry connector. */
+.entry.type-transit{width:355px;left:0;min-height:110px;padding:16px 0 28px 70px;text-align:left}
+.entry.type-transit .entry-node,.entry-left.type-transit .entry-node{position:absolute;left:-18px;right:auto;top:25px;width:37px;height:37px;border:1px solid #a9d4cd;border-radius:50%;background:#dcefe8;color:#397b78;display:flex;align-items:center;justify-content:center;z-index:2;box-shadow:none}
+.entry.type-transit .transit-icon{width:20px;height:20px;fill:none;stroke:#417f78;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.entry.type-transit .entry-content strong{font-size:13px;font-weight:700;line-height:1.15;letter-spacing:-.025em}
+.entry.type-transit .entry-content small{font-size:10px;line-height:1.35;margin-top:4px;text-transform:none;letter-spacing:0}
+.entry.type-transit .transit-route{font-size:11px;line-height:1.35;color:#689289;white-space:nowrap;margin-top:4px}
+/* The active stop keeps the same ink as the locked timeline; only its rail dot marks selection. */
+.entry.active .entry-content strong{color:#293d30}
+/* Notes put their timestamp above the heading, as on the paper cards in the reference. */
+.entry.type-note .entry-content{display:flex;flex-direction:column}
+.entry.type-note .entry-content small{order:0;margin:0 0 7px;font-size:10px;color:#bc805e}
+.entry.type-note .entry-content strong{order:1}
+.entry.type-note .entry-content .entry-note{order:2}
+/* Keep the small mode badge close to the 32px reference stop. */
+.entry.type-transit .entry-node,.entry-left.type-transit .entry-node{width:32px;height:32px;left:-16px;top:27px}
+.entry.type-transit .transit-icon{width:18px;height:18px}
+/* The journey's transit leg is a teal dotted line; the rest of the rail stays green. */
+.entry.type-transit::before{content:"";position:absolute;left:-3px;top:0;bottom:0;width:3px;background-color:#fffdfa;background-image:radial-gradient(circle,#609b91 1.2px,transparent 1.4px);background-size:3px 10px;background-position:center top;z-index:1}
+.entry.type-transit .entry-node{z-index:2}
+.entry.type-transit .entry-content small{color:#61948d;font-weight:500}
+.entry.type-transit .transit-route{color:#61948d;font-weight:500}
+/* A continuing overnight stay is a small rail-side chip, not a new full entry. */
+.multi-day-chip{position:relative;margin:3px 0 14px 18px;display:table;padding:4px 9px;background:#eff2e9;border:1px solid #d3e1ce;box-shadow:1px 2px 0 #e4e9dd;color:#6a9276;font-size:10px;font-weight:600}
+/* Loose photo moments are single small, lightly tilted prints; place galleries keep their three-card fan. */
+.entry.type-photo .stack,.entry.type-cluster .stack{height:107px;width:110px;margin-top:19px}
+.entry.type-photo .stack img,.entry.type-cluster .stack img{width:93px;height:93px;left:5px;top:0;transform:rotate(-5deg);box-shadow:0 6px 9px #3b403329;border:3px solid #faf9f2;border-bottom-width:7px}
+.entry.type-cluster .stack img{transform:rotate(-4deg)}
+.sequence-eyebrow{display:flex;justify-content:space-between;align-items:center;font-size:9px;letter-spacing:.16em;font-weight:700;color:#9bad9b;margin-bottom:8px}
+.sequence-eyebrow span:last-child{letter-spacing:0;font-weight:400}
+.panel-body:has(.sequence-eyebrow) .meta{font-weight:500;color:#63877c}
+/* Three-day example: a second dotted lane grows from the start node, hugs the rail 6px to its right, and ends at a hollow diamond. */
+.rail{--rail-x:calc(870px * .555)}
+.multiday-span{position:absolute;left:calc(55.5% + 4px);width:3px;background-image:radial-gradient(circle,#6f9f84 1.2px,transparent 1.4px);background-size:3px 9px;z-index:1;pointer-events:none}
+.multiday-end{position:relative;height:70px;margin-top:12px;display:flex;align-items:flex-start;padding:0 0 0 18px;color:#729786;font-size:10px;font-weight:600}
+.multiday-end .diamond{position:absolute;left:-7px;top:2px;width:12px;height:12px;background:#fffdfa;border:1.5px solid #6f9f84;transform:rotate(45deg);z-index:2}
+.multiday-end small{font-size:10px;margin-top:0}
+/* The duration lane lives beside the rail, while transit has its own short teal segment. */
+.entry.type-transit::before{z-index:3}
+/* The final dot run bends gently back to the hollow diamond in the locked geometry. */
+.multiday-span{border-bottom-left-radius:15px}
+
+/* A sequence of five keeps two columns like the locked sequence panel. */
+.panel-body .photos.count-5{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr))}
+.panel-body .photos.count-5 .photo,.panel-body .photos.count-5 .photo:nth-child(-n+2){grid-column:auto}
+/* Keep the transit disc clean: short teal dots flank the disc, not through it. */
+.entry.type-transit::before{background-image:none;background-color:#fffdfa}
+.entry.type-transit::after{content:"";position:absolute;left:-3px;top:0;bottom:0;width:3px;background-image:radial-gradient(circle,#609b91 1.2px,transparent 1.4px);background-size:3px 10px;z-index:4;pointer-events:none;mask-image:linear-gradient(to bottom,#000 0 26px,transparent 26px 58px,#000 58px)}
+.entry.type-transit .entry-node{z-index:5}
+.multiday-span{background-repeat:repeat-y;background-clip:content-box;padding-bottom:14px}
+.multiday-span::after{content:"";position:absolute;left:-7px;bottom:-1px;width:12px;height:15px;background:radial-gradient(circle at 9px 1px,#6f9f84 1.2px,transparent 1.4px),radial-gradient(circle at 8px 5px,#6f9f84 1.2px,transparent 1.4px),radial-gradient(circle at 6px 9px,#6f9f84 1.2px,transparent 1.4px);mask-image:none}
+/* Locked two-track treatment: a solid rail and distinct, round dots 7px to its right. */
+.multiday-span{left:calc(55.5% + 5px);width:7px;background-image:radial-gradient(circle at 3px 3px,#6f9f84 0 1px,transparent 1.25px);background-size:7px 10px;background-position:0 0}
+.entry.type-transit::before{left:-3px;width:3px;background:#63a39b;z-index:3}
+.entry.type-transit::after{left:5px;width:7px;top:0;bottom:0;background:radial-gradient(circle at 3px 3px,#6f9f84 0 1px,transparent 1.25px) 0 0/7px 10px repeat-y;mask-image:none;z-index:4}
+.entry.type-transit .entry-node,.entry-left.type-transit .entry-node{background:#f2f7f1;border:1px solid #a7d0c7;color:#397b78;z-index:5}
+.entry.type-transit .entry-content strong{font-size:11px;font-weight:700;letter-spacing:0}
+.entry.type-transit .entry-content small,.entry.type-transit .transit-route{color:#548b84}
+.multi-day-chip{background:#f3f5ed;border:1px solid #d9e0d1;box-shadow:1px 2px 0 #e8ece2;color:#436c5f}
+/* The locked journal has a continuous pair: solid rail, then round-dot track. */
+.entries{background-image:radial-gradient(circle at 3px 3px,#749d85 0 1px,transparent 1.25px);background-size:7px 10px;background-position:5px 0;background-repeat:repeat-y}
+.multiday-span{background:none}
+.entry.type-transit::after{background:none}
+/* Photos fill each tilted card edge-to-edge; no instant-photo frame. */
+.stack img,.entry.type-photo .stack img,.entry.type-cluster .stack img{border:0;border-radius:4px;box-shadow:0 6px 10px #3b403329}
+/* Exact paper-card treatment is edge-to-edge with a shallow rounded corner. */
+.entry.type-photo .stack img,.entry.type-cluster .stack img{border:0!important;border-radius:5px;box-shadow:0 6px 10px #3b403329}
+.entry.type-place .stack img,.entry.type-lodging .stack img{border:0;border-radius:4px}
