@@ -16,21 +16,21 @@ Phase 0 goal: confirm that the prototype is implemented correctly against the re
 
 ## Parts
 
-| #   | Part                                                                                   | References                                                                                       | Status  |
-| --- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ------- |
-| 1   | Page shell: header, intro, scroll model, backgrounds                                   | `mock/app-locked-geometry-final-full`, `mock/image-e55ca7ac`, `captures/wayfarer-locked-opening` | pending |
-| 2   | Rail and day banners (two-track rail, day tag)                                         | geometry mock, `captures/wayfarer-locked-rail-*`                                                 | pending |
-| 3   | Place / lodging entries (connector, title, byline, photo fan)                          | geometry mock, `mock/roi-shot-cards`                                                             | pending |
-| 4   | Loose photo and cluster entries                                                        | `mock/roi-shot-cards`, `captures/wayfarer-photo-cards-compare-*`                                 | pending |
-| 5   | Transit stop                                                                           | `mock/transit-locked-zoom`, `captures/wayfarer-transit-rail-compare-*`                           | pending |
-| 6   | Notes (tape, LTR/RTL)                                                                  | geometry mock, `captures/wayfarer-locked-notes`                                                  | pending |
-| 7   | Multi-day span (start block, day chips, dot lane, end diamond)                         | geometry mock, `captures/wayfarer-locked-multiday-end`                                           | pending |
-| 8   | Map card (layout, ratios, markers, route, Whole trip, day emphasis)                    | `mock/trip-real-map-whole-final`, `mock/trip-real-map-day-final`, `mock/panel-ratio-large`       | pending |
-| 9   | Detail panel: place and lodging                                                        | `mock/panel-final-place`, `captures/wayfarer-locked-place`                                       | pending |
-| 10  | Detail panel: photo, cluster, day album, gallery and pager                             | `mock/image-e55ca7ac`, `captures/wayfarer-locked-single`, `-cluster`, `-pager`                   | pending |
-| 11  | Lightbox                                                                               | `captures/wayfarer-locked-fullscreen`                                                            | pending |
-| 12  | Collapsed right column                                                                 | no reference image; written spec in `DESIGN.md` only                                             | pending |
-| 13  | Interactions: click-to-scroll, day tracking while scrolling, map pin → entry, keyboard | written spec in `DESIGN.md`                                                                      | pending |
+| #   | Part                                                                                   | References                                                                                       | Status              |
+| --- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------- |
+| 1   | Page shell: header, intro, scroll model, backgrounds                                   | `mock/app-locked-geometry-final-full`, `mock/image-e55ca7ac`, `captures/wayfarer-locked-opening` | agreed with changes |
+| 2   | Rail and day banners (two-track rail, day tag)                                         | geometry mock, `captures/wayfarer-locked-rail-*`                                                 | pending             |
+| 3   | Place / lodging entries (connector, title, byline, photo fan)                          | geometry mock, `mock/roi-shot-cards`                                                             | pending             |
+| 4   | Loose photo and cluster entries                                                        | `mock/roi-shot-cards`, `captures/wayfarer-photo-cards-compare-*`                                 | pending             |
+| 5   | Transit stop                                                                           | `mock/transit-locked-zoom`, `captures/wayfarer-transit-rail-compare-*`                           | pending             |
+| 6   | Notes (tape, LTR/RTL)                                                                  | geometry mock, `captures/wayfarer-locked-notes`                                                  | pending             |
+| 7   | Multi-day span (start block, day chips, dot lane, end diamond)                         | geometry mock, `captures/wayfarer-locked-multiday-end`                                           | pending             |
+| 8   | Map card (layout, ratios, markers, route, Whole trip, day emphasis)                    | `mock/trip-real-map-whole-final`, `mock/trip-real-map-day-final`, `mock/panel-ratio-large`       | pending             |
+| 9   | Detail panel: place and lodging                                                        | `mock/panel-final-place`, `captures/wayfarer-locked-place`                                       | pending             |
+| 10  | Detail panel: photo, cluster, day album, gallery and pager                             | `mock/image-e55ca7ac`, `captures/wayfarer-locked-single`, `-cluster`, `-pager`                   | pending             |
+| 11  | Lightbox                                                                               | `captures/wayfarer-locked-fullscreen`                                                            | pending             |
+| 12  | Collapsed right column                                                                 | no reference image; written spec in `DESIGN.md` only                                             | pending             |
+| 13  | Interactions: click-to-scroll, day tracking while scrolling, map pin → entry, keyboard | written spec in `DESIGN.md`                                                                      | pending             |
 
 ## Part decisions
 

@@ -22,7 +22,7 @@ Known issues found while initializing:
 
 ## Phase 0 — Foundation and fidelity verification (no visual change unless agreed)
 
-1. **Verify the implementation against the mocks, part by part** (`docs/VERIFICATION.md`). Each of the 13 parts is reviewed side by side (mock, handoff capture, current capture) and agreed before moving on. Fixes that come out of a part are small, reviewed changes.
+1. **Verify the implementation against the mocks, part by part** (`docs/VERIFICATION.md`). Each of the 13 parts is reviewed side by side (mock, handoff capture, current capture) and agreed before moving on. Fixes that come out of a part are small, reviewed changes. Progress: Part 1 agreed; data separation done; a measured mock style pass (header, timeline, photo cards, right column, content-sized detail card) done ahead of Parts 2–13, which still need their review.
 2. Tooling: Prettier (done), ESLint, `npm run typecheck`, a GitHub Actions CI job (install, typecheck, lint, build), Node pinned (`engines`, done).
 3. Screenshot guard: `scripts/capture.mjs` (done) becomes Playwright visual tests with committed baselines, taken once the parts are agreed.
 4. Refactor behind the guard: split `Client.tsx` into components (`Header`, `Timeline` + entry kinds, `MapCard`, `DetailPanel`, `Gallery`, `Lightbox`). Split `lib/data.ts` into schema, seed and typed queries. Remove sample-only hard-coding found during verification. No visual diff.
