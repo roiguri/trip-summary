@@ -1673,3 +1673,7 @@ button:disabled {
     radial-gradient(circle at 4px 16px, #739d7c 0 1px, transparent 1.25px);
   pointer-events: none;
 }
+/* Later-day labels sit close under the day banner (user decision): ~24px instead of the mock's ~57px. */
+.entries > .multi-day-chip:first-child {
+  margin-top: -27px;
+}

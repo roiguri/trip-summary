@@ -81,6 +81,7 @@ Sampled pixel colours and positions from `mock/app-locked-geometry-final-full` (
 Sampled from `mock/app-locked-geometry-final-full` (positions relative to the rail centre and the end diamond's centre):
 
 - Later-day label ("… · day 2" / "· final day"): 2px `#9cb7a0` left edge, no outline, `#f0f2e8` fill, 2px `#dfe8dc` offset shadow, 11px bold `#76937e`, 22px tall, starting 21px right of the rail centre. Was a 1px outline all round, 10px text, 21px tall.
+- Later-day labels sit ~20px under the day banner (user decision; the mock has ~57px).
 - Lane: dots are anchored to the end, so the last straight dot always sits 34px above the diamond centre, whatever the span's length.
 - End bend: two dots step in from the lane (+6px at −22px, +2px at −10px) into the diamond's top corner, continuing the 12px rhythm. Replaces three small dots bunched up and to the right of the diamond (the handoff had flagged the bend as unfinished).
 - End diamond: 11px square rotated, 2px `#638e70` border, centred on the rail. Was a lighter 1px border and slightly larger.
