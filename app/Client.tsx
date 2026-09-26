@@ -498,7 +498,10 @@ export default function Client({ trip }: { trip: Trip }) {
               <span>OPENFREEMAP</span>
             </footer>
           </section>
-          <section className="panel" key={`${album || selected?.id}-${photoPage}`}>
+          <section
+            className={`panel ${album ? 'panel-album' : `panel-${selected?.type}`}`}
+            key={`${album || selected?.id}-${photoPage}`}
+          >
             <div className="panel-body">
               <h2>{album ? days.find((d) => d.date === album)?.title : selected?.title}</h2>
               {!album && selected && (

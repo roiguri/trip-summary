@@ -58,6 +58,7 @@ Measured against `mock/panel-ratio-large`, `mock/panel-final-place` and `mock/im
 - Entries: 22px/-0.02em titles; neutral grey bylines; text 68px from the rail centre on both sides; node level with the title baseline; 2px arm and ring with a 4px centre dot; photo fans 266×102.
 - Right column: 424px cards, 42px from the right, 78px from the top, 13px from the bottom. Map card head 55px with a 16px title. Detail panel with a 26px title, 11px meta, 13px note, 12px Maps link, and a sentence-case photo count ("1 photo" / "16 photos").
 - Photo cards (follow-up after review): fan cards 92×98 laid side by side with ~6px overlap and tilts of −4°/+2°/−3° (were 108×92, overlapping ~35px, −4°/0°/+4°); loose-photo cards 100px squares at −4° with 8px corners; panel gallery 7px gaps and 6px corners.
+- Detail card fits its content (user decision): no stretched photos, pager right under the gallery, rows shrink only if the card would outgrow the column (checked at 900px and 800px window heights, no overflow in any state).
 - Kept on purpose: the thin chevron pager (user preferred it to the mock's round arrows), no title underlines, the two-track rail, and the 3px rail width (the mock's ~4px would shift the dotted-lane and transit geometry).
 - Fixed along the way: left-side nodes were 3px right of the rail centre (right side was centred), and entries without photos (lodging) were vertically centred below their connector because entries are buttons.
 

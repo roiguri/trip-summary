@@ -1472,3 +1472,84 @@ button:disabled {
 .photo {
   border-radius: 6px;
 }
+
+/* Detail card fits its content: photos keep a natural size instead of stretching to fill the
+   column, so the count/pager sits directly under them. When content would outgrow the column,
+   the card and the gallery rows shrink together (the panel never scrolls). */
+.panel {
+  flex: 0 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+.panel-body {
+  height: auto;
+  flex: 0 1 auto;
+}
+.photos {
+  flex: 0 1 auto;
+  --row: 110px;
+}
+.photos.count-1 {
+  --row: 250px;
+  grid-template-rows: minmax(0, var(--row));
+}
+.photos.count-2 {
+  --row: 150px;
+  grid-template-rows: minmax(0, var(--row));
+}
+.photos.count-3 {
+  --row: 105px;
+}
+.photos.count-4 {
+  --row: 125px;
+}
+.photos.count-6 {
+  --row: 95px;
+}
+.photos.count-7,
+.photos.count-8 {
+  --row: 80px;
+}
+.photos.count-9 {
+  --row: 90px;
+}
+.photos.count-10 {
+  --row: 70px;
+}
+.photos.count-11,
+.photos.count-12 {
+  --row: 76px;
+}
+.photos.count-3,
+.photos.count-4,
+.photos.count-6,
+.photos.count-7,
+.photos.count-8,
+.photos.count-10 {
+  grid-template-rows: repeat(2, minmax(0, var(--row)));
+}
+.photos.count-9,
+.photos.count-11,
+.photos.count-12,
+.panel-body .photos.count-5 {
+  grid-template-rows: repeat(3, minmax(0, var(--row)));
+}
+.panel-body .photos.count-5 {
+  --row: 120px;
+}
+.pagination {
+  margin-top: 4px;
+}
+/* Five photos: photo sequences keep the mock's 2x3 grid; places and day albums, which also show a
+   note, use the shorter two-over-three layout so the tiles keep their shape. */
+.panel:not(.panel-cluster) .panel-body .photos.count-5 {
+  --row: 110px;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, var(--row)));
+}
+.panel:not(.panel-cluster) .panel-body .photos.count-5 .photo {
+  grid-column: span 2;
+}
+.panel:not(.panel-cluster) .panel-body .photos.count-5 .photo:nth-child(-n + 2) {
+  grid-column: span 3;
+}
