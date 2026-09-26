@@ -4,56 +4,72 @@ Starting point: the reconstructed prototype from the design handoff (Next.js 15 
 
 ## Where things stand
 
-| Area | State |
-| --- | --- |
-| Journey timeline, map, detail panel, lightbox | Done, visually locked against the references |
-| Wishlist / Places tabs | Header links only, no screens |
-| Data | SQLite schema + fictional seed in `lib/data.ts`; read-only |
+| Area                                                | State                                                                                      |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Journey timeline, map, detail panel, lightbox       | Done, visually locked against the references                                               |
+| Wishlist / Places tabs                              | Header links only, no screens                                                              |
+| Data                                                | SQLite schema + fictional seed in `lib/data.ts`; read-only                                 |
 | Import (Google Maps Timeline, Google Photos, notes) | Parsers exist only in `legacy-vite/` (localStorage prototype), not wired into the Next app |
-| Editing / review (highlights, recommendations) | Not started |
-| Auth / deployment | Not configured ("View-only demo"); no deploy without a separate decision |
-| Tooling | No lint, formatter, tests or CI |
+| Editing / review (highlights, recommendations)      | Not started                                                                                |
+| Auth / deployment                                   | Not configured ("View-only demo"); no deploy without a separate decision                   |
+| Tooling                                             | Prettier and a screenshot capture script; no lint, tests or CI yet                         |
 
 Known issues found while initializing:
 
 - `/` is prerendered as static, so the trip is read from SQLite at **build** time. Any real data flow needs the page to be dynamic (`export const dynamic = 'force-dynamic'` or server actions/route handlers).
-- `app/Client.tsx`, `lib/data.ts` and `app/globals.css` are written in a dense, near-minified style (a few very long lines). Hard to review and diff.
 - Remaining visual gaps from the handoff: substitute photos don't match captions; the multi-day end bend is subtler than the reference; the font is inferred (Arial/Helvetica), not proven.
 - Sample photos are Wikimedia Commons copies; licenses need checking before any public deployment.
 
-## Phase 0 — Foundation (no visual change)
+## Phase 0 — Foundation and fidelity verification (no visual change unless agreed)
 
-1. Reformat the code base (Prettier) and split `Client.tsx` into components: `Header`, `Timeline` (+ entry kinds: place, lodging, transit, note, photo, cluster, multi-day span), `MapCard`, `DetailPanel`, `Gallery`, `Lightbox`.
-2. Split `lib/data.ts` into `schema.sql`/migrations, a seed script, and typed query functions.
-3. Add ESLint, Prettier, `npm run typecheck`, and a GitHub Actions CI job (install, typecheck, lint, build).
-4. Visual regression guard: Playwright screenshots of the locked states at 1440×900, compared against committed baselines (the existing `docs/reference/captures/` set is the target). This protects the locked design during refactors.
-5. Pin Node (`.nvmrc` / `engines` ≥ 22.5).
+1. **Verify the implementation against the mocks, part by part** (`docs/VERIFICATION.md`). Each of the 13 parts is reviewed side by side (mock, handoff capture, current capture) and agreed before moving on. Fixes that come out of a part are small, reviewed changes.
+2. Tooling: Prettier (done), ESLint, `npm run typecheck`, a GitHub Actions CI job (install, typecheck, lint, build), Node pinned (`engines`, done).
+3. Screenshot guard: `scripts/capture.mjs` (done) becomes Playwright visual tests with committed baselines, taken once the parts are agreed.
+4. Refactor behind the guard: split `Client.tsx` into components (`Header`, `Timeline` + entry kinds, `MapCard`, `DetailPanel`, `Gallery`, `Lightbox`). Split `lib/data.ts` into schema, seed and typed queries. Remove sample-only hard-coding found during verification. No visual diff.
 
-## Phase 1 — Real data in (local only)
+## Phase 1 — Real data: discovery and design (its own step, no build yet)
 
-1. Port the legacy importers (`legacy-vite/src/lib/importers/*`) into `lib/importers/`, retargeted to the SQLite schema (`places`, `itinerary`, `photos`). Unit tests with small synthetic fixtures.
-2. Timeline builder: group by day in the destination timezone, merge photos into place visits by time/location, derive clusters and loose photos, detect transit from activity segments.
-3. Import UI (or CLI first: `npm run import -- --timeline file.json --photos dir/`), writing to a git-ignored DB. Local photo files served from a git-ignored folder.
-4. Make the page dynamic so it reflects the DB at request time.
-5. Keep the hard rule: no real trip data or photos in the repo.
+Real data integration is complex enough to be designed and agreed on before any code. Topics to work through together:
 
-## Phase 2 — Review & edit
+- **Sources:** which exports we actually have and in which format (Google Maps Timeline on-device vs. Takeout; Google Photos Takeout vs. API; the planning/notes format; bookings/transit). We'll gather small anonymised samples, and none go into the repo.
+- **Model:** how the SQLite schema covers visits, transit, lodging, photo clusters and multi-day spans. What is imported vs. authored vs. derived.
+- **Pipeline:** matching photos to places (time and location), clustering loose photos, timezone handling, deduplication, re-import without losing edits.
+- **Storage and privacy:** where the DB and photo files live, what's git-ignored, thumbnails.
+- **UX:** import flow (CLI first vs. in-app), and how review/editing corrections feed back.
+
+Output: a written data design, agreed before Phase 2.
+
+## Phase 2 — Real data: implementation
+
+Build what Phase 1 agreed: the importers (porting `legacy-vite/src/lib/importers/*` where it still fits), the timeline builder, the import flow, and a page that reads the DB per request. Fixture-based tests. Hard rule: no real trip data or photos in the repo.
+
+## Phase 3 — Review and editing
 
 - Mark highlights, favorite photos, edit notes/recommendations, rename/merge/reorder entries, fix categories.
 - Trip picker (the schema already supports multiple trips with one `is_current`).
-- Export/backup (JSON), matching the legacy export format where useful.
+- Export/backup.
 
-## Phase 3 — Remaining screens
+## Phase 4 — Mobile: design (its own step)
 
-- **Places**: by-category view (legacy `CategoryView.tsx` is a starting point), map-first.
-- **Wishlist**: backed by the existing `wishlist` table, with done/priority.
-- Responsive/mobile layout (the locked design is desktop 1440×900 only).
+Nothing has been discussed or designed for mobile yet; the locked design is desktop (1440×900) only. First decide together:
 
-## Phase 4 — Sharing & deployment (needs a separate decision)
+- Which uses matter on a phone (browsing a finished trip, logging during the trip, sharing).
+- How the rail + map + detail layout translates (e.g. map as sheet/toggle, detail as full-screen sheet, rail single-sided).
+- Mocks for the key screens, agreed the same part-by-part way as Phase 0.
+
+Then implementation as its own step.
+
+## Phase 5 — Remaining screens
+
+- **Places:** by-category view (legacy `CategoryView.tsx` is a starting point), map-first.
+- **Wishlist:** backed by the existing `wishlist` table, with done/priority.
+- Each needs its own design pass. There are no mocks for either today.
+
+## Phase 6 — Sharing and deployment (needs a separate decision)
 
 - Hosting choice (SQLite on a single node vs. hosted DB), auth, and read-only share links.
 - Photo storage strategy (local files vs. object storage), and media licensing review.
 
-## Suggested immediate next step
+## Immediate next step
 
-Phase 0, items 1–4: refactor + tooling + screenshot guard, landed as one reviewed PR with no visual diff. Then start Phase 1 with the Google Maps Timeline importer.
+Phase 0, item 1: walk through verification part 1 (page shell and scroll model) and agree on it.

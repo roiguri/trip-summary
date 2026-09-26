@@ -1,0 +1,6 @@
+node_modules
+.next
+legacy-vite
+public
+docs/reference
+package-lock.json

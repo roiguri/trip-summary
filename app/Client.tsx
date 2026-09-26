@@ -1,28 +1,625 @@
 'use client';
-import {useEffect,useMemo,useRef,useState} from 'react';import maplibregl,{Map as MapType,Marker} from 'maplibre-gl';import type {Day,Entry,Photo} from '../lib/data';
-type Trip={title:string;timezone:string;days:Day[]};
-const allPhotos=(days:Day[])=>days.flatMap(d=>d.entries.flatMap(e=>e.photos));
-function dateLabel(day:string){return new Date(`${day}T12:00:00`).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}).toUpperCase()}
-function noteDir(s:string):'ltr'|'rtl'{for(const ch of s){if(/[֐-ࣿ]/.test(ch))return 'rtl';if(/[A-Za-z]/.test(ch))return 'ltr'}return 'ltr'}
-function zoneLabel(zone:string|null){if(!zone)return '';return zone==='America/Los_Angeles'?'PT':zone.split('/').pop()?.replace(/_/g,' ')||zone}
-function icon(type:Entry['type'],title:string){if(type==='transit')return /train/i.test(title)?'train':/flight|fly/i.test(title)?'flight':'drive';if(type==='lodging')return '⌂';if(type==='note')return '✎';if(type==='cluster')return '▦';return '◈'}
-function MapView({trip,selected,focused,day,onSelect,ratio}:{trip:Trip;selected:Entry|null;focused:Photo|null;day:string;onSelect:(e:Entry)=>void;ratio:string}){
- const el=useRef<HTMLDivElement>(null), map=useRef<MapType|null>(null), markers=useRef<Marker[]>([]), firstDay=useRef(true), selectedRef=useRef(onSelect);selectedRef.current=onSelect;
- const places=useMemo(()=>trip.days.flatMap(d=>d.entries.filter(e=>e.type==='place'&&e.lat!=null&&e.lng!=null)),[trip]);
- useEffect(()=>{if(!el.current)return;const m=new maplibregl.Map({container:el.current,style:'https://tiles.openfreemap.org/styles/liberty',center:[-121.92,36.5],zoom:9,attributionControl:false});map.current=m;m.addControl(new maplibregl.NavigationControl({showCompass:false}),'top-right');m.once('load',()=>{const colors:Record<string,string>={background:'#f8f7f1',park:'#e2eddf',park_outline:'#d6e5d4',landuse_residential:'#f3f2e9',landcover_wood:'#e0eddf',landcover_grass:'#e3ede0',landcover_ice:'#e6eee8',landcover_wetland:'#e5efe7',landuse_pitch:'#e7ebe0',landuse_track:'#e7ebe0',landuse_cemetery:'#e5eddf',landuse_hospital:'#f3f0e8',landuse_school:'#e7eadf',waterway_tunnel:'#b9d8d4',waterway_river:'#b9d8d4',waterway_other:'#b9d8d4',water:'#d7e9e5',landcover_sand:'#f3eee3',aeroway_fill:'#efeee7',aeroway_runway:'#e4e0d7',aeroway_taxiway:'#e4e0d7',tunnel_motorway_link_casing:'#e2dcd1',tunnel_service_track_casing:'#e2dcd1',tunnel_link_casing:'#e2dcd1',tunnel_street_casing:'#e2dcd1'};for(const [id,color] of Object.entries(colors)){const layer=m.getLayer(id);if(!layer)continue;try{if(layer.type==='background')m.setPaintProperty(id,'background-color',color);else if(layer.type==='fill'){m.setPaintProperty(id,'fill-color',color);if(id==='water')m.setPaintProperty(id,'fill-opacity',1)}else if(layer.type==='line')m.setPaintProperty(id,'line-color',color)}catch{}}if(!m.getLayer('route')){m.addSource('route',{type:'geojson',data:{type:'Feature',geometry:{type:'LineString',coordinates:places.map(e=>[e.lng!,e.lat!])},properties:{}}});m.addLayer({id:'route',type:'line',source:'route',paint:{'line-color':'#6c9e83','line-width':2,'line-dasharray':[1.5,3],'line-opacity':0.72}})}m.fitBounds([[-121.98,36.34],[-121.86,36.66]],{padding:55,duration:0})});return()=>{m.remove();map.current=null}},[places]);
- useEffect(()=>{const m=map.current;if(!m)return;markers.current.forEach(x=>x.remove());markers.current=places.map((entry,i)=>{const div=document.createElement('button');div.className=`map-pin ${entry.day===day?'day-pin':'dim-pin'} ${selected?.id===entry.id?'chosen-pin':''}`;div.textContent=String(i+1);div.title=entry.title;div.onclick=()=>selectedRef.current(entry);return new maplibregl.Marker({element:div,anchor:'center'}).setLngLat([entry.lng!,entry.lat!]).addTo(m)});let p=focused||(selected?.type!=='place'?selected?.photos[0]:null);if(p?.lat!=null&&p?.lng!=null){const div=document.createElement('div');div.className='photo-pin';div.textContent='✦';markers.current.push(new maplibregl.Marker({element:div,anchor:'center'}).setLngLat([p.lng,p.lat]).addTo(m))}if(!day&&!firstDay.current){m.fitBounds([[-121.98,36.34],[-121.86,36.66]],{padding:55,duration:650})}else if(day&&!firstDay.current){const ds=places.filter(e=>e.day===day);if(ds.length)m.fitBounds(ds.reduce((bounds,e)=>bounds.extend([e.lng!,e.lat!]),new maplibregl.LngLatBounds([ds[0].lng!,ds[0].lat!],[ds[0].lng!,ds[0].lat!])),{padding:65,maxZoom:11,duration:650})}firstDay.current=false},[places,day,selected,focused]);
- useEffect(()=>{map.current?.resize()},[ratio]);return <div className="map" ref={el}/>}
-export default function Client({trip}:{trip:Trip}){const [selected,setSelected]=useState<Entry|null>(trip.days[0].entries[0]);const [day,setDay]=useState(trip.days[0].date);const [album,setAlbum]=useState<string|null>(null);const [photoPage,setPhotoPage]=useState(0);const [full,setFull]=useState<Photo|null>(null);const [activePhoto,setActivePhoto]=useState<Photo|null>(null);const [ratio,setRatio]=useState('large');const [collapsed,setCollapsed]=useState(false);const [arrows,setArrows]=useState('a');const [focus,setFocus]=useState<Photo|null>(null);const [multiSpan,setMultiSpan]=useState<{top:number;height:number}|null>(null);
- const rail=useRef<HTMLElement>(null);const days=trip.days;const photos=album?allPhotos(days).filter(p=>days.find(d=>d.date===album)?.entries.some(e=>e.photos.some(x=>x.id===p.id))):selected?.photos||[];const pagePhotos=photos.slice(photoPage*12,photoPage*12+12);const fullscreenSet=photos;const index=full?fullscreenSet.findIndex(p=>p.id===full.id):-1;
- useEffect(()=>{const q=new URLSearchParams(window.location.search);const r=q.get('map');if(['small','current','large'].includes(r||''))setRatio(r!);const a=q.get('arrows');if(['a','b','c'].includes(a||''))setArrows(a!);},[]);
- useEffect(()=>{function key(ev:KeyboardEvent){if(ev.key==='Escape')setFull(null);if(full&&ev.key==='ArrowRight')setFull(fullscreenSet[(index+1)%fullscreenSet.length]);if(full&&ev.key==='ArrowLeft')setFull(fullscreenSet[(index-1+fullscreenSet.length)%fullscreenSet.length])}window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key)},[full,index,fullscreenSet]);
- useEffect(()=>{const root=rail.current;if(!root)return;const observer=new IntersectionObserver(records=>{for(const r of records)if(r.isIntersecting){const id=(r.target as HTMLElement).dataset.day;if(id)setDay(id)}},{root,rootMargin:'-15% 0px -65% 0px'});root.querySelectorAll('[data-day]').forEach(e=>observer.observe(e));return()=>observer.disconnect()},[]);
- useEffect(()=>{function measure(){const root=rail.current;if(!root)return;const a=root.querySelector('.multiday-start .entry-node');const b=root.querySelector('.multiday-end');if(!a||!b)return;const rt=root.getBoundingClientRect();const top=a.getBoundingClientRect().top-rt.top+root.scrollTop+20;const end=b.getBoundingClientRect().top-rt.top+root.scrollTop+9;setMultiSpan({top,height:Math.max(0,end-top)})}measure();window.addEventListener('resize',measure);return()=>window.removeEventListener('resize',measure)},[]);
- function choose(e:Entry){const target=rail.current?.querySelector(`[data-entry-id="${e.id}"]`);if(target&&rail.current){const top=(target as HTMLElement).offsetTop;rail.current.scrollTo({top:Math.max(0,top-60),behavior:'smooth'})}setSelected(e);setAlbum(null);setPhotoPage(0);setActivePhoto(null);setFocus(null);setDay(e.day)}function showAlbum(d:string){setDay(d);setAlbum(d);setSelected(null);setPhotoPage(0);setActivePhoto(null);setFocus(null)}function pickPhoto(p:Photo){setActivePhoto(p);setFocus(p);setFull(p)}
- return <main className={`shell ${collapsed?'collapsed':''}`} style={{'--map-height':ratio==='small'?'20%':ratio==='large'?'40%':'30%'} as React.CSSProperties}>
- <header className="header"><div className="brand"><span className="brand-mark">✳</span> WAYFARER</div><nav className="nav"><span className="nav-active">THE JOURNEY</span><span>WISHLIST</span><span>PLACES</span></nav><span className="status">View-only demo · sign-in not configured</span></header>
- <section className="left"><div className="intro"><div className="kicker">03 / THE JOURNEY</div><h1>Sample: Coastal Detour</h1><p>Fictional sample · SQLite-driven · {trip.timezone}</p></div><section className="rail" ref={rail}>{multiSpan&&<div className="multiday-span" style={{top:multiSpan.top,height:multiSpan.height}}/>}{days.map((d,di)=><section className="day-section" data-day={d.date} key={d.date}><button className={`day-banner ${album===d.date?'active':''}`} onClick={()=>showAlbum(d.date)}><span>Day {di+1} - {new Date(`${d.date}T12:00:00`).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})}</span><small>Coast</small></button><div className="entries">{di>0&&<div className="multi-day-chip">Coast Path Walk · {di===days.length-1?'final day':`day ${di+1}`}</div>}{d.entries.map((e,ei)=><button key={e.id} data-entry-id={e.id} className={`entry ${e.id===12?'multiday-start':''} ${selected?.id===e.id&&!album?'active':''} type-${e.type} ${ei%2===0?'entry-left':'entry-right'}`} onClick={()=>choose(e)}><span className="entry-node">{e.type==='transit'&&<svg className="transit-icon" viewBox="0 0 24 24" aria-hidden="true">{icon(e.type,e.title)==='train'?<><rect x="5" y="2" width="14" height="17" rx="3"/><path d="M5 9h14M7 15h2m6 0h2M8 19l-2 3m10-3 2 3"/></>:icon(e.type,e.title)==='flight'?<path d="M2 13l8 2 3 7 2-1-1-7 7-8a2 2 0 0 0-3-3l-8 7-7-1z"/>:<><path d="M4 15l2-7h12l2 7v5h-3v-2H7v2H4zM6 15h12M8 18v-3m8 3v-3"/></>}</svg>}</span><span className="entry-content" dir={e.type==='note'?noteDir(e.notes||e.title):undefined}><strong>{e.title}</strong><small>{e.type==='cluster'?`PHOTO · ${e.time} – ${e.end_time}`:e.type==='photo'?`PHOTO · ${e.time}`:e.type==='lodging'?'STAY · '+e.time:e.type==='transit'?`${e.time}${e.end_time?' → '+e.end_time:''}${e.departure_timezone?' ('+zoneLabel(e.departure_timezone)+')':''}`:e.type==='note'?e.time:((e.tags[0]||'PLACE')+' · '+e.time).toUpperCase()}</small>{e.type==='transit'&&<span className="transit-route">{e.from_location||'Origin'} → {e.to_location||'Destination'}</span>}{e.photos.length>0&&<span className="stack">{e.photos.slice(0,e.type==='photo'||e.type==='cluster'?1:3).map((p,i)=><img key={p.id} src={p.url} alt="" style={{'--i':i} as React.CSSProperties}/>)}</span>}{e.notes&&e.type==='note'&&<span className="entry-note" dir={noteDir(e.notes)}>{e.notes}</span>}</span></button>)}{di===days.length-1&&<div className="multiday-end"><span className="diamond"/><small>15:40 · END</small></div>}</div></section>)}</section></section>
- {collapsed?<button className="reopen" title="Show map and details" onClick={()=>setCollapsed(false)}>✳</button>:<aside className="right"><section className="map-card"><header className="card-head"><div><small>THE JOURNEY / MAP</small><strong>Coastal detour</strong></div><button className="card-close" title="Collapse map and details" onClick={()=>setCollapsed(true)}>×</button></header><div className="map-wrap"><MapView trip={trip} selected={selected} focused={focus} day={day} onSelect={choose} ratio={ratio}/><button className="whole-chip" onClick={()=>setDay('')}>Whole trip</button></div><footer className="map-foot"><span>● 3 DAYS · OSM</span><span>OPENFREEMAP</span></footer></section><section className="panel" key={`${album||selected?.id}-${photoPage}`}><div className="panel-body"><h2>{album?days.find(d=>d.date===album)?.title:selected?.title}</h2>{!album&&selected&&<div className="meta">{selected.type==='cluster'?'':<>{selected.day} <span>·</span> </>}{selected.time}{selected.end_time?` – ${selected.end_time}`:''} {selected.tags.map(t=><em key={t}>{t}</em>)}</div>}{selected?.type==='lodging'&&!album&&<div className="stay-info"><span>CHECK-IN<br/><b>{selected.day} · {selected.time}</b></span><span>CHECK-OUT<br/><b>{selected.check_out}</b></span></div>}{photos.length>0&&<><div className={`photos count-${Math.min(pagePhotos.length,12)} arrows-${arrows}`}>{pagePhotos.map(p=><button className={`photo ${activePhoto?.id===p.id?'photo-active':''}`} key={p.id} onClick={()=>pickPhoto(p)}><img src={p.url} alt={p.caption}/><span>{p.caption}</span></button>)}</div><div className={`pagination pagination-${arrows}`}><small>{photos.length} PHOTOS</small><div><button aria-label="Previous photos" disabled={photoPage===0} onClick={()=>setPhotoPage(v=>v-1)}>{arrows==='a'?<svg className="pager-chevron prev-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 5 L9 8 L6 11"/></svg>:arrows==='c'?'←':'‹'}</button><span>{arrows==='b'?`${String(photoPage+1).padStart(2,'0')} / ${String(Math.ceil(photos.length/12)).padStart(2,'0')}`:`${photoPage+1} / ${Math.ceil(photos.length/12)}`}</span><button aria-label="Next photos" disabled={(photoPage+1)*12>=photos.length} onClick={()=>setPhotoPage(v=>v+1)}>{arrows==='a'?<svg className="pager-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 5 L9 8 L6 11"/></svg>:arrows==='c'?'→':'›'}</button></div></div></>}{!album&&selected?.notes&&<p className="note">{selected.notes}</p>}{!album&&selected?.type==='place'&&selected.lat!=null&&<a className="maps-link" target="_blank" rel="noreferrer" href={selected.maps_url||`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${selected.lat},${selected.lng}`)}`}>View on Google Maps ↗</a>}</div></section></aside>}
- {full&&<div className="lightbox" onClick={()=>setFull(null)}><button className="close" onClick={()=>setFull(null)}>✕ CLOSE</button><button className="lightnav prev" onClick={e=>{e.stopPropagation();setFull(fullscreenSet[(index-1+fullscreenSet.length)%fullscreenSet.length])}}>←</button><img src={full.url} alt={full.caption} onClick={e=>e.stopPropagation()}/><button className="lightnav next" onClick={e=>{e.stopPropagation();setFull(fullscreenSet[(index+1)%fullscreenSet.length])}}>→</button><div className="lightcaption">{full.caption} <span>{index+1} / {fullscreenSet.length}</span></div></div>}
- </main>}
-function allPlaceIndex(days:Day[],e:Entry){if(e.type!=='place')return null;return days.flatMap(d=>d.entries.filter(x=>x.type==='place')).findIndex(x=>x.id===e.id)+1}
+import { useEffect, useMemo, useRef, useState } from 'react';
+import maplibregl, { Map as MapType, Marker } from 'maplibre-gl';
+import type { Day, Entry, Photo } from '../lib/data';
+type Trip = { title: string; timezone: string; days: Day[] };
+const allPhotos = (days: Day[]) => days.flatMap((d) => d.entries.flatMap((e) => e.photos));
+function dateLabel(day: string) {
+  return new Date(`${day}T12:00:00`)
+    .toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+    .toUpperCase();
+}
+function noteDir(s: string): 'ltr' | 'rtl' {
+  for (const ch of s) {
+    if (/[֐-ࣿ]/.test(ch)) return 'rtl';
+    if (/[A-Za-z]/.test(ch)) return 'ltr';
+  }
+  return 'ltr';
+}
+function zoneLabel(zone: string | null) {
+  if (!zone) return '';
+  return zone === 'America/Los_Angeles' ? 'PT' : zone.split('/').pop()?.replace(/_/g, ' ') || zone;
+}
+function icon(type: Entry['type'], title: string) {
+  if (type === 'transit')
+    return /train/i.test(title) ? 'train' : /flight|fly/i.test(title) ? 'flight' : 'drive';
+  if (type === 'lodging') return '⌂';
+  if (type === 'note') return '✎';
+  if (type === 'cluster') return '▦';
+  return '◈';
+}
+function MapView({
+  trip,
+  selected,
+  focused,
+  day,
+  onSelect,
+  ratio,
+}: {
+  trip: Trip;
+  selected: Entry | null;
+  focused: Photo | null;
+  day: string;
+  onSelect: (e: Entry) => void;
+  ratio: string;
+}) {
+  const el = useRef<HTMLDivElement>(null),
+    map = useRef<MapType | null>(null),
+    markers = useRef<Marker[]>([]),
+    firstDay = useRef(true),
+    selectedRef = useRef(onSelect);
+  selectedRef.current = onSelect;
+  const places = useMemo(
+    () =>
+      trip.days.flatMap((d) =>
+        d.entries.filter((e) => e.type === 'place' && e.lat != null && e.lng != null),
+      ),
+    [trip],
+  );
+  useEffect(() => {
+    if (!el.current) return;
+    const m = new maplibregl.Map({
+      container: el.current,
+      style: 'https://tiles.openfreemap.org/styles/liberty',
+      center: [-121.92, 36.5],
+      zoom: 9,
+      attributionControl: false,
+    });
+    map.current = m;
+    m.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+    m.once('load', () => {
+      const colors: Record<string, string> = {
+        background: '#f8f7f1',
+        park: '#e2eddf',
+        park_outline: '#d6e5d4',
+        landuse_residential: '#f3f2e9',
+        landcover_wood: '#e0eddf',
+        landcover_grass: '#e3ede0',
+        landcover_ice: '#e6eee8',
+        landcover_wetland: '#e5efe7',
+        landuse_pitch: '#e7ebe0',
+        landuse_track: '#e7ebe0',
+        landuse_cemetery: '#e5eddf',
+        landuse_hospital: '#f3f0e8',
+        landuse_school: '#e7eadf',
+        waterway_tunnel: '#b9d8d4',
+        waterway_river: '#b9d8d4',
+        waterway_other: '#b9d8d4',
+        water: '#d7e9e5',
+        landcover_sand: '#f3eee3',
+        aeroway_fill: '#efeee7',
+        aeroway_runway: '#e4e0d7',
+        aeroway_taxiway: '#e4e0d7',
+        tunnel_motorway_link_casing: '#e2dcd1',
+        tunnel_service_track_casing: '#e2dcd1',
+        tunnel_link_casing: '#e2dcd1',
+        tunnel_street_casing: '#e2dcd1',
+      };
+      for (const [id, color] of Object.entries(colors)) {
+        const layer = m.getLayer(id);
+        if (!layer) continue;
+        try {
+          if (layer.type === 'background') m.setPaintProperty(id, 'background-color', color);
+          else if (layer.type === 'fill') {
+            m.setPaintProperty(id, 'fill-color', color);
+            if (id === 'water') m.setPaintProperty(id, 'fill-opacity', 1);
+          } else if (layer.type === 'line') m.setPaintProperty(id, 'line-color', color);
+        } catch {}
+      }
+      if (!m.getLayer('route')) {
+        m.addSource('route', {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            geometry: { type: 'LineString', coordinates: places.map((e) => [e.lng!, e.lat!]) },
+            properties: {},
+          },
+        });
+        m.addLayer({
+          id: 'route',
+          type: 'line',
+          source: 'route',
+          paint: {
+            'line-color': '#6c9e83',
+            'line-width': 2,
+            'line-dasharray': [1.5, 3],
+            'line-opacity': 0.72,
+          },
+        });
+      }
+      m.fitBounds(
+        [
+          [-121.98, 36.34],
+          [-121.86, 36.66],
+        ],
+        { padding: 55, duration: 0 },
+      );
+    });
+    return () => {
+      m.remove();
+      map.current = null;
+    };
+  }, [places]);
+  useEffect(() => {
+    const m = map.current;
+    if (!m) return;
+    markers.current.forEach((x) => x.remove());
+    markers.current = places.map((entry, i) => {
+      const div = document.createElement('button');
+      div.className = `map-pin ${entry.day === day ? 'day-pin' : 'dim-pin'} ${selected?.id === entry.id ? 'chosen-pin' : ''}`;
+      div.textContent = String(i + 1);
+      div.title = entry.title;
+      div.onclick = () => selectedRef.current(entry);
+      return new maplibregl.Marker({ element: div, anchor: 'center' })
+        .setLngLat([entry.lng!, entry.lat!])
+        .addTo(m);
+    });
+    let p = focused || (selected?.type !== 'place' ? selected?.photos[0] : null);
+    if (p?.lat != null && p?.lng != null) {
+      const div = document.createElement('div');
+      div.className = 'photo-pin';
+      div.textContent = '✦';
+      markers.current.push(
+        new maplibregl.Marker({ element: div, anchor: 'center' })
+          .setLngLat([p.lng, p.lat])
+          .addTo(m),
+      );
+    }
+    if (!day && !firstDay.current) {
+      m.fitBounds(
+        [
+          [-121.98, 36.34],
+          [-121.86, 36.66],
+        ],
+        { padding: 55, duration: 650 },
+      );
+    } else if (day && !firstDay.current) {
+      const ds = places.filter((e) => e.day === day);
+      if (ds.length)
+        m.fitBounds(
+          ds.reduce(
+            (bounds, e) => bounds.extend([e.lng!, e.lat!]),
+            new maplibregl.LngLatBounds([ds[0].lng!, ds[0].lat!], [ds[0].lng!, ds[0].lat!]),
+          ),
+          { padding: 65, maxZoom: 11, duration: 650 },
+        );
+    }
+    firstDay.current = false;
+  }, [places, day, selected, focused]);
+  useEffect(() => {
+    map.current?.resize();
+  }, [ratio]);
+  return <div className="map" ref={el} />;
+}
+export default function Client({ trip }: { trip: Trip }) {
+  const [selected, setSelected] = useState<Entry | null>(trip.days[0].entries[0]);
+  const [day, setDay] = useState(trip.days[0].date);
+  const [album, setAlbum] = useState<string | null>(null);
+  const [photoPage, setPhotoPage] = useState(0);
+  const [full, setFull] = useState<Photo | null>(null);
+  const [activePhoto, setActivePhoto] = useState<Photo | null>(null);
+  const [ratio, setRatio] = useState('large');
+  const [collapsed, setCollapsed] = useState(false);
+  const [arrows, setArrows] = useState('a');
+  const [focus, setFocus] = useState<Photo | null>(null);
+  const [multiSpan, setMultiSpan] = useState<{ top: number; height: number } | null>(null);
+  const rail = useRef<HTMLElement>(null);
+  const days = trip.days;
+  const photos = album
+    ? allPhotos(days).filter((p) =>
+        days
+          .find((d) => d.date === album)
+          ?.entries.some((e) => e.photos.some((x) => x.id === p.id)),
+      )
+    : selected?.photos || [];
+  const pagePhotos = photos.slice(photoPage * 12, photoPage * 12 + 12);
+  const fullscreenSet = photos;
+  const index = full ? fullscreenSet.findIndex((p) => p.id === full.id) : -1;
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    const r = q.get('map');
+    if (['small', 'current', 'large'].includes(r || '')) setRatio(r!);
+    const a = q.get('arrows');
+    if (['a', 'b', 'c'].includes(a || '')) setArrows(a!);
+  }, []);
+  useEffect(() => {
+    function key(ev: KeyboardEvent) {
+      if (ev.key === 'Escape') setFull(null);
+      if (full && ev.key === 'ArrowRight')
+        setFull(fullscreenSet[(index + 1) % fullscreenSet.length]);
+      if (full && ev.key === 'ArrowLeft')
+        setFull(fullscreenSet[(index - 1 + fullscreenSet.length) % fullscreenSet.length]);
+    }
+    window.addEventListener('keydown', key);
+    return () => window.removeEventListener('keydown', key);
+  }, [full, index, fullscreenSet]);
+  useEffect(() => {
+    const root = rail.current;
+    if (!root) return;
+    const observer = new IntersectionObserver(
+      (records) => {
+        for (const r of records)
+          if (r.isIntersecting) {
+            const id = (r.target as HTMLElement).dataset.day;
+            if (id) setDay(id);
+          }
+      },
+      { root, rootMargin: '-15% 0px -65% 0px' },
+    );
+    root.querySelectorAll('[data-day]').forEach((e) => observer.observe(e));
+    return () => observer.disconnect();
+  }, []);
+  useEffect(() => {
+    function measure() {
+      const root = rail.current;
+      if (!root) return;
+      const a = root.querySelector('.multiday-start .entry-node');
+      const b = root.querySelector('.multiday-end');
+      if (!a || !b) return;
+      const rt = root.getBoundingClientRect();
+      const top = a.getBoundingClientRect().top - rt.top + root.scrollTop + 20;
+      const end = b.getBoundingClientRect().top - rt.top + root.scrollTop + 9;
+      setMultiSpan({ top, height: Math.max(0, end - top) });
+    }
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, []);
+  function choose(e: Entry) {
+    const target = rail.current?.querySelector(`[data-entry-id="${e.id}"]`);
+    if (target && rail.current) {
+      const top = (target as HTMLElement).offsetTop;
+      rail.current.scrollTo({ top: Math.max(0, top - 60), behavior: 'smooth' });
+    }
+    setSelected(e);
+    setAlbum(null);
+    setPhotoPage(0);
+    setActivePhoto(null);
+    setFocus(null);
+    setDay(e.day);
+  }
+  function showAlbum(d: string) {
+    setDay(d);
+    setAlbum(d);
+    setSelected(null);
+    setPhotoPage(0);
+    setActivePhoto(null);
+    setFocus(null);
+  }
+  function pickPhoto(p: Photo) {
+    setActivePhoto(p);
+    setFocus(p);
+    setFull(p);
+  }
+  return (
+    <main
+      className={`shell ${collapsed ? 'collapsed' : ''}`}
+      style={
+        {
+          '--map-height': ratio === 'small' ? '20%' : ratio === 'large' ? '40%' : '30%',
+        } as React.CSSProperties
+      }
+    >
+      <header className="header">
+        <div className="brand">
+          <span className="brand-mark">✳</span> WAYFARER
+        </div>
+        <nav className="nav">
+          <span className="nav-active">THE JOURNEY</span>
+          <span>WISHLIST</span>
+          <span>PLACES</span>
+        </nav>
+        <span className="status">View-only demo · sign-in not configured</span>
+      </header>
+      <section className="left">
+        <div className="intro">
+          <div className="kicker">03 / THE JOURNEY</div>
+          <h1>Sample: Coastal Detour</h1>
+          <p>Fictional sample · SQLite-driven · {trip.timezone}</p>
+        </div>
+        <section className="rail" ref={rail}>
+          {multiSpan && (
+            <div
+              className="multiday-span"
+              style={{ top: multiSpan.top, height: multiSpan.height }}
+            />
+          )}
+          {days.map((d, di) => (
+            <section className="day-section" data-day={d.date} key={d.date}>
+              <button
+                className={`day-banner ${album === d.date ? 'active' : ''}`}
+                onClick={() => showAlbum(d.date)}
+              >
+                <span>
+                  Day {di + 1} -{' '}
+                  {new Date(`${d.date}T12:00:00`).toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </span>
+                <small>Coast</small>
+              </button>
+              <div className="entries">
+                {di > 0 && (
+                  <div className="multi-day-chip">
+                    Coast Path Walk · {di === days.length - 1 ? 'final day' : `day ${di + 1}`}
+                  </div>
+                )}
+                {d.entries.map((e, ei) => (
+                  <button
+                    key={e.id}
+                    data-entry-id={e.id}
+                    className={`entry ${e.id === 12 ? 'multiday-start' : ''} ${selected?.id === e.id && !album ? 'active' : ''} type-${e.type} ${ei % 2 === 0 ? 'entry-left' : 'entry-right'}`}
+                    onClick={() => choose(e)}
+                  >
+                    <span className="entry-node">
+                      {e.type === 'transit' && (
+                        <svg className="transit-icon" viewBox="0 0 24 24" aria-hidden="true">
+                          {icon(e.type, e.title) === 'train' ? (
+                            <>
+                              <rect x="5" y="2" width="14" height="17" rx="3" />
+                              <path d="M5 9h14M7 15h2m6 0h2M8 19l-2 3m10-3 2 3" />
+                            </>
+                          ) : icon(e.type, e.title) === 'flight' ? (
+                            <path d="M2 13l8 2 3 7 2-1-1-7 7-8a2 2 0 0 0-3-3l-8 7-7-1z" />
+                          ) : (
+                            <>
+                              <path d="M4 15l2-7h12l2 7v5h-3v-2H7v2H4zM6 15h12M8 18v-3m8 3v-3" />
+                            </>
+                          )}
+                        </svg>
+                      )}
+                    </span>
+                    <span
+                      className="entry-content"
+                      dir={e.type === 'note' ? noteDir(e.notes || e.title) : undefined}
+                    >
+                      <strong>{e.title}</strong>
+                      <small>
+                        {e.type === 'cluster'
+                          ? `PHOTO · ${e.time} – ${e.end_time}`
+                          : e.type === 'photo'
+                            ? `PHOTO · ${e.time}`
+                            : e.type === 'lodging'
+                              ? 'STAY · ' + e.time
+                              : e.type === 'transit'
+                                ? `${e.time}${e.end_time ? ' → ' + e.end_time : ''}${e.departure_timezone ? ' (' + zoneLabel(e.departure_timezone) + ')' : ''}`
+                                : e.type === 'note'
+                                  ? e.time
+                                  : ((e.tags[0] || 'PLACE') + ' · ' + e.time).toUpperCase()}
+                      </small>
+                      {e.type === 'transit' && (
+                        <span className="transit-route">
+                          {e.from_location || 'Origin'} → {e.to_location || 'Destination'}
+                        </span>
+                      )}
+                      {e.photos.length > 0 && (
+                        <span className="stack">
+                          {e.photos
+                            .slice(0, e.type === 'photo' || e.type === 'cluster' ? 1 : 3)
+                            .map((p, i) => (
+                              <img
+                                key={p.id}
+                                src={p.url}
+                                alt=""
+                                style={{ '--i': i } as React.CSSProperties}
+                              />
+                            ))}
+                        </span>
+                      )}
+                      {e.notes && e.type === 'note' && (
+                        <span className="entry-note" dir={noteDir(e.notes)}>
+                          {e.notes}
+                        </span>
+                      )}
+                    </span>
+                  </button>
+                ))}
+                {di === days.length - 1 && (
+                  <div className="multiday-end">
+                    <span className="diamond" />
+                    <small>15:40 · END</small>
+                  </div>
+                )}
+              </div>
+            </section>
+          ))}
+        </section>
+      </section>
+      {collapsed ? (
+        <button className="reopen" title="Show map and details" onClick={() => setCollapsed(false)}>
+          ✳
+        </button>
+      ) : (
+        <aside className="right">
+          <section className="map-card">
+            <header className="card-head">
+              <div>
+                <small>THE JOURNEY / MAP</small>
+                <strong>Coastal detour</strong>
+              </div>
+              <button
+                className="card-close"
+                title="Collapse map and details"
+                onClick={() => setCollapsed(true)}
+              >
+                ×
+              </button>
+            </header>
+            <div className="map-wrap">
+              <MapView
+                trip={trip}
+                selected={selected}
+                focused={focus}
+                day={day}
+                onSelect={choose}
+                ratio={ratio}
+              />
+              <button className="whole-chip" onClick={() => setDay('')}>
+                Whole trip
+              </button>
+            </div>
+            <footer className="map-foot">
+              <span>● 3 DAYS · OSM</span>
+              <span>OPENFREEMAP</span>
+            </footer>
+          </section>
+          <section className="panel" key={`${album || selected?.id}-${photoPage}`}>
+            <div className="panel-body">
+              <h2>{album ? days.find((d) => d.date === album)?.title : selected?.title}</h2>
+              {!album && selected && (
+                <div className="meta">
+                  {selected.type === 'cluster' ? (
+                    ''
+                  ) : (
+                    <>
+                      {selected.day} <span>·</span>{' '}
+                    </>
+                  )}
+                  {selected.time}
+                  {selected.end_time ? ` – ${selected.end_time}` : ''}{' '}
+                  {selected.tags.map((t) => (
+                    <em key={t}>{t}</em>
+                  ))}
+                </div>
+              )}
+              {selected?.type === 'lodging' && !album && (
+                <div className="stay-info">
+                  <span>
+                    CHECK-IN
+                    <br />
+                    <b>
+                      {selected.day} · {selected.time}
+                    </b>
+                  </span>
+                  <span>
+                    CHECK-OUT
+                    <br />
+                    <b>{selected.check_out}</b>
+                  </span>
+                </div>
+              )}
+              {photos.length > 0 && (
+                <>
+                  <div
+                    className={`photos count-${Math.min(pagePhotos.length, 12)} arrows-${arrows}`}
+                  >
+                    {pagePhotos.map((p) => (
+                      <button
+                        className={`photo ${activePhoto?.id === p.id ? 'photo-active' : ''}`}
+                        key={p.id}
+                        onClick={() => pickPhoto(p)}
+                      >
+                        <img src={p.url} alt={p.caption} />
+                        <span>{p.caption}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <div className={`pagination pagination-${arrows}`}>
+                    <small>{photos.length} PHOTOS</small>
+                    <div>
+                      <button
+                        aria-label="Previous photos"
+                        disabled={photoPage === 0}
+                        onClick={() => setPhotoPage((v) => v - 1)}
+                      >
+                        {arrows === 'a' ? (
+                          <svg
+                            className="pager-chevron prev-chevron"
+                            viewBox="0 0 16 16"
+                            aria-hidden="true"
+                          >
+                            <path d="M6 5 L9 8 L6 11" />
+                          </svg>
+                        ) : arrows === 'c' ? (
+                          '←'
+                        ) : (
+                          '‹'
+                        )}
+                      </button>
+                      <span>
+                        {arrows === 'b'
+                          ? `${String(photoPage + 1).padStart(2, '0')} / ${String(Math.ceil(photos.length / 12)).padStart(2, '0')}`
+                          : `${photoPage + 1} / ${Math.ceil(photos.length / 12)}`}
+                      </span>
+                      <button
+                        aria-label="Next photos"
+                        disabled={(photoPage + 1) * 12 >= photos.length}
+                        onClick={() => setPhotoPage((v) => v + 1)}
+                      >
+                        {arrows === 'a' ? (
+                          <svg className="pager-chevron" viewBox="0 0 16 16" aria-hidden="true">
+                            <path d="M6 5 L9 8 L6 11" />
+                          </svg>
+                        ) : arrows === 'c' ? (
+                          '→'
+                        ) : (
+                          '›'
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+              {!album && selected?.notes && <p className="note">{selected.notes}</p>}
+              {!album && selected?.type === 'place' && selected.lat != null && (
+                <a
+                  className="maps-link"
+                  target="_blank"
+                  rel="noreferrer"
+                  href={
+                    selected.maps_url ||
+                    `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${selected.lat},${selected.lng}`)}`
+                  }
+                >
+                  View on Google Maps ↗
+                </a>
+              )}
+            </div>
+          </section>
+        </aside>
+      )}
+      {full && (
+        <div className="lightbox" onClick={() => setFull(null)}>
+          <button className="close" onClick={() => setFull(null)}>
+            ✕ CLOSE
+          </button>
+          <button
+            className="lightnav prev"
+            onClick={(e) => {
+              e.stopPropagation();
+              setFull(fullscreenSet[(index - 1 + fullscreenSet.length) % fullscreenSet.length]);
+            }}
+          >
+            ←
+          </button>
+          <img src={full.url} alt={full.caption} onClick={(e) => e.stopPropagation()} />
+          <button
+            className="lightnav next"
+            onClick={(e) => {
+              e.stopPropagation();
+              setFull(fullscreenSet[(index + 1) % fullscreenSet.length]);
+            }}
+          >
+            →
+          </button>
+          <div className="lightcaption">
+            {full.caption}{' '}
+            <span>
+              {index + 1} / {fullscreenSet.length}
+            </span>
+          </div>
+        </div>
+      )}
+    </main>
+  );
+}
+function allPlaceIndex(days: Day[], e: Entry) {
+  if (e.type !== 'place') return null;
+  return (
+    days
+      .flatMap((d) => d.entries.filter((x) => x.type === 'place'))
+      .findIndex((x) => x.id === e.id) + 1
+  );
+}
