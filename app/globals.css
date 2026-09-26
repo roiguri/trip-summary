@@ -64,11 +64,14 @@ button:disabled {
   height: calc(100dvh - 62px);
   width: min(870px, calc(100vw - 480px));
   position: relative;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #d7dcd1 transparent;
 }
+/* The intro scrolls away with the timeline; its 220px box keeps the rail's opening position. */
 .intro {
-  position: absolute;
-  top: 46px;
-  left: 60px;
+  height: 220px;
+  padding: 46px 0 0 60px;
 }
 .kicker {
   font-size: 11px;
@@ -89,14 +92,7 @@ button:disabled {
   margin-top: 17px;
 }
 .rail {
-  position: absolute;
-  top: 220px;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  overflow: auto;
-  scrollbar-width: thin;
-  scrollbar-color: #d7dcd1 transparent;
+  position: relative;
   padding: 0 0 120px;
 }
 .day-section {
@@ -722,10 +718,8 @@ button:disabled {
   margin: 0;
 }
 .shell.collapsed .rail {
-  left: 50%;
-  right: auto;
   width: min(900px, 100%);
-  transform: translateX(-50%);
+  margin: 0 auto;
 }
 /* Minimal pager: a single vector path is mirrored, with no disabled opacity shift. */
 .pagination-a div {

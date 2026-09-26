@@ -42,8 +42,17 @@ if (!db.prepare('SELECT trip_id FROM trips LIMIT 1').get()) {
     'INSERT INTO destinations (destination_id,name,kind,country,timezone,lat,lng) VALUES (1,?,?,?,?,?,?)',
   ).run('Monterey Coast', 'region', 'United States', 'America/Los_Angeles', 36.53, -121.92);
   db.prepare(
-    'INSERT INTO trips (trip_id,title,destination_id,start_date,end_date,status,is_current) VALUES (?,?,?,?,?,?,?)',
-  ).run('sample-coast', 'Three days along the coast', 1, '2026-05-15', '2026-05-17', 'draft', 1);
+    'INSERT INTO trips (trip_id,title,destination_id,start_date,end_date,status,is_current,notes) VALUES (?,?,?,?,?,?,?,?)',
+  ).run(
+    'sample-coast',
+    'Sample: Coastal Detour',
+    1,
+    '2026-05-15',
+    '2026-05-17',
+    'draft',
+    1,
+    'Fictional sample · SQLite-driven',
+  );
   const places: [number, string, number, number][] = [
     [1, 'Carmel Beach', 36.5552, -121.9246],
     [2, 'Point Lobos State Natural Reserve', 36.5162, -121.9417],
@@ -259,9 +268,9 @@ if (db.prepare("SELECT trip_id FROM trips WHERE trip_id='sample-coast'").get()) 
 export function getTrip() {
   const trip = db
     .prepare(
-      'SELECT trips.title,destinations.timezone FROM trips JOIN destinations USING(destination_id) WHERE trips.is_current=1',
+      'SELECT trips.title,trips.notes subtitle,destinations.timezone FROM trips JOIN destinations USING(destination_id) WHERE trips.is_current=1',
     )
-    .get() as { title: string; timezone: string };
+    .get() as { title: string; subtitle: string | null; timezone: string };
   const raw = db
     .prepare(
       'SELECT i.*,p.lat lat,p.lng lng,p.maps_url maps_url,p.category category FROM itinerary i LEFT JOIN places p ON i.place_id=p.place_id ORDER BY i.start_date,i.start_time',
@@ -361,5 +370,12 @@ export function getTrip() {
     entries.sort((a, b) => a.time.localeCompare(b.time));
     return { date, title: titles[i], entries };
   });
-  return JSON.parse(JSON.stringify({ title: trip.title, timezone: trip.timezone, days }));
+  return JSON.parse(
+    JSON.stringify({
+      title: trip.title,
+      subtitle: trip.subtitle ?? '',
+      timezone: trip.timezone,
+      days,
+    }),
+  );
 }

@@ -11,6 +11,7 @@ Phase 0 goal: confirm that the prototype is implemented correctly against the re
   1. _Visual_: does it look like the reference?
   2. _Behavioural/data_: is it driven by the data, or faked for the sample? A part that looks right but is hard-coded is not done.
 - **Map tiles:** OpenFreeMap is blocked in the cloud dev environment, so map captures there show markers on an empty background. Tile styling is verified locally.
+- **Data decoupling (applies to every part):** the UI must contain no trip-specific values. Everything it shows comes from the trip model, and the sample is just one data set. A part isn't agreed while it still depends on sample IDs, names, dates or counts in code.
 - Per part status: `pending` → `in review` → `agreed` (or `agreed with changes`, listing the changes).
 
 ## Parts
@@ -31,12 +32,21 @@ Phase 0 goal: confirm that the prototype is implemented correctly against the re
 | 12  | Collapsed right column                                                                 | no reference image; written spec in `DESIGN.md` only                                             | pending |
 | 13  | Interactions: click-to-scroll, day tracking while scrolling, map pin → entry, keyboard | written spec in `DESIGN.md`                                                                      | pending |
 
+## Part decisions
+
+### Part 1: Page shell (agreed with changes)
+
+- The intro scrolls away with the timeline, as in the mock. `.left` is now the single scroll container, and the rail uses the full height under the header once scrolled.
+- The title comes from `trips.title` and the subtitle from `trips.notes`, followed by the destination timezone.
+- Clicking an entry now scrolls to it; this fixes the P13 scroll bug as a side effect.
+- Not changed: the "03 / THE JOURNEY" kicker is navigation chrome, not trip data. The map-card title ("Coastal detour") is handled in Part 8.
+
 ## Preliminary findings (to be confirmed per part)
 
 Things noticed during the first capture pass. Each gets decided in its part's review.
 
-- **P1 (scroll model):** in the mocks the trip title block scrolls away with the timeline, and the rail uses the full height under the header. In the code the intro is pinned and the rail scrolls in a window that starts at y≈282. The handoff captures show the code's behaviour, so the handoff did not flag it.
-- **P1:** the intro title, kicker ("03 / THE JOURNEY") and subtitle are hard-coded strings, not the trip's title.
+- ~~**P1 (scroll model):** in the mocks the trip title block scrolls away with the timeline, and the rail uses the full height under the header. In the code the intro is pinned and the rail scrolls in a window that starts at y≈282. The handoff captures show the code's behaviour, so the handoff did not flag it.~~ Fixed in Part 1.
+- ~~**P1:** the intro title, kicker ("03 / THE JOURNEY") and subtitle are hard-coded strings, not the trip's title.~~ Fixed in Part 1.
 - **P2:** every day banner shows a hard-coded `Coast` tag. Day titles and dates are hard-coded in `lib/data.ts` (`dates`, `titles`), not derived from the trip.
 - **P2 vs mock:** the mock shows the dotted lane only during a multi-day span. The code shows it along the whole rail, per the later "two-track throughout" decision. Needs confirming.
 - **P3:** lodging check-out is the hard-coded string `2026-05-17 · 11:00`. Place tags fall back to `Walk` for missing categories.
@@ -44,6 +54,6 @@ Things noticed during the first capture pass. Each gets decided in its part's re
 - **P8:** map bounds, the initial centre, "3 DAYS" and the timezone label `PT` are hard-coded for the sample.
 - **P10:** the pager footer says "1 PHOTOS" for a single photo (no singular form).
 - **P10:** the photo-sequence panel in `mock/image-e55ca7ac` has an eyebrow and a date; these were removed by a later written decision (no eyebrows). Confirm.
-- **P13 (bug):** clicking a timeline entry doesn't scroll to it. `choose()` uses `offsetTop`, which is measured from the entry's day section (`position: relative`), not the rail. It scrolls to the wrong place (e.g. clicking the Day 2 transit scrolls to the top).
+- ~~**P13 (bug):** clicking a timeline entry doesn't scroll to it. `choose()` uses `offsetTop`, which is measured from the entry's day section (`position: relative`), not the rail. It scrolls to the wrong place (e.g. clicking the Day 2 transit scrolls to the top).~~ Fixed in Part 1.
 - **P13:** the map-to-photo marker and photo-location dot work. Numbered pins are the place order across the whole trip.
 - **Code:** `dateLabel` and `allPlaceIndex` in `Client.tsx` are unused. Photo URLs in the DB are overwritten at read time.

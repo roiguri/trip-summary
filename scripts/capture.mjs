@@ -16,7 +16,7 @@ import { mkdirSync } from 'node:fs';
   await shot('opening');
 
   for (let i = 0; i < 6; i++) {
-    await p.$eval('.rail', (r, y) => r.scrollTo(0, y), i * 820);
+    await p.$eval('.left', (r, y) => r.scrollTo(0, y), i * 820);
     await shot(`rail-${i}`);
   }
   const click = async (sel, name) => {
@@ -34,12 +34,12 @@ import { mkdirSync } from 'node:fs';
   await click('.type-photo', 'single');
   await click('.type-cluster', 'cluster');
   await click('.multiday-start', 'multiday-start');
-  await p.$eval('.rail', (r) => r.scrollTo(0, r.scrollHeight));
+  await p.$eval('.left', (r) => r.scrollTo(0, r.scrollHeight));
   await shot('multiday-end');
   await click('.day-banner', 'day-album');
   await click('.panel .photo', 'fullscreen');
   await p.keyboard.press('Escape');
-  await p.$eval('.rail', (r) => r.scrollTo(0, 0));
+  await p.$eval('.left', (r) => r.scrollTo(0, 0));
   await click('.type-place', 'place');
   await click('.card-close', 'collapsed');
   for (const r of ['small', 'current']) {

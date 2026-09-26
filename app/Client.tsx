@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import maplibregl, { Map as MapType, Marker } from 'maplibre-gl';
 import type { Day, Entry, Photo } from '../lib/data';
-type Trip = { title: string; timezone: string; days: Day[] };
+type Trip = { title: string; subtitle: string; timezone: string; days: Day[] };
 const allPhotos = (days: Day[]) => days.flatMap((d) => d.entries.flatMap((e) => e.photos));
 function dateLabel(day: string) {
   return new Date(`${day}T12:00:00`)
@@ -203,6 +203,7 @@ export default function Client({ trip }: { trip: Trip }) {
   const [arrows, setArrows] = useState('a');
   const [focus, setFocus] = useState<Photo | null>(null);
   const [multiSpan, setMultiSpan] = useState<{ top: number; height: number } | null>(null);
+  const scroller = useRef<HTMLElement>(null);
   const rail = useRef<HTMLElement>(null);
   const days = trip.days;
   const photos = album
@@ -234,7 +235,7 @@ export default function Client({ trip }: { trip: Trip }) {
     return () => window.removeEventListener('keydown', key);
   }, [full, index, fullscreenSet]);
   useEffect(() => {
-    const root = rail.current;
+    const root = scroller.current;
     if (!root) return;
     const observer = new IntersectionObserver(
       (records) => {
@@ -257,8 +258,8 @@ export default function Client({ trip }: { trip: Trip }) {
       const b = root.querySelector('.multiday-end');
       if (!a || !b) return;
       const rt = root.getBoundingClientRect();
-      const top = a.getBoundingClientRect().top - rt.top + root.scrollTop + 20;
-      const end = b.getBoundingClientRect().top - rt.top + root.scrollTop + 9;
+      const top = a.getBoundingClientRect().top - rt.top + 20;
+      const end = b.getBoundingClientRect().top - rt.top + 9;
       setMultiSpan({ top, height: Math.max(0, end - top) });
     }
     measure();
@@ -266,10 +267,12 @@ export default function Client({ trip }: { trip: Trip }) {
     return () => window.removeEventListener('resize', measure);
   }, []);
   function choose(e: Entry) {
-    const target = rail.current?.querySelector(`[data-entry-id="${e.id}"]`);
-    if (target && rail.current) {
-      const top = (target as HTMLElement).offsetTop;
-      rail.current.scrollTo({ top: Math.max(0, top - 60), behavior: 'smooth' });
+    const root = scroller.current;
+    const target = root?.querySelector(`[data-entry-id="${e.id}"]`);
+    if (target && root) {
+      const top =
+        target.getBoundingClientRect().top - root.getBoundingClientRect().top + root.scrollTop;
+      root.scrollTo({ top: Math.max(0, top - 60), behavior: 'smooth' });
     }
     setSelected(e);
     setAlbum(null);
@@ -311,11 +314,11 @@ export default function Client({ trip }: { trip: Trip }) {
         </nav>
         <span className="status">View-only demo · sign-in not configured</span>
       </header>
-      <section className="left">
+      <section className="left" ref={scroller}>
         <div className="intro">
           <div className="kicker">03 / THE JOURNEY</div>
-          <h1>Sample: Coastal Detour</h1>
-          <p>Fictional sample · SQLite-driven · {trip.timezone}</p>
+          <h1>{trip.title}</h1>
+          <p>{[trip.subtitle, trip.timezone].filter(Boolean).join(' · ')}</p>
         </div>
         <section className="rail" ref={rail}>
           {multiSpan && (
