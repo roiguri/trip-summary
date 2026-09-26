@@ -1694,3 +1694,23 @@ button:disabled {
     radial-gradient(circle at 10.78px 2.98px, #739d7c 0 1px, transparent 1.25px),
     radial-gradient(circle at 2px 10px, #739d7c 0 1px, transparent 1.25px);
 }
+/* Multi-day lanes (user decision): overlapping spans run side by side, 9px apart. The end curve
+   is an SVG drawn per lane (LaneCurve in Client.tsx), behind the diamond. */
+.multiday-span {
+  left: calc(55.5% + 6px + var(--lane, 0) * 9px);
+}
+.multiday-end::before {
+  display: none;
+}
+.multiday-end {
+  padding-left: calc(16px + var(--lane, 0) * 9px);
+}
+.lane-curve {
+  position: absolute;
+  z-index: 1;
+  fill: #739d7c;
+  pointer-events: none;
+}
+.multiday-end .diamond {
+  z-index: 2;
+}

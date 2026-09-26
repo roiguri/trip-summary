@@ -210,7 +210,9 @@ export default function Client({ trip }: { trip: Trip }) {
   const [collapsed, setCollapsed] = useState(false);
   const [arrows, setArrows] = useState('a');
   const [focus, setFocus] = useState<Photo | null>(null);
-  const [spanLanes, setSpanLanes] = useState<{ id: string; top: number; height: number }[]>([]);
+  const [spanLanes, setSpanLanes] = useState<
+    { id: string; top: number; height: number; lane: number }[]
+  >([]);
   const scroller = useRef<HTMLElement>(null);
   const rail = useRef<HTMLElement>(null);
   const days = trip.days;
@@ -270,7 +272,7 @@ export default function Client({ trip }: { trip: Trip }) {
         if (!id || !a) continue;
         const top = a.getBoundingClientRect().top - rt.top + 20;
         const end = b.getBoundingClientRect().top - rt.top + 9;
-        lanes.push({ id, top, height: Math.max(0, end - top) });
+        lanes.push({ id, top, height: Math.max(0, end - top), lane: Number(b.dataset.lane) || 0 });
       }
       setSpanLanes(lanes);
     }
@@ -337,7 +339,14 @@ export default function Client({ trip }: { trip: Trip }) {
             <div
               key={lane.id}
               className="multiday-span"
-              style={{ top: lane.top, height: lane.height }}
+              style={
+                {
+                  top: lane.top,
+                  height: lane.height,
+                  paddingBottom: laneCurve(lane.lane).padBottom,
+                  '--lane': lane.lane,
+                } as React.CSSProperties
+              }
             />
           ))}
           {days.map((d, di) => (
@@ -364,7 +373,14 @@ export default function Client({ trip }: { trip: Trip }) {
                 ))}
                 {timelineItems(d).map((item) =>
                   item.kind === 'end' ? (
-                    <div className="multiday-end" data-span-id={item.id} key={`end-${item.id}`}>
+                    <div
+                      className="multiday-end"
+                      data-span-id={item.id}
+                      data-lane={item.lane}
+                      key={`end-${item.id}`}
+                      style={{ '--lane': item.lane } as React.CSSProperties}
+                    >
+                      <LaneCurve lane={item.lane} />
                       <span className="diamond" />
                       <small>{[item.time, 'END'].filter(Boolean).join(' · ')}</small>
                     </div>
@@ -655,7 +671,8 @@ export default function Client({ trip }: { trip: Trip }) {
 }
 
 type TimelineItem =
-  { kind: 'entry'; entry: Entry; index: number } | { kind: 'end'; id: string; time: string | null };
+  | { kind: 'entry'; entry: Entry; index: number }
+  | { kind: 'end'; id: string; time: string | null; lane: number };
 /** A day's entries plus the end markers of multi-day spans, in time order; `index` drives left/right alternation. */
 function timelineItems(d: Day): TimelineItem[] {
   const items: TimelineItem[] = d.entries.map((entry, index) => ({ kind: 'entry', entry, index }));
@@ -664,4 +681,69 @@ function timelineItems(d: Day): TimelineItem[] {
     items.splice(at === -1 ? items.length : at, 0, { kind: 'end', ...end });
   }
   return items;
+}
+
+/**
+ * End curve of a multi-day lane. The lane runs `9 * (lane + 1)` px right of the rail and eases into
+ * the rail through a smooth curve that ends at the diamond's centre (hidden behind the diamond).
+ * Dots keep the lane's 12px spacing along the curve, counted back from the centre, so the straight
+ * part of the lane must end where that rhythm continues: `padBottom` places its last dot there.
+ * Coordinates are relative to the diamond centre (x right, y down).
+ */
+const DOT_SPACING = 12;
+const laneCurves = new Map<number, { dots: [number, number][]; rise: number; padBottom: number }>();
+function laneCurve(lane: number) {
+  const cached = laneCurves.get(lane);
+  if (cached) return cached;
+  const dx = 9 * (lane + 1);
+  const rise = 36 + 12 * lane;
+  const P = [
+    [dx, -rise],
+    [dx, -rise * 0.45],
+    [0, -rise * 0.5],
+    [0, 0],
+  ];
+  const at = (t: number) =>
+    [0, 1].map(
+      (k) =>
+        (1 - t) ** 3 * P[0][k] +
+        3 * (1 - t) ** 2 * t * P[1][k] +
+        3 * (1 - t) * t * t * P[2][k] +
+        t ** 3 * P[3][k],
+    ) as [number, number];
+  const samples: { s: number; p: [number, number] }[] = [{ s: 0, p: at(0) }];
+  for (let k = 1; k <= 200; k++) {
+    const p = at(k / 200);
+    const q = samples[samples.length - 1];
+    samples.push({ s: q.s + Math.hypot(p[0] - q.p[0], p[1] - q.p[1]), p });
+  }
+  const length = samples[samples.length - 1].s;
+  const dots: [number, number][] = [];
+  let s = length;
+  for (; s >= -1e-6; s -= DOT_SPACING)
+    dots.push((samples.find((x) => x.s >= s - 1e-6) ?? samples[samples.length - 1]).p);
+  const firstOnCurve = s + DOT_SPACING;
+  const lastStraightY = -rise - (DOT_SPACING - firstOnCurve);
+  // The span ends 1px below the diamond centre and its dots sit 9px above its content bottom.
+  const result = { dots, rise, padBottom: -8 - lastStraightY };
+  laneCurves.set(lane, result);
+  return result;
+}
+function LaneCurve({ lane }: { lane: number }) {
+  const { dots, rise } = laneCurve(lane);
+  const pad = 3;
+  const width = 9 * (lane + 1) + pad * 2;
+  return (
+    <svg
+      className="lane-curve"
+      width={width}
+      height={rise + pad * 2}
+      style={{ left: -2 - pad, top: 8 - rise - pad }}
+      aria-hidden="true"
+    >
+      {dots.map(([x, y], i) => (
+        <circle key={i} cx={x + pad} cy={y + rise + pad} r={1} />
+      ))}
+    </svg>
+  );
 }
