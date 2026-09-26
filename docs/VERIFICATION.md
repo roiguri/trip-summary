@@ -82,8 +82,8 @@ Sampled from `mock/app-locked-geometry-final-full` (positions relative to the ra
 
 - Later-day label ("… · day 2" / "· final day"): 2px `#9cb7a0` left edge, no outline, `#f0f2e8` fill, 2px `#dfe8dc` offset shadow, 11px bold `#76937e`, 22px tall, starting 21px right of the rail centre. Was a 1px outline all round, 10px text, 21px tall.
 - Later-day labels sit ~20px under the day banner (user decision; the mock has ~57px).
-- Lane: dots are anchored to the end, so the last straight dot always sits 34px above the diamond centre, whatever the span's length.
-- End bend: two dots step in from the lane (+6px at −22px, +2px at −10px) into the diamond's top corner, continuing the 12px rhythm. Replaces three small dots bunched up and to the right of the diamond (the handoff had flagged the bend as unfinished).
+- Lane: dots are anchored to the end, so the last straight dot always sits 19px above the diamond centre and the corner lands on the 12px rhythm, whatever the span's length.
+- End curve (user decision, replacing the mock's stepped bend): the lane keeps its 12px dot rhythm and turns into the rail through a small rounded corner (radius 9px, the lane's offset), ending with a dot at the diamond's centre on the main rail. Replaces three dots bunched to the upper right of the diamond.
 - End diamond: 11px square rotated, 2px `#638e70` border, centred on the rail. Was a lighter 1px border and slightly larger.
 - "15:40 · END": 11px bold `#6b8f78`, vertically centred on the diamond. Placed 18px right of the rail centre (a 10px gap from the diamond), closer than the mock's 32px (user decision). Was 10px, 20px right, slightly high.
 - Checked with the Kansai fixture (span ending mid-morning with entries after it): the lane stops at the diamond and later entries sit on the plain rail.
