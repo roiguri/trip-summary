@@ -1615,3 +1615,60 @@ button:disabled {
   background-repeat: repeat-y;
   background-position: 0 0;
 }
+
+/* ------------------------------------------------------------------------------------------
+   Part 7: multi-day span, sampled from mock/app-locked-geometry-final-full. Positions are
+   relative to the rail centre (x=515 at 1440px) and the end diamond's centre.
+   ------------------------------------------------------------------------------------------ */
+/* Later-day label: 2px accent edge, no outline, soft offset shadow, 11px bold, 21px right of the rail. */
+.multi-day-chip {
+  margin-left: 20px;
+  padding: 5px 10px;
+  border: 0;
+  border-left: 2px solid #9cb7a0;
+  background: #f0f2e8;
+  box-shadow: 2px 2px 0 #dfe8dc;
+  color: #76937e;
+  font-size: 11px;
+  font-weight: 700;
+}
+/* The lane's dots are anchored to the end, so the last straight dot always sits 34px above the
+   diamond centre; the old ::after bend is replaced by two stepped dots on the end marker. */
+.multiday-span {
+  padding-bottom: 26px;
+  background-origin: content-box;
+  background-clip: content-box;
+  background-position: 0 100%;
+}
+.multiday-span::after {
+  display: none;
+}
+.multiday-end {
+  padding-left: 30px;
+  color: #6b8f78;
+}
+.multiday-end small {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 16px;
+}
+.multiday-end .diamond {
+  left: -7.5px;
+  top: 2.5px;
+  width: 11px;
+  height: 11px;
+  border: 2px solid #638e70;
+}
+/* Two dots step in from the lane (+6px at -22px, +2px at -10px from the diamond centre). */
+.multiday-end::before {
+  content: '';
+  position: absolute;
+  left: -4px;
+  top: -18px;
+  width: 12px;
+  height: 20px;
+  background:
+    radial-gradient(circle at 8px 4px, #739d7c 0 1px, transparent 1.25px),
+    radial-gradient(circle at 4px 16px, #739d7c 0 1px, transparent 1.25px);
+  pointer-events: none;
+}

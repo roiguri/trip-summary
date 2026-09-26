@@ -62,7 +62,7 @@ Measured against `mock/panel-ratio-large`, `mock/panel-final-place` and `mock/im
 - Kept on purpose: the thin chevron pager (user preferred it to the mock's round arrows), no title underlines. (The rail was later set to the mock's 4px in Part 2, and the dotted lane limited to multi-day events.)
 - Fixed along the way: left-side nodes were 3px right of the rail centre (right side was centred), and entries without photos (lodging) were vertically centred below their connector because entries are buttons.
 
-### Part 2: Rail and day banners (in review)
+### Part 2: Rail and day banners (agreed with changes)
 
 Sampled pixel colours and positions from `mock/app-locked-geometry-final-full` (the locked geometry) and `mock/transit-locked-zoom`, then matched them exactly at 1440×900:
 
@@ -75,6 +75,18 @@ Sampled pixel colours and positions from `mock/app-locked-geometry-final-full` (
 - First entry after a banner moved down 24px: the node now sits 77px below the banner's bottom edge (mock: 78–79px on all three days). Later-day chips sit within ~6px of the mock.
 - Seen in the mocks but belongs to Part 3: places show their note as a short caption under the photo fan ("Start early, no shade after ten."); the build doesn't.
 - Removed per-day minimum heights (600/540/470px for days 1/2/3), which were tuned to the sample and had no effect (every day's content is taller).
+
+### Part 7: Multi-day span (in review)
+
+Sampled from `mock/app-locked-geometry-final-full` (positions relative to the rail centre and the end diamond's centre):
+
+- Later-day label ("… · day 2" / "· final day"): 2px `#9cb7a0` left edge, no outline, `#f0f2e8` fill, 2px `#dfe8dc` offset shadow, 11px bold `#76937e`, 22px tall, starting 21px right of the rail centre. Was a 1px outline all round, 10px text, 21px tall.
+- Lane: dots are anchored to the end, so the last straight dot always sits 34px above the diamond centre, whatever the span's length.
+- End bend: two dots step in from the lane (+6px at −22px, +2px at −10px) into the diamond's top corner, continuing the 12px rhythm. Replaces three small dots bunched up and to the right of the diamond (the handoff had flagged the bend as unfinished).
+- End diamond: 11px square rotated, 2px `#638e70` border, centred on the rail. Was a lighter 1px border and slightly larger.
+- "15:40 · END": 11px bold `#6b8f78`, 32px right of the rail centre, vertically centred on the diamond. Was 10px, 20px right, slightly high.
+- Checked with the Kansai fixture (span ending mid-morning with entries after it): the lane stops at the diamond and later entries sit on the plain rail.
+- Start block: matches; the caption under its photos belongs to Part 3.
 
 ## Preliminary findings (to be confirmed per part)
 
