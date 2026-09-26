@@ -1602,3 +1602,16 @@ button:disabled {
 .entries {
   padding-top: 50px;
 }
+/* The round-dot lane belongs to multi-day events only (locked geometry mock; user decision):
+   no lane along the plain rail, the same 2px #739d7c dots every 12px at +9px while a span runs. */
+.entries {
+  background-image: none;
+}
+.multiday-span {
+  left: calc(55.5% + 6px);
+  width: 7px;
+  background-image: radial-gradient(circle at 3px 3px, #739d7c 0 1px, transparent 1.25px);
+  background-size: 7px 12px;
+  background-repeat: repeat-y;
+  background-position: 0 0;
+}
