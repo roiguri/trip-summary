@@ -1,0 +1,622 @@
+{
+  "$comment": "Fictional sample trip. Loaded into SQLite by `npm run seed`. See data/README.md for the format.",
+  "destination": {
+    "name": "Monterey Coast",
+    "kind": "region",
+    "country": "United States",
+    "timezone": "America/Los_Angeles",
+    "lat": 36.53,
+    "lng": -121.92
+  },
+  "trip": {
+    "id": "sample-coast",
+    "title": "Sample: Coastal Detour",
+    "subtitle": "Fictional sample · SQLite-driven",
+    "start_date": "2026-05-15",
+    "end_date": "2026-05-17"
+  },
+  "days": [
+    {
+      "date": "2026-05-15",
+      "title": "Carmel & the coves",
+      "tags": ["Coast"]
+    },
+    {
+      "date": "2026-05-16",
+      "title": "The long way south",
+      "tags": ["Coast"]
+    },
+    {
+      "date": "2026-05-17",
+      "title": "Monterey afternoon",
+      "tags": ["Coast"]
+    }
+  ],
+  "places": [
+    {
+      "key": "carmel-beach",
+      "title": "Carmel Beach",
+      "lat": 36.5552,
+      "lng": -121.9246,
+      "category": "beach"
+    },
+    {
+      "key": "point-lobos",
+      "title": "Point Lobos State Natural Reserve",
+      "lat": 36.5162,
+      "lng": -121.9417,
+      "category": "nature"
+    },
+    {
+      "key": "cypress-salt",
+      "title": "Cypress & Salt Café",
+      "lat": 36.5548,
+      "lng": -121.9221,
+      "category": "food"
+    },
+    {
+      "key": "bixby-bridge",
+      "title": "Bixby Creek Bridge",
+      "lat": 36.3714,
+      "lng": -121.9021,
+      "category": "viewpoint"
+    },
+    {
+      "key": "garrapata",
+      "title": "Garrapata State Park",
+      "lat": 36.4604,
+      "lng": -121.9252,
+      "category": "nature"
+    },
+    {
+      "key": "aquarium",
+      "title": "Monterey Bay Aquarium",
+      "lat": 36.6181,
+      "lng": -121.9018,
+      "category": "museum"
+    },
+    {
+      "key": "lovers-point",
+      "title": "Lovers Point Park",
+      "lat": 36.625,
+      "lng": -121.9165,
+      "category": "park"
+    },
+    {
+      "key": "coast-path",
+      "title": "Coast Path",
+      "category": "walk"
+    }
+  ],
+  "itinerary": [
+    {
+      "key": "carmel-beach-visit",
+      "type": "place",
+      "place": "carmel-beach",
+      "start_date": "2026-05-15",
+      "start_time": "09:20",
+      "end_time": "10:45",
+      "notes": "Morning light over the dunes. A slow walk along the shore before heading south."
+    },
+    {
+      "key": "point-lobos-visit",
+      "type": "place",
+      "place": "point-lobos",
+      "start_date": "2026-05-15",
+      "start_time": "11:15",
+      "end_time": "13:00",
+      "notes": "Follow the cliff trail to the cove. The view opens up around every turn."
+    },
+    {
+      "key": "lunch",
+      "type": "place",
+      "place": "cypress-salt",
+      "start_date": "2026-05-15",
+      "start_time": "13:20",
+      "end_time": "14:10",
+      "notes": "A quiet lunch stop, with a table by the window."
+    },
+    {
+      "key": "inn",
+      "type": "lodging",
+      "title": "Carmel Garden Inn",
+      "start_date": "2026-05-15",
+      "end_date": "2026-05-17",
+      "start_time": "15:00",
+      "end_time": "11:00",
+      "notes": "A small fictional inn among the trees, a short walk from the village."
+    },
+    {
+      "key": "coast-path-walk",
+      "type": "place",
+      "place": "coast-path",
+      "title": "Coast Path Walk",
+      "start_date": "2026-05-15",
+      "end_date": "2026-05-17",
+      "start_time": "18:20",
+      "end_time": "15:40",
+      "notes": "Three slow days along the shore."
+    },
+    {
+      "key": "drive-hwy1",
+      "type": "transit",
+      "title": "Drive down Highway 1",
+      "start_date": "2026-05-16",
+      "start_time": "09:00",
+      "end_time": "09:45",
+      "from_location": "Carmel",
+      "to_location": "Bixby Creek Bridge",
+      "departure_timezone": "America/Los_Angeles",
+      "arrival_timezone": "America/Los_Angeles",
+      "notes": "The coast road winds past headlands and open sea."
+    },
+    {
+      "key": "bixby-visit",
+      "type": "place",
+      "place": "bixby-bridge",
+      "start_date": "2026-05-16",
+      "start_time": "09:45",
+      "end_time": "10:20",
+      "notes": "Pull over for the big coastal view."
+    },
+    {
+      "key": "garrapata-visit",
+      "type": "place",
+      "place": "garrapata",
+      "start_date": "2026-05-16",
+      "start_time": "11:00",
+      "end_time": "12:30",
+      "notes": "Wildflowers and a narrow path toward the water."
+    },
+    {
+      "key": "wander-note",
+      "type": "note",
+      "title": "A little time to wander",
+      "start_date": "2026-05-16",
+      "start_time": "14:00",
+      "notes": "Leave the afternoon open. Stop wherever the light looks good."
+    },
+    {
+      "key": "quiet-note",
+      "type": "note",
+      "title": "רגע שקט בדרך",
+      "start_date": "2026-05-16",
+      "start_time": "15:20",
+      "notes": "לעצור ליד הים ולנשום קצת אוויר."
+    },
+    {
+      "key": "aquarium-visit",
+      "type": "place",
+      "place": "aquarium",
+      "start_date": "2026-05-17",
+      "start_time": "10:00",
+      "end_time": "12:30",
+      "notes": "The jellyfish galleries are worth taking your time over."
+    },
+    {
+      "key": "lovers-point-visit",
+      "type": "place",
+      "place": "lovers-point",
+      "start_date": "2026-05-17",
+      "start_time": "15:00",
+      "end_time": "16:00",
+      "notes": "An easy final walk by the water."
+    }
+  ],
+  "photos": [
+    {
+      "url": "/photos/coast-1.jpg",
+      "caption": "Morning at Carmel Beach · 1",
+      "date": "2026-05-15",
+      "time": "09:45",
+      "entry": "carmel-beach-visit",
+      "lat": 36.5552,
+      "lng": -121.9246
+    },
+    {
+      "url": "/photos/coast-2.jpg",
+      "caption": "Morning at Carmel Beach · 2",
+      "date": "2026-05-15",
+      "time": "09:45",
+      "entry": "carmel-beach-visit",
+      "lat": 36.5552,
+      "lng": -121.9246
+    },
+    {
+      "url": "/photos/coast-3.jpg",
+      "caption": "Morning at Carmel Beach · 3",
+      "date": "2026-05-15",
+      "time": "09:45",
+      "entry": "carmel-beach-visit",
+      "lat": 36.5552,
+      "lng": -121.9246
+    },
+    {
+      "url": "/photos/coast-4.jpg",
+      "caption": "Morning at Carmel Beach · 4",
+      "date": "2026-05-15",
+      "time": "09:45",
+      "entry": "carmel-beach-visit",
+      "lat": 36.5552,
+      "lng": -121.9246
+    },
+    {
+      "url": "/photos/coast-5.jpg",
+      "caption": "Morning at Carmel Beach · 5",
+      "date": "2026-05-15",
+      "time": "09:45",
+      "entry": "carmel-beach-visit",
+      "lat": 36.5552,
+      "lng": -121.9246
+    },
+    {
+      "url": "/photos/coast-6.jpg",
+      "caption": "Morning at Carmel Beach · 6",
+      "date": "2026-05-15",
+      "time": "09:45",
+      "entry": "carmel-beach-visit",
+      "lat": 36.5552,
+      "lng": -121.9246
+    },
+    {
+      "url": "/photos/coast-7.jpg",
+      "caption": "Morning at Carmel Beach · 7",
+      "date": "2026-05-15",
+      "time": "09:45",
+      "entry": "carmel-beach-visit",
+      "lat": 36.5552,
+      "lng": -121.9246
+    },
+    {
+      "url": "/photos/coast-8.jpg",
+      "caption": "Morning at Carmel Beach · 8",
+      "date": "2026-05-15",
+      "time": "09:45",
+      "entry": "carmel-beach-visit",
+      "lat": 36.5552,
+      "lng": -121.9246
+    },
+    {
+      "url": "/photos/coast-9.jpg",
+      "caption": "Morning at Carmel Beach · 9",
+      "date": "2026-05-15",
+      "time": "09:45",
+      "entry": "carmel-beach-visit",
+      "lat": 36.5552,
+      "lng": -121.9246
+    },
+    {
+      "url": "/photos/coast-10.jpg",
+      "caption": "Morning at Carmel Beach · 10",
+      "date": "2026-05-15",
+      "time": "09:45",
+      "entry": "carmel-beach-visit",
+      "lat": 36.5552,
+      "lng": -121.9246
+    },
+    {
+      "url": "/photos/coast-11.jpg",
+      "caption": "Morning at Carmel Beach · 11",
+      "date": "2026-05-15",
+      "time": "09:45",
+      "entry": "carmel-beach-visit",
+      "lat": 36.5552,
+      "lng": -121.9246
+    },
+    {
+      "url": "/photos/coast-12.jpg",
+      "caption": "Morning at Carmel Beach · 12",
+      "date": "2026-05-15",
+      "time": "09:45",
+      "entry": "carmel-beach-visit",
+      "lat": 36.5552,
+      "lng": -121.9246
+    },
+    {
+      "url": "/photos/coast-13.jpg",
+      "caption": "Morning at Carmel Beach · 13",
+      "date": "2026-05-15",
+      "time": "09:45",
+      "entry": "carmel-beach-visit",
+      "lat": 36.5552,
+      "lng": -121.9246
+    },
+    {
+      "url": "/photos/coast-14.jpg",
+      "caption": "Morning at Carmel Beach · 14",
+      "date": "2026-05-15",
+      "time": "09:45",
+      "entry": "carmel-beach-visit",
+      "lat": 36.5552,
+      "lng": -121.9246
+    },
+    {
+      "url": "/photos/coast-15.jpg",
+      "caption": "Morning at Carmel Beach · 15",
+      "date": "2026-05-15",
+      "time": "09:45",
+      "entry": "carmel-beach-visit",
+      "lat": 36.5552,
+      "lng": -121.9246
+    },
+    {
+      "url": "/photos/coast-16.jpg",
+      "caption": "Morning at Carmel Beach · 16",
+      "date": "2026-05-15",
+      "time": "09:45",
+      "entry": "carmel-beach-visit",
+      "lat": 36.5552,
+      "lng": -121.9246
+    },
+    {
+      "url": "/photos/coast-17.jpg",
+      "caption": "Cliffs at Point Lobos · 1",
+      "date": "2026-05-15",
+      "time": "11:40",
+      "entry": "point-lobos-visit",
+      "lat": 36.5162,
+      "lng": -121.9417
+    },
+    {
+      "url": "/photos/coast-18.jpg",
+      "caption": "Cliffs at Point Lobos · 2",
+      "date": "2026-05-15",
+      "time": "11:40",
+      "entry": "point-lobos-visit",
+      "lat": 36.5162,
+      "lng": -121.9417
+    },
+    {
+      "url": "/photos/coast-19.jpg",
+      "caption": "Cliffs at Point Lobos · 3",
+      "date": "2026-05-15",
+      "time": "11:40",
+      "entry": "point-lobos-visit",
+      "lat": 36.5162,
+      "lng": -121.9417
+    },
+    {
+      "url": "/photos/coast-20.jpg",
+      "caption": "Cliffs at Point Lobos · 4",
+      "date": "2026-05-15",
+      "time": "11:40",
+      "entry": "point-lobos-visit",
+      "lat": 36.5162,
+      "lng": -121.9417
+    },
+    {
+      "url": "/photos/coast-21.jpg",
+      "caption": "Cliffs at Point Lobos · 5",
+      "date": "2026-05-15",
+      "time": "11:40",
+      "entry": "point-lobos-visit",
+      "lat": 36.5162,
+      "lng": -121.9417
+    },
+    {
+      "url": "/photos/coast-22.jpg",
+      "caption": "Lunch stop · 1",
+      "date": "2026-05-15",
+      "time": "13:30",
+      "entry": "lunch",
+      "lat": 36.5548,
+      "lng": -121.9221
+    },
+    {
+      "url": "/photos/coast-23.jpg",
+      "caption": "Lunch stop · 2",
+      "date": "2026-05-15",
+      "time": "13:30",
+      "entry": "lunch",
+      "lat": 36.5548,
+      "lng": -121.9221
+    },
+    {
+      "url": "/photos/coast-24.jpg",
+      "caption": "The road at golden hour",
+      "date": "2026-05-15",
+      "time": "16:42",
+      "lat": 36.532,
+      "lng": -121.931
+    },
+    {
+      "url": "/photos/coast-25.jpg",
+      "caption": "Coastal details · 1",
+      "date": "2026-05-15",
+      "time": "17:10",
+      "lat": 36.54,
+      "lng": -121.94
+    },
+    {
+      "url": "/photos/coast-1.jpg",
+      "caption": "Coastal details · 2",
+      "date": "2026-05-15",
+      "time": "17:10",
+      "lat": 36.54,
+      "lng": -121.94
+    },
+    {
+      "url": "/photos/coast-2.jpg",
+      "caption": "Coastal details · 3",
+      "date": "2026-05-15",
+      "time": "17:10",
+      "lat": 36.54,
+      "lng": -121.94
+    },
+    {
+      "url": "/photos/coast-3.jpg",
+      "caption": "Bridge and ocean · 1",
+      "date": "2026-05-16",
+      "time": "10:00",
+      "entry": "bixby-visit",
+      "lat": 36.3714,
+      "lng": -121.9021
+    },
+    {
+      "url": "/photos/coast-4.jpg",
+      "caption": "Bridge and ocean · 2",
+      "date": "2026-05-16",
+      "time": "10:00",
+      "entry": "bixby-visit",
+      "lat": 36.3714,
+      "lng": -121.9021
+    },
+    {
+      "url": "/photos/coast-5.jpg",
+      "caption": "Bridge and ocean · 3",
+      "date": "2026-05-16",
+      "time": "10:00",
+      "entry": "bixby-visit",
+      "lat": 36.3714,
+      "lng": -121.9021
+    },
+    {
+      "url": "/photos/coast-6.jpg",
+      "caption": "Bridge and ocean · 4",
+      "date": "2026-05-16",
+      "time": "10:00",
+      "entry": "bixby-visit",
+      "lat": 36.3714,
+      "lng": -121.9021
+    },
+    {
+      "url": "/photos/coast-7.jpg",
+      "caption": "Trail by the sea · 1",
+      "date": "2026-05-16",
+      "time": "11:30",
+      "entry": "garrapata-visit",
+      "lat": 36.4604,
+      "lng": -121.9252
+    },
+    {
+      "url": "/photos/coast-8.jpg",
+      "caption": "Trail by the sea · 2",
+      "date": "2026-05-16",
+      "time": "11:30",
+      "entry": "garrapata-visit",
+      "lat": 36.4604,
+      "lng": -121.9252
+    },
+    {
+      "url": "/photos/coast-9.jpg",
+      "caption": "Trail by the sea · 3",
+      "date": "2026-05-16",
+      "time": "11:30",
+      "entry": "garrapata-visit",
+      "lat": 36.4604,
+      "lng": -121.9252
+    },
+    {
+      "url": "/photos/coast-10.jpg",
+      "caption": "From the road · 1",
+      "date": "2026-05-16",
+      "time": "13:15",
+      "lat": 36.41,
+      "lng": -121.915
+    },
+    {
+      "url": "/photos/coast-11.jpg",
+      "caption": "From the road · 2",
+      "date": "2026-05-16",
+      "time": "13:15",
+      "lat": 36.41,
+      "lng": -121.915
+    },
+    {
+      "url": "/photos/coast-12.jpg",
+      "caption": "From the road · 3",
+      "date": "2026-05-16",
+      "time": "13:15",
+      "lat": 36.41,
+      "lng": -121.915
+    },
+    {
+      "url": "/photos/coast-13.jpg",
+      "caption": "From the road · 4",
+      "date": "2026-05-16",
+      "time": "13:15",
+      "lat": 36.41,
+      "lng": -121.915
+    },
+    {
+      "url": "/photos/coast-14.jpg",
+      "caption": "From the road · 5",
+      "date": "2026-05-16",
+      "time": "13:15",
+      "lat": 36.41,
+      "lng": -121.915
+    },
+    {
+      "url": "/photos/coast-15.jpg",
+      "caption": "Last light near the shore",
+      "date": "2026-05-16",
+      "time": "17:36"
+    },
+    {
+      "url": "/photos/coast-16.jpg",
+      "caption": "Inside the aquarium · 1",
+      "date": "2026-05-17",
+      "time": "11:00",
+      "entry": "aquarium-visit",
+      "lat": 36.6181,
+      "lng": -121.9018
+    },
+    {
+      "url": "/photos/coast-17.jpg",
+      "caption": "Inside the aquarium · 2",
+      "date": "2026-05-17",
+      "time": "11:00",
+      "entry": "aquarium-visit",
+      "lat": 36.6181,
+      "lng": -121.9018
+    },
+    {
+      "url": "/photos/coast-18.jpg",
+      "caption": "Inside the aquarium · 3",
+      "date": "2026-05-17",
+      "time": "11:00",
+      "entry": "aquarium-visit",
+      "lat": 36.6181,
+      "lng": -121.9018
+    },
+    {
+      "url": "/photos/coast-19.jpg",
+      "caption": "Afternoon at Lovers Point · 1",
+      "date": "2026-05-17",
+      "time": "15:30",
+      "entry": "lovers-point-visit",
+      "lat": 36.625,
+      "lng": -121.9165
+    },
+    {
+      "url": "/photos/coast-20.jpg",
+      "caption": "Afternoon at Lovers Point · 2",
+      "date": "2026-05-17",
+      "time": "15:30",
+      "entry": "lovers-point-visit",
+      "lat": 36.625,
+      "lng": -121.9165
+    },
+    {
+      "url": "/photos/coast-1.jpg",
+      "caption": "Along the coast path · 1",
+      "date": "2026-05-15",
+      "time": "18:30",
+      "entry": "coast-path-walk"
+    },
+    {
+      "url": "/photos/coast-2.jpg",
+      "caption": "Along the coast path · 2",
+      "date": "2026-05-15",
+      "time": "18:30",
+      "entry": "coast-path-walk"
+    },
+    {
+      "url": "/photos/coast-3.jpg",
+      "caption": "Along the coast path · 3",
+      "date": "2026-05-15",
+      "time": "18:30",
+      "entry": "coast-path-walk"
+    }
+  ]
+}

@@ -12,7 +12,7 @@ npm run dev
 # http://localhost:3100
 ```
 
-`npm run build && npm run start` serves the production build on port 3100. On first execution, `lib/data.ts` creates `trip-sample.db` and seeds only fictional trip entries and public sample imagery. SQLite files are git-ignored. Images are local copies of Wikimedia Commons media; see `public/photos/SOURCES.txt` for source URLs. This is a local prototype: images are for illustrative review, and license terms should be checked before any public deployment.
+`npm run build && npm run start` serves the production build on port 3100. On first execution the app creates `trip-sample.db` from `data/sample-trip.json` (fictional entries and public sample imagery). `npm run seed [file]` reloads it from any trip file; see `data/README.md`. SQLite files are git-ignored. Images are local copies of Wikimedia Commons media; see `public/photos/SOURCES.txt` for source URLs. This is a local prototype: images are for illustrative review, and license terms should be checked before any public deployment.
 
 ## Interface
 
@@ -20,7 +20,11 @@ The timeline rail scrolls within a fixed viewport; the right-hand map and detail
 
 ## Data contract
 
-The SQLite core tables `destinations`, `trips`, `places`, `wishlist`, `itinerary` mirror the supplied schema, including the `one_current_trip` index. A prototype-only `photos` table holds sample image references and photo coordinates. The current trip is selected by `is_current=1` and the timezone comes from `destinations.timezone`, not from the browser or a Denver fixture. This is an illustrative viewer, not yet a complete importer or editor. No real trip data should be committed to this repository.
+The SQLite core tables `destinations`, `trips`, `places`, `wishlist`, `itinerary` mirror the supplied schema, including the `one_current_trip` index. Prototype-only `days` and `photos` tables hold day titles and photo references with coordinates. The current trip is selected by `is_current=1` and the timezone comes from `destinations.timezone`, not from the browser or a Denver fixture. This is an illustrative viewer, not yet a complete importer or editor. No real trip data should be committed to this repository.
+
+## Hosted preview
+
+`npm run build && npm run start`, then `npm run snapshot` writes a static, relative-path copy of the page to `preview/` (git-ignored) for hosting as a private review page. Map tiles do not load there.
 
 ## Project docs
 
