@@ -1430,3 +1430,45 @@ button:disabled {
   font-size: 12px;
   color: #7c9483;
 }
+
+/* Photo cards, measured from the mocks: fan cards are ~92x98 (slightly portrait), laid side by side
+   with a few px of overlap and irregular tilts; loose photos are 100px squares tilted -4deg. */
+.stack img {
+  width: 92px;
+  height: 98px;
+  top: 2px;
+  left: calc(var(--i) * 86px);
+  border-radius: 5px;
+  box-shadow: 0 8px 14px #3b403330;
+}
+.stack img:nth-child(1) {
+  transform: rotate(-4deg);
+}
+.stack img:nth-child(2) {
+  transform: rotate(2deg);
+}
+.stack img:nth-child(3) {
+  transform: rotate(-3deg);
+}
+.entry.type-photo .stack,
+.entry.type-cluster .stack {
+  width: 108px;
+  height: 108px;
+  margin-top: 10px;
+}
+.entry.type-photo .stack img,
+.entry.type-cluster .stack img {
+  width: 100px;
+  height: 100px;
+  left: 4px;
+  top: 2px;
+  border-radius: 8px;
+  transform: rotate(-4deg);
+}
+/* Panel gallery, as in the mocks: 7px gutters and 6px corners. */
+.photos {
+  gap: 7px;
+}
+.photo {
+  border-radius: 6px;
+}
