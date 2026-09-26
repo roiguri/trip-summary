@@ -84,7 +84,7 @@ Sampled from `mock/app-locked-geometry-final-full` (positions relative to the ra
 - Lane: dots are anchored to the end, so the last straight dot always sits 34px above the diamond centre, whatever the span's length.
 - End bend: two dots step in from the lane (+6px at −22px, +2px at −10px) into the diamond's top corner, continuing the 12px rhythm. Replaces three small dots bunched up and to the right of the diamond (the handoff had flagged the bend as unfinished).
 - End diamond: 11px square rotated, 2px `#638e70` border, centred on the rail. Was a lighter 1px border and slightly larger.
-- "15:40 · END": 11px bold `#6b8f78`, 32px right of the rail centre, vertically centred on the diamond. Was 10px, 20px right, slightly high.
+- "15:40 · END": 11px bold `#6b8f78`, vertically centred on the diamond. Placed 18px right of the rail centre (a 10px gap from the diamond), closer than the mock's 32px (user decision). Was 10px, 20px right, slightly high.
 - Checked with the Kansai fixture (span ending mid-morning with entries after it): the lane stops at the diamond and later entries sit on the plain rail.
 - Start block: matches; the caption under its photos belongs to Part 3.
 

@@ -1643,8 +1643,9 @@ button:disabled {
 .multiday-span::after {
   display: none;
 }
+/* END label sits closer to the diamond than in the mock (user decision): 10px gap. */
 .multiday-end {
-  padding-left: 30px;
+  padding-left: 16px;
   color: #6b8f78;
 }
 .multiday-end small {
