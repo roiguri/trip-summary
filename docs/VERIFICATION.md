@@ -6,7 +6,7 @@ Phase 0 goal: confirm that the prototype is implemented correctly against the re
 
 - **Current state:** `npm run build && npm run start`, then `npm run capture <dir>` saves every state at 1440×900 (`scripts/capture.mjs`).
 - **Targets:** `docs/reference/mock/` (original mocks) and `docs/reference/captures/` (the handoff's "locked" captures of this code). The handoff captures show what the code does. The mocks show what was designed. Where they differ, the part review decides.
-- **Precedence:** where a mock conflicts with a later written decision in `DESIGN.md` (e.g. the Sept 26 "two-track rail throughout" correction), the written decision wins unless we agree otherwise.
+- **Precedence:** where a mock conflicts with a later written decision in `DESIGN.md` (the Sept 26 "two-track rail throughout" note was later overruled by the user: the lane is for multi-day events only), the written decision wins unless we agree otherwise.
 - **Two kinds of check per part:**
   1. _Visual_: does it look like the reference?
   2. _Behavioural/data_: is it driven by the data, or faked for the sample? A part that looks right but is hard-coded is not done.
@@ -19,7 +19,7 @@ Phase 0 goal: confirm that the prototype is implemented correctly against the re
 | #   | Part                                                                                   | References                                                                                       | Status              |
 | --- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------- |
 | 1   | Page shell: header, intro, scroll model, backgrounds                                   | `mock/app-locked-geometry-final-full`, `mock/image-e55ca7ac`, `captures/wayfarer-locked-opening` | agreed with changes |
-| 2   | Rail and day banners (two-track rail, day tag)                                         | geometry mock, `captures/wayfarer-locked-rail-*`                                                 | pending             |
+| 2   | Rail and day banners (rail, multi-day lane, day tag)                                   | geometry mock, `captures/wayfarer-locked-rail-*`                                                 | pending             |
 | 3   | Place / lodging entries (connector, title, byline, photo fan)                          | geometry mock, `mock/roi-shot-cards`                                                             | pending             |
 | 4   | Loose photo and cluster entries                                                        | `mock/roi-shot-cards`, `captures/wayfarer-photo-cards-compare-*`                                 | pending             |
 | 5   | Transit stop                                                                           | `mock/transit-locked-zoom`, `captures/wayfarer-transit-rail-compare-*`                           | pending             |
@@ -59,7 +59,7 @@ Measured against `mock/panel-ratio-large`, `mock/panel-final-place` and `mock/im
 - Right column: 424px cards, 42px from the right, 78px from the top, 13px from the bottom. Map card head 55px with a 16px title. Detail panel with a 26px title, 11px meta, 13px note, 12px Maps link, and a sentence-case photo count ("1 photo" / "16 photos").
 - Photo cards (follow-up after review): fan cards 92×98 laid side by side with ~6px overlap and tilts of −4°/+2°/−3° (were 108×92, overlapping ~35px, −4°/0°/+4°); loose-photo cards 100px squares at −4° with 8px corners; panel gallery 7px gaps and 6px corners.
 - Detail card fits its content (user decision): no stretched photos, pager right under the gallery, rows shrink only if the card would outgrow the column (checked at 900px and 800px window heights, no overflow in any state).
-- Kept on purpose: the thin chevron pager (user preferred it to the mock's round arrows), no title underlines, the two-track rail, and the 3px rail width (the mock's ~4px would shift the dotted-lane and transit geometry).
+- Kept on purpose: the thin chevron pager (user preferred it to the mock's round arrows), no title underlines. (The rail was later set to the mock's 4px in Part 2, and the dotted lane limited to multi-day events.)
 - Fixed along the way: left-side nodes were 3px right of the rail centre (right side was centred), and entries without photos (lodging) were vertically centred below their connector because entries are buttons.
 
 ### Part 2: Rail and day banners (in review)
@@ -68,6 +68,7 @@ Sampled pixel colours and positions from `mock/app-locked-geometry-final-full` (
 
 - Rail: 4px `#c4d3c7` at x=513–516 (was 3px `#bfd1c1` at 515–517). Now pixel-identical to the mock.
 - Round-dot lane: 2px `#739d7c` dots every 12px, centred 9px right of the rail centre (x=523–524), as in the locked mock ("seven pixels to the right" in `DESIGN.md`). Was `#749d85` every 10px at +10px. The grey dots in `image-e55ca7ac` are JPEG blur, not a different colour.
+- Dotted lane limited to multi-day events (user decision, matching the locked geometry mock). The handoff's "two-track throughout" note had put it along the whole rail. It now runs only from a span's start node to its end diamond, at the same position and colour.
 - Everything tied to the rail moved with it and is centred on x=515: place/photo nodes, the transit disc and teal leg, the multi-day bend and end diamond. Titles still end at 447 / start at 583.
 - Day banners: exact fills and shadows (green `#dcead6`/`#c3d6bb`, peach `#f6d1b7`/`#e7b99c`), text `#26342c`, tag border `#d6e1ca`. Size and position already matched (57px tall including the shadow; left edge 178px left of the rail).
 - Rail starts at the Day 1 banner and runs behind later banners, as in the mocks.
