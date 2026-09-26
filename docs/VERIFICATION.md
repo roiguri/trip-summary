@@ -62,6 +62,19 @@ Measured against `mock/panel-ratio-large`, `mock/panel-final-place` and `mock/im
 - Kept on purpose: the thin chevron pager (user preferred it to the mock's round arrows), no title underlines, the two-track rail, and the 3px rail width (the mock's ~4px would shift the dotted-lane and transit geometry).
 - Fixed along the way: left-side nodes were 3px right of the rail centre (right side was centred), and entries without photos (lodging) were vertically centred below their connector because entries are buttons.
 
+### Part 2: Rail and day banners (in review)
+
+Sampled pixel colours and positions from `mock/app-locked-geometry-final-full` (the locked geometry) and `mock/transit-locked-zoom`, then matched them exactly at 1440×900:
+
+- Rail: 4px `#c4d3c7` at x=513–516 (was 3px `#bfd1c1` at 515–517). Now pixel-identical to the mock.
+- Round-dot lane: 2px `#739d7c` dots every 12px, centred 9px right of the rail centre (x=523–524), as in the locked mock ("seven pixels to the right" in `DESIGN.md`). Was `#749d85` every 10px at +10px. The grey dots in `image-e55ca7ac` are JPEG blur, not a different colour.
+- Everything tied to the rail moved with it and is centred on x=515: place/photo nodes, the transit disc and teal leg, the multi-day bend and end diamond. Titles still end at 447 / start at 583.
+- Day banners: exact fills and shadows (green `#dcead6`/`#c3d6bb`, peach `#f6d1b7`/`#e7b99c`), text `#26342c`, tag border `#d6e1ca`. Size and position already matched (57px tall including the shadow; left edge 178px left of the rail).
+- Rail starts at the Day 1 banner and runs behind later banners, as in the mocks.
+- First entry after a banner moved down 24px: the node now sits 77px below the banner's bottom edge (mock: 78–79px on all three days). Later-day chips sit within ~6px of the mock.
+- Seen in the mocks but belongs to Part 3: places show their note as a short caption under the photo fan ("Start early, no shade after ten."); the build doesn't.
+- Removed per-day minimum heights (600/540/470px for days 1/2/3), which were tuned to the sample and had no effect (every day's content is taller).
+
 ## Preliminary findings (to be confirmed per part)
 
 Things noticed during the first capture pass. Each gets decided in its part's review.

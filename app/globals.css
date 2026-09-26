@@ -97,13 +97,6 @@ button:disabled {
 }
 .day-section {
   position: relative;
-  min-height: 600px;
-}
-.day-section:nth-of-type(2) {
-  min-height: 540px;
-}
-.day-section:nth-of-type(3) {
-  min-height: 470px;
 }
 .day-banner {
   position: relative;
@@ -1552,4 +1545,60 @@ button:disabled {
 }
 .panel:not(.panel-cluster) .panel-body .photos.count-5 .photo:nth-child(-n + 2) {
   grid-column: span 3;
+}
+
+/* ------------------------------------------------------------------------------------------
+   Part 2: rail and day banners, sampled from mock/app-locked-geometry-final-full and
+   mock/transit-locked-zoom. Rail 4px #c4d3c7 at x=513-516 (1440px); round-dot lane 2px #739d7c
+   dots every 12px, centred 9px right of the rail centre. Rail-relative markers move with it.
+   ------------------------------------------------------------------------------------------ */
+.entries {
+  margin-left: calc(55.5% - 2px);
+  border-left: 4px solid #c4d3c7;
+  background-image: radial-gradient(circle at 3px 3px, #739d7c 0 1px, transparent 1.25px);
+  background-size: 7px 12px;
+  background-position: 4px 0;
+}
+.entry {
+  padding-left: 66px;
+}
+.entry-left {
+  padding-left: 0;
+  padding-right: 70px;
+}
+.entry:not(.type-note):not(.type-transit) .entry-node {
+  left: -8.5px;
+}
+.entry-left:not(.type-note):not(.type-transit) .entry-node {
+  left: auto;
+  right: -4.5px;
+}
+.entry.type-transit .entry-node {
+  left: -18.5px;
+}
+.entry.type-transit::before {
+  left: -4px;
+  width: 4px;
+}
+.multiday-span {
+  left: calc(55.5% + 3px);
+}
+.multiday-end .diamond {
+  left: -8px;
+}
+.day-banner {
+  background: #dcead6;
+  box-shadow: 3px 4px 0 #c3d6bb;
+  color: #26342c;
+}
+.day-section:nth-of-type(even) .day-banner {
+  background: #f6d1b7;
+  box-shadow: 3px 4px 0 #e7b99c;
+}
+.day-banner small {
+  border-color: #d6e1ca;
+}
+/* First entry sits ~78px below the banner's bottom edge on every day of the locked mock. */
+.entries {
+  padding-top: 50px;
 }
