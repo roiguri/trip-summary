@@ -1,0 +1,151 @@
+{
+  "$comment": "Small fictional trip that differs from the sample in every dimension (dates, timezone, day count, span placement, transit mode). Used to check the UI has no sample-specific code. Images reuse the sample photos.",
+  "destination": {
+    "name": "Kansai",
+    "kind": "region",
+    "country": "Japan",
+    "timezone": "Asia/Tokyo",
+    "lat": 34.9,
+    "lng": 135.6
+  },
+  "trip": {
+    "id": "test-kansai",
+    "title": "Test: Two Days in Kansai",
+    "subtitle": "Decoupling fixture",
+    "start_date": "2027-03-02",
+    "end_date": "2027-03-03"
+  },
+  "days": [
+    { "date": "2027-03-02", "title": "Arrival", "tags": ["City", "Rain"] },
+    { "date": "2027-03-03", "title": "Up the mountain" }
+  ],
+  "places": [
+    {
+      "key": "fushimi",
+      "title": "Fushimi Inari Taisha",
+      "lat": 34.9671,
+      "lng": 135.7727,
+      "category": "shrine"
+    },
+    {
+      "key": "nishiki",
+      "title": "Nishiki Market",
+      "lat": 35.005,
+      "lng": 135.7649,
+      "category": "market",
+      "maps_url": "https://www.google.com/maps/search/?api=1&query=Nishiki+Market"
+    },
+    { "key": "koya", "title": "Mount Kōya", "lat": 34.2131, "lng": 135.5858, "category": "hike" }
+  ],
+  "itinerary": [
+    {
+      "key": "train-in",
+      "type": "transit",
+      "title": "Shinkansen from Tokyo",
+      "start_date": "2027-03-02",
+      "start_time": "07:30",
+      "end_time": "09:45",
+      "from_location": "Tokyo",
+      "to_location": "Kyoto",
+      "departure_timezone": "Asia/Tokyo",
+      "arrival_timezone": "Asia/Tokyo"
+    },
+    {
+      "key": "market",
+      "type": "place",
+      "place": "nishiki",
+      "start_date": "2027-03-02",
+      "start_time": "11:00",
+      "end_time": "12:15",
+      "notes": "Pickles and grilled skewers."
+    },
+    {
+      "key": "ryokan",
+      "type": "lodging",
+      "title": "Riverside Ryokan",
+      "start_date": "2027-03-02",
+      "end_date": "2027-03-03",
+      "start_time": "16:00",
+      "end_time": "10:00",
+      "notes": "Tatami room with a view of the river."
+    },
+    {
+      "key": "pilgrim-walk",
+      "type": "place",
+      "place": "fushimi",
+      "title": "Torii Gate Walk",
+      "start_date": "2027-03-02",
+      "end_date": "2027-03-03",
+      "start_time": "13:30",
+      "end_time": "12:00",
+      "notes": "Start at the lower gates, finish at the summit the next morning."
+    },
+    {
+      "key": "hike",
+      "type": "place",
+      "place": "koya",
+      "start_date": "2027-03-03",
+      "start_time": "14:00",
+      "end_time": "17:00"
+    },
+    {
+      "key": "note",
+      "type": "note",
+      "title": "Rain all afternoon",
+      "start_date": "2027-03-02",
+      "start_time": "18:00",
+      "notes": "Umbrellas from the convenience store saved the day."
+    }
+  ],
+  "photos": [
+    {
+      "url": "/photos/coast-4.jpg",
+      "caption": "Market stalls · 1",
+      "date": "2027-03-02",
+      "time": "11:20",
+      "entry": "market",
+      "lat": 35.005,
+      "lng": 135.7649
+    },
+    {
+      "url": "/photos/coast-5.jpg",
+      "caption": "Market stalls · 2",
+      "date": "2027-03-02",
+      "time": "11:25",
+      "entry": "market",
+      "lat": 35.005,
+      "lng": 135.7649
+    },
+    {
+      "url": "/photos/coast-6.jpg",
+      "caption": "Gates · 1",
+      "date": "2027-03-02",
+      "time": "13:40",
+      "entry": "pilgrim-walk"
+    },
+    {
+      "url": "/photos/coast-7.jpg",
+      "caption": "Street at dusk",
+      "date": "2027-03-02",
+      "time": "19:05",
+      "lat": 35.0,
+      "lng": 135.77
+    },
+    {
+      "url": "/photos/coast-8.jpg",
+      "caption": "Summit · 1",
+      "date": "2027-03-03",
+      "time": "08:10",
+      "lat": 34.9671,
+      "lng": 135.7727
+    },
+    {
+      "url": "/photos/coast-9.jpg",
+      "caption": "Summit · 2",
+      "date": "2027-03-03",
+      "time": "08:20",
+      "lat": 34.9671,
+      "lng": 135.7727
+    }
+  ]
+}

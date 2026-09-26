@@ -41,19 +41,27 @@ Phase 0 goal: confirm that the prototype is implemented correctly against the re
 - Clicking an entry now scrolls to it; this fixes the P13 scroll bug as a side effect.
 - Not changed: the "03 / THE JOURNEY" kicker is navigation chrome, not trip data. The map-card title ("Coastal detour") is handled in Part 8.
 
+### Data separation (done, cross-cutting)
+
+- The sample trip now lives in `data/sample-trip.json` and is loaded with `npm run seed` (format: `data/README.md`). `lib/schema.ts` holds the schema, `lib/db.ts` the loader, and `lib/data.ts` generic queries only. The page reads the database per request.
+- Removed from the code: sample dates and day titles, the `Coast` day tag, the `entry_id === 12` span, its chip text and "15:40 · END", the lodging check-out string, map bounds and centre, "3 DAYS", the `PT` special case (zone labels now come from `Intl`), and photo URLs being rewritten at read time. Multi-day spans are generic: any place/note whose end date is later than its start date.
+- The walk has its own photo records (same images), so Day 1's album counts 30 real photos.
+- Visible changes: the map-card title is now the destination name ("Monterey Coast", not "Coastal detour"); the map fits the actual places instead of a fixed box; the span tag reads "walk" (its place category), not "Walk". Pixel diff of all 20 states: the timeline column is identical.
+- Checked with `data/fixtures/test-trip.json` (Kansai, Asia/Tokyo, 2 days, span ending mid-morning, train): renders correctly, with no sample text anywhere in the page.
+
 ## Preliminary findings (to be confirmed per part)
 
 Things noticed during the first capture pass. Each gets decided in its part's review.
 
 - ~~**P1 (scroll model):** in the mocks the trip title block scrolls away with the timeline, and the rail uses the full height under the header. In the code the intro is pinned and the rail scrolls in a window that starts at y≈282. The handoff captures show the code's behaviour, so the handoff did not flag it.~~ Fixed in Part 1.
 - ~~**P1:** the intro title, kicker ("03 / THE JOURNEY") and subtitle are hard-coded strings, not the trip's title.~~ Fixed in Part 1.
-- **P2:** every day banner shows a hard-coded `Coast` tag. Day titles and dates are hard-coded in `lib/data.ts` (`dates`, `titles`), not derived from the trip.
+- ~~**P2:** every day banner shows a hard-coded `Coast` tag. Day titles and dates are hard-coded in `lib/data.ts` (`dates`, `titles`), not derived from the trip.~~ Fixed by the data separation.
 - **P2 vs mock:** the mock shows the dotted lane only during a multi-day span. The code shows it along the whole rail, per the later "two-track throughout" decision. Needs confirming.
-- **P3:** lodging check-out is the hard-coded string `2026-05-17 · 11:00`. Place tags fall back to `Walk` for missing categories.
-- **P7:** the multi-day span is keyed to `entry_id === 12`. The chip text ("Coast Path Walk · day N") and the end label ("15:40 · END") are literal strings in `Client.tsx`. The span's photos are borrowed from Carmel Beach (entry 1), so the day album counts them twice (Day 1 shows 30 photos; there are 27).
-- **P8:** map bounds, the initial centre, "3 DAYS" and the timezone label `PT` are hard-coded for the sample.
+- ~~**P3:** lodging check-out is the hard-coded string `2026-05-17 · 11:00`. Place tags fall back to `Walk` for missing categories.~~ Fixed by the data separation.
+- ~~**P7:** the multi-day span is keyed to `entry_id === 12`. The chip text ("Coast Path Walk · day N") and the end label ("15:40 · END") are literal strings in `Client.tsx`. The span's photos are borrowed from Carmel Beach (entry 1), so the day album counts them twice (Day 1 shows 30 photos; there are 27).~~ Fixed by the data separation.
+- ~~**P8:** map bounds, the initial centre, "3 DAYS" and the timezone label `PT` are hard-coded for the sample.~~ Fixed by the data separation.
 - **P10:** the pager footer says "1 PHOTOS" for a single photo (no singular form).
 - **P10:** the photo-sequence panel in `mock/image-e55ca7ac` has an eyebrow and a date; these were removed by a later written decision (no eyebrows). Confirm.
 - ~~**P13 (bug):** clicking a timeline entry doesn't scroll to it. `choose()` uses `offsetTop`, which is measured from the entry's day section (`position: relative`), not the rail. It scrolls to the wrong place (e.g. clicking the Day 2 transit scrolls to the top).~~ Fixed in Part 1.
 - **P13:** the map-to-photo marker and photo-location dot work. Numbered pins are the place order across the whole trip.
-- **Code:** `dateLabel` and `allPlaceIndex` in `Client.tsx` are unused. Photo URLs in the DB are overwritten at read time.
+- ~~**Code:** `dateLabel` and `allPlaceIndex` in `Client.tsx` are unused. Photo URLs in the DB are overwritten at read time.~~ Fixed by the data separation.

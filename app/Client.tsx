@@ -1,14 +1,8 @@
 'use client';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import maplibregl, { Map as MapType, Marker } from 'maplibre-gl';
-import type { Day, Entry, Photo } from '../lib/data';
-type Trip = { title: string; subtitle: string; timezone: string; days: Day[] };
+import type { Day, Entry, Photo, Trip } from '../lib/data';
 const allPhotos = (days: Day[]) => days.flatMap((d) => d.entries.flatMap((e) => e.photos));
-function dateLabel(day: string) {
-  return new Date(`${day}T12:00:00`)
-    .toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
-    .toUpperCase();
-}
 function noteDir(s: string): 'ltr' | 'rtl' {
   for (const ch of s) {
     if (/[֐-ࣿ]/.test(ch)) return 'rtl';
@@ -18,7 +12,26 @@ function noteDir(s: string): 'ltr' | 'rtl' {
 }
 function zoneLabel(zone: string | null) {
   if (!zone) return '';
-  return zone === 'America/Los_Angeles' ? 'PT' : zone.split('/').pop()?.replace(/_/g, ' ') || zone;
+  try {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: zone,
+      timeZoneName: 'shortGeneric',
+    }).formatToParts(new Date());
+    return parts.find((p) => p.type === 'timeZoneName')?.value || zone;
+  } catch {
+    return zone.split('/').pop()?.replace(/_/g, ' ') || zone;
+  }
+}
+type Bounds = [[number, number], [number, number]];
+function boundsOf(points: { lat: number | null; lng: number | null }[]): Bounds | null {
+  const pts = points.filter((p) => p.lat != null && p.lng != null);
+  if (!pts.length) return null;
+  const lngs = pts.map((p) => p.lng!),
+    lats = pts.map((p) => p.lat!);
+  return [
+    [Math.min(...lngs), Math.min(...lats)],
+    [Math.max(...lngs), Math.max(...lats)],
+  ];
 }
 function icon(type: Entry['type'], title: string) {
   if (type === 'transit')
@@ -61,7 +74,10 @@ function MapView({
     const m = new maplibregl.Map({
       container: el.current,
       style: 'https://tiles.openfreemap.org/styles/liberty',
-      center: [-121.92, 36.5],
+      center: [
+        trip.destination.lng ?? places[0]?.lng ?? 0,
+        trip.destination.lat ?? places[0]?.lat ?? 0,
+      ],
       zoom: 9,
       attributionControl: false,
     });
@@ -127,13 +143,8 @@ function MapView({
           },
         });
       }
-      m.fitBounds(
-        [
-          [-121.98, 36.34],
-          [-121.86, 36.66],
-        ],
-        { padding: 55, duration: 0 },
-      );
+      const whole = boundsOf(places);
+      if (whole) m.fitBounds(whole, { padding: 55, maxZoom: 11, duration: 0 });
     });
     return () => {
       m.remove();
@@ -166,13 +177,8 @@ function MapView({
       );
     }
     if (!day && !firstDay.current) {
-      m.fitBounds(
-        [
-          [-121.98, 36.34],
-          [-121.86, 36.66],
-        ],
-        { padding: 55, duration: 650 },
-      );
+      const whole = boundsOf(places);
+      if (whole) m.fitBounds(whole, { padding: 55, maxZoom: 11, duration: 650 });
     } else if (day && !firstDay.current) {
       const ds = places.filter((e) => e.day === day);
       if (ds.length)
@@ -192,8 +198,10 @@ function MapView({
   return <div className="map" ref={el} />;
 }
 export default function Client({ trip }: { trip: Trip }) {
-  const [selected, setSelected] = useState<Entry | null>(trip.days[0].entries[0]);
-  const [day, setDay] = useState(trip.days[0].date);
+  const [selected, setSelected] = useState<Entry | null>(
+    trip.days.flatMap((d) => d.entries)[0] ?? null,
+  );
+  const [day, setDay] = useState(trip.days[0]?.date ?? '');
   const [album, setAlbum] = useState<string | null>(null);
   const [photoPage, setPhotoPage] = useState(0);
   const [full, setFull] = useState<Photo | null>(null);
@@ -202,7 +210,7 @@ export default function Client({ trip }: { trip: Trip }) {
   const [collapsed, setCollapsed] = useState(false);
   const [arrows, setArrows] = useState('a');
   const [focus, setFocus] = useState<Photo | null>(null);
-  const [multiSpan, setMultiSpan] = useState<{ top: number; height: number } | null>(null);
+  const [spanLanes, setSpanLanes] = useState<{ id: string; top: number; height: number }[]>([]);
   const scroller = useRef<HTMLElement>(null);
   const rail = useRef<HTMLElement>(null);
   const days = trip.days;
@@ -254,13 +262,17 @@ export default function Client({ trip }: { trip: Trip }) {
     function measure() {
       const root = rail.current;
       if (!root) return;
-      const a = root.querySelector('.multiday-start .entry-node');
-      const b = root.querySelector('.multiday-end');
-      if (!a || !b) return;
       const rt = root.getBoundingClientRect();
-      const top = a.getBoundingClientRect().top - rt.top + 20;
-      const end = b.getBoundingClientRect().top - rt.top + 9;
-      setMultiSpan({ top, height: Math.max(0, end - top) });
+      const lanes = [];
+      for (const b of root.querySelectorAll<HTMLElement>('.multiday-end')) {
+        const id = b.dataset.spanId;
+        const a = root.querySelector(`.multiday-start[data-entry-id="${id}"] .entry-node`);
+        if (!id || !a) continue;
+        const top = a.getBoundingClientRect().top - rt.top + 20;
+        const end = b.getBoundingClientRect().top - rt.top + 9;
+        lanes.push({ id, top, height: Math.max(0, end - top) });
+      }
+      setSpanLanes(lanes);
     }
     measure();
     window.addEventListener('resize', measure);
@@ -321,12 +333,13 @@ export default function Client({ trip }: { trip: Trip }) {
           <p>{[trip.subtitle, trip.timezone].filter(Boolean).join(' · ')}</p>
         </div>
         <section className="rail" ref={rail}>
-          {multiSpan && (
+          {spanLanes.map((lane) => (
             <div
+              key={lane.id}
               className="multiday-span"
-              style={{ top: multiSpan.top, height: multiSpan.height }}
+              style={{ top: lane.top, height: lane.height }}
             />
-          )}
+          ))}
           {days.map((d, di) => (
             <section className="day-section" data-day={d.date} key={d.date}>
               <button
@@ -341,89 +354,104 @@ export default function Client({ trip }: { trip: Trip }) {
                     day: 'numeric',
                   })}
                 </span>
-                <small>Coast</small>
+                {d.tags.length > 0 && <small>{d.tags.join(' · ')}</small>}
               </button>
               <div className="entries">
-                {di > 0 && (
-                  <div className="multi-day-chip">
-                    Coast Path Walk · {di === days.length - 1 ? 'final day' : `day ${di + 1}`}
+                {d.continuing.map((s) => (
+                  <div className="multi-day-chip" key={s.id}>
+                    {s.title} · {s.final ? 'final day' : `day ${s.dayNumber}`}
                   </div>
-                )}
-                {d.entries.map((e, ei) => (
-                  <button
-                    key={e.id}
-                    data-entry-id={e.id}
-                    className={`entry ${e.id === 12 ? 'multiday-start' : ''} ${selected?.id === e.id && !album ? 'active' : ''} type-${e.type} ${ei % 2 === 0 ? 'entry-left' : 'entry-right'}`}
-                    onClick={() => choose(e)}
-                  >
-                    <span className="entry-node">
-                      {e.type === 'transit' && (
-                        <svg className="transit-icon" viewBox="0 0 24 24" aria-hidden="true">
-                          {icon(e.type, e.title) === 'train' ? (
-                            <>
-                              <rect x="5" y="2" width="14" height="17" rx="3" />
-                              <path d="M5 9h14M7 15h2m6 0h2M8 19l-2 3m10-3 2 3" />
-                            </>
-                          ) : icon(e.type, e.title) === 'flight' ? (
-                            <path d="M2 13l8 2 3 7 2-1-1-7 7-8a2 2 0 0 0-3-3l-8 7-7-1z" />
-                          ) : (
-                            <>
-                              <path d="M4 15l2-7h12l2 7v5h-3v-2H7v2H4zM6 15h12M8 18v-3m8 3v-3" />
-                            </>
-                          )}
-                        </svg>
-                      )}
-                    </span>
-                    <span
-                      className="entry-content"
-                      dir={e.type === 'note' ? noteDir(e.notes || e.title) : undefined}
-                    >
-                      <strong>{e.title}</strong>
-                      <small>
-                        {e.type === 'cluster'
-                          ? `PHOTO · ${e.time} – ${e.end_time}`
-                          : e.type === 'photo'
-                            ? `PHOTO · ${e.time}`
-                            : e.type === 'lodging'
-                              ? 'STAY · ' + e.time
-                              : e.type === 'transit'
-                                ? `${e.time}${e.end_time ? ' → ' + e.end_time : ''}${e.departure_timezone ? ' (' + zoneLabel(e.departure_timezone) + ')' : ''}`
-                                : e.type === 'note'
-                                  ? e.time
-                                  : ((e.tags[0] || 'PLACE') + ' · ' + e.time).toUpperCase()}
-                      </small>
-                      {e.type === 'transit' && (
-                        <span className="transit-route">
-                          {e.from_location || 'Origin'} → {e.to_location || 'Destination'}
-                        </span>
-                      )}
-                      {e.photos.length > 0 && (
-                        <span className="stack">
-                          {e.photos
-                            .slice(0, e.type === 'photo' || e.type === 'cluster' ? 1 : 3)
-                            .map((p, i) => (
-                              <img
-                                key={p.id}
-                                src={p.url}
-                                alt=""
-                                style={{ '--i': i } as React.CSSProperties}
-                              />
-                            ))}
-                        </span>
-                      )}
-                      {e.notes && e.type === 'note' && (
-                        <span className="entry-note" dir={noteDir(e.notes)}>
-                          {e.notes}
-                        </span>
-                      )}
-                    </span>
-                  </button>
                 ))}
-                {di === days.length - 1 && (
-                  <div className="multiday-end">
-                    <span className="diamond" />
-                    <small>15:40 · END</small>
-                  </div>
+                {timelineItems(d).map((item) =>
+                  item.kind === 'end' ? (
+                    <div className="multiday-end" data-span-id={item.id} key={`end-${item.id}`}>
+                      <span className="diamond" />
+                      <small>{[item.time, 'END'].filter(Boolean).join(' · ')}</small>
+                    </div>
+                  ) : (
+                    <button
+                      key={item.entry.id}
+                      data-entry-id={item.entry.id}
+                      className={`entry ${item.entry.span_end ? 'multiday-start' : ''} ${selected?.id === item.entry.id && !album ? 'active' : ''} type-${item.entry.type} ${item.index % 2 === 0 ? 'entry-left' : 'entry-right'}`}
+                      onClick={() => choose(item.entry)}
+                    >
+                      <span className="entry-node">
+                        {item.entry.type === 'transit' && (
+                          <svg className="transit-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            {icon(item.entry.type, item.entry.title) === 'train' ? (
+                              <>
+                                <rect x="5" y="2" width="14" height="17" rx="3" />
+                                <path d="M5 9h14M7 15h2m6 0h2M8 19l-2 3m10-3 2 3" />
+                              </>
+                            ) : icon(item.entry.type, item.entry.title) === 'flight' ? (
+                              <path d="M2 13l8 2 3 7 2-1-1-7 7-8a2 2 0 0 0-3-3l-8 7-7-1z" />
+                            ) : (
+                              <>
+                                <path d="M4 15l2-7h12l2 7v5h-3v-2H7v2H4zM6 15h12M8 18v-3m8 3v-3" />
+                              </>
+                            )}
+                          </svg>
+                        )}
+                      </span>
+                      <span
+                        className="entry-content"
+                        dir={
+                          item.entry.type === 'note'
+                            ? noteDir(item.entry.notes || item.entry.title)
+                            : undefined
+                        }
+                      >
+                        <strong>{item.entry.title}</strong>
+                        <small>
+                          {item.entry.type === 'cluster'
+                            ? `PHOTO · ${item.entry.time} – ${item.entry.end_time}`
+                            : item.entry.type === 'photo'
+                              ? `PHOTO · ${item.entry.time}`
+                              : item.entry.type === 'lodging'
+                                ? 'STAY · ' + item.entry.time
+                                : item.entry.type === 'transit'
+                                  ? `${item.entry.time}${item.entry.end_time ? ' → ' + item.entry.end_time : ''}${item.entry.departure_timezone ? ' (' + zoneLabel(item.entry.departure_timezone) + ')' : ''}`
+                                  : item.entry.type === 'note'
+                                    ? item.entry.time
+                                    : (
+                                        (item.entry.tags[0] || 'PLACE') +
+                                        ' · ' +
+                                        item.entry.time
+                                      ).toUpperCase()}
+                        </small>
+                        {item.entry.type === 'transit' && (
+                          <span className="transit-route">
+                            {item.entry.from_location || 'Origin'} →{' '}
+                            {item.entry.to_location || 'Destination'}
+                          </span>
+                        )}
+                        {item.entry.photos.length > 0 && (
+                          <span className="stack">
+                            {item.entry.photos
+                              .slice(
+                                0,
+                                item.entry.type === 'photo' || item.entry.type === 'cluster'
+                                  ? 1
+                                  : 3,
+                              )
+                              .map((p, i) => (
+                                <img
+                                  key={p.id}
+                                  src={p.url}
+                                  alt=""
+                                  style={{ '--i': i } as React.CSSProperties}
+                                />
+                              ))}
+                          </span>
+                        )}
+                        {item.entry.notes && item.entry.type === 'note' && (
+                          <span className="entry-note" dir={noteDir(item.entry.notes)}>
+                            {item.entry.notes}
+                          </span>
+                        )}
+                      </span>
+                    </button>
+                  ),
                 )}
               </div>
             </section>
@@ -440,7 +468,7 @@ export default function Client({ trip }: { trip: Trip }) {
             <header className="card-head">
               <div>
                 <small>THE JOURNEY / MAP</small>
-                <strong>Coastal detour</strong>
+                <strong>{trip.destination.name}</strong>
               </div>
               <button
                 className="card-close"
@@ -464,7 +492,9 @@ export default function Client({ trip }: { trip: Trip }) {
               </button>
             </div>
             <footer className="map-foot">
-              <span>● 3 DAYS · OSM</span>
+              <span>
+                ● {days.length} {days.length === 1 ? 'DAY' : 'DAYS'} · OSM
+              </span>
               <span>OPENFREEMAP</span>
             </footer>
           </section>
@@ -618,11 +648,15 @@ export default function Client({ trip }: { trip: Trip }) {
     </main>
   );
 }
-function allPlaceIndex(days: Day[], e: Entry) {
-  if (e.type !== 'place') return null;
-  return (
-    days
-      .flatMap((d) => d.entries.filter((x) => x.type === 'place'))
-      .findIndex((x) => x.id === e.id) + 1
-  );
+
+type TimelineItem =
+  { kind: 'entry'; entry: Entry; index: number } | { kind: 'end'; id: string; time: string | null };
+/** A day's entries plus the end markers of multi-day spans, in time order; `index` drives left/right alternation. */
+function timelineItems(d: Day): TimelineItem[] {
+  const items: TimelineItem[] = d.entries.map((entry, index) => ({ kind: 'entry', entry, index }));
+  for (const end of d.spanEnds) {
+    const at = items.findIndex((x) => x.kind === 'entry' && !!end.time && x.entry.time > end.time);
+    items.splice(at === -1 ? items.length : at, 0, { kind: 'end', ...end });
+  }
+  return items;
 }

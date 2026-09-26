@@ -12,7 +12,7 @@ npm run dev
 # http://localhost:3100
 ```
 
-`npm run build && npm run start` serves the production build on port 3100. On first execution, `lib/data.ts` creates `trip-sample.db` and seeds only fictional trip entries and public sample imagery. SQLite files are git-ignored. Images are local copies of Wikimedia Commons media; see `public/photos/SOURCES.txt` for source URLs. This is a local prototype: images are for illustrative review, and license terms should be checked before any public deployment.
+`npm run build && npm run start` serves the production build on port 3100. On first execution the app creates `trip-sample.db` from `data/sample-trip.json` (fictional entries and public sample imagery). `npm run seed [file]` reloads it from any trip file; see `data/README.md`. SQLite files are git-ignored. Images are local copies of Wikimedia Commons media; see `public/photos/SOURCES.txt` for source URLs. This is a local prototype: images are for illustrative review, and license terms should be checked before any public deployment.
 
 ## Interface
 
