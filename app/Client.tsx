@@ -550,7 +550,9 @@ export default function Client({ trip }: { trip: Trip }) {
                     ))}
                   </div>
                   <div className={`pagination pagination-${arrows}`}>
-                    <small>{photos.length} PHOTOS</small>
+                    <small>
+                      {photos.length} {photos.length === 1 ? 'photo' : 'photos'}
+                    </small>
                     <div>
                       <button
                         aria-label="Previous photos"

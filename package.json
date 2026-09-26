@@ -9,7 +9,8 @@
     "capture": "node scripts/capture.mjs",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
-    "seed": "node scripts/seed.ts"
+    "seed": "node scripts/seed.ts",
+    "snapshot": "bash scripts/snapshot.sh"
   },
   "dependencies": {
     "maplibre-gl": "^5.7.3",

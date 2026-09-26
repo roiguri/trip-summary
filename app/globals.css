@@ -1226,3 +1226,207 @@ button:disabled {
   border: 0;
   border-radius: 4px;
 }
+
+/* ------------------------------------------------------------------------------------------
+   Part 2 style pass: values measured from docs/reference/mock (panel-ratio-large,
+   panel-final-place, image-e55ca7ac) at 1440x900. Kept together here until the Phase 0
+   refactor folds them into the base rules. The pager keeps the thin chevrons (style A).
+   ------------------------------------------------------------------------------------------ */
+
+/* Header: 65px tall, smaller mark, tighter wordmark, 11px nav/status, nav centred at 680px. */
+.header {
+  height: 65px;
+  padding: 0 35px;
+}
+.brand {
+  font-size: 15px;
+  letter-spacing: 0.07em;
+}
+.brand-mark {
+  font-size: 14px;
+  margin-right: 8px;
+  letter-spacing: 0;
+}
+.nav {
+  left: calc(50% - 40px);
+  gap: 28px;
+  font-size: 11px;
+  letter-spacing: 0;
+  color: #7f9383;
+}
+.nav-active {
+  color: #2d3a33;
+}
+.status {
+  font-size: 11px;
+  color: #7d8a80;
+}
+
+/* Timeline column: 928px wide so the rail sits at 515px; intro and first banner as in the mock. */
+.left {
+  height: calc(100dvh - 65px);
+  width: min(928px, calc(100vw - 512px));
+}
+.intro {
+  height: 244px;
+  padding: 52px 0 0 65px;
+}
+.intro h1 {
+  font-size: 42px;
+  letter-spacing: -0.05em;
+  margin-top: 0;
+}
+.intro .kicker {
+  margin-bottom: 5px;
+}
+.intro p {
+  margin-top: 18px;
+  color: #8e968f;
+}
+.day-banner {
+  left: calc(55.5% - 178px);
+  width: max-content;
+  min-width: 250px;
+  padding: 15px 16px 11px;
+  font-size: 22px;
+  letter-spacing: -0.05em;
+}
+.day-banner small {
+  font-size: 11px;
+  letter-spacing: 0;
+  color: #3b4a40;
+  background: #f4f5ec;
+  border-color: #d5dccb;
+  padding: 4px 10px;
+}
+
+/* Entries: 22px titles, neutral bylines, text 68px from the rail centre, the node level with the
+   title baseline, larger photo fans. */
+.entry {
+  padding-left: 65px;
+}
+.entry-left {
+  padding-left: 0;
+  padding-right: 71px;
+}
+.entry-content strong {
+  font-size: 22px;
+  letter-spacing: -0.02em;
+}
+.entry-content small {
+  margin-top: 7px;
+  color: #7f8c84;
+}
+.entry:not(.type-note):not(.type-transit) .entry-node {
+  top: 24px;
+  border-width: 2px;
+  border-color: #b98468;
+}
+.entry:not(.type-note):not(.type-transit) .entry-node::after {
+  left: 2.5px;
+  top: 2.5px;
+  width: 4px;
+  height: 4px;
+  background: #b98468;
+}
+.entry:not(.type-note):not(.type-transit) .entry-content:before {
+  top: 30px;
+  width: 61px;
+  border-top: 2px solid #b98468;
+}
+/* Entries are buttons, which centre their content vertically; entries without photos (lodging)
+   then dropped below their connector. Top-align them like the mock's "Cedar House". */
+.entry:not(.type-note):not(.type-transit) {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+/* Left-side nodes were 3px right of the rail centre; centre them like the right side. */
+.entry-left:not(.type-note):not(.type-transit) .entry-node {
+  right: -5px;
+}
+.entry-left:not(.type-note):not(.type-transit) .entry-content:before {
+  right: 1.5px;
+  width: 64px;
+}
+.stack {
+  width: 266px;
+  height: 102px;
+  margin-top: 10px;
+}
+.stack img {
+  width: 108px;
+  height: 92px;
+  left: calc(var(--i) * 73px);
+}
+
+/* Right column: 424px cards, 42px from the right edge, 78px from the top, 13px from the bottom. */
+.right {
+  right: max(40px, calc((100vw - 1370px) / 2 + 7px));
+  top: 78px;
+  bottom: 13px;
+  width: 424px;
+}
+.card-head {
+  height: 55px;
+  padding: 0 16px 0 18px;
+  border-bottom: 1px solid #e3e8df;
+}
+.card-head small {
+  letter-spacing: 0.2em;
+  color: #8b9a8d;
+}
+.card-head strong {
+  font-size: 16px;
+  letter-spacing: -0.06em;
+  color: #2a3a30;
+}
+.card-close {
+  width: 29px;
+  height: 29px;
+  color: #3f5c4b;
+}
+.whole-chip {
+  left: 14px;
+  top: 15px;
+  font-size: 11px;
+  letter-spacing: 0.01em;
+  color: #3d4f44;
+  padding: 7px 12px;
+}
+
+/* Detail panel: 24px inset, 26px title, 11-13px supporting text. */
+.panel-body {
+  padding: 22px 23px 16px;
+}
+.panel-body h2 {
+  font-size: 26px;
+  letter-spacing: -0.06em;
+  margin-bottom: 13px;
+}
+.meta {
+  font-size: 11px;
+  color: #6e8779;
+  margin-bottom: 23px;
+}
+.meta em {
+  font-size: 11px;
+  padding: 3px 8px;
+}
+.pagination small {
+  font-size: 11px;
+  color: #9aa39b;
+}
+.note {
+  font-size: 13px;
+  line-height: 1.45;
+  border-left: 3px solid #d3ae93;
+  background: #f8f2e9;
+  color: #3e4a42;
+  padding: 9px 13px;
+  max-height: 64px;
+}
+.maps-link {
+  font-size: 12px;
+  color: #7c9483;
+}

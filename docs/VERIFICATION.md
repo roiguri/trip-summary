@@ -49,6 +49,17 @@ Phase 0 goal: confirm that the prototype is implemented correctly against the re
 - Visible changes: the map-card title is now the destination name ("Monterey Coast", not "Coastal detour"); the map fits the actual places instead of a fixed box; the span tag reads "walk" (its place category), not "Walk". Pixel diff of all 20 states: the timeline column is identical.
 - Checked with `data/fixtures/test-trip.json` (Kansai, Asia/Tokyo, 2 days, span ending mid-morning, train): renders correctly, with no sample text anywhere in the page.
 
+### Mock style pass (done, before Part 2)
+
+Measured against `mock/panel-ratio-large`, `mock/panel-final-place` and `mock/image-e55ca7ac` at 1440×900 (values fitted from zoomed crops and text widths). It lives in one marked block at the end of `app/globals.css` until the refactor.
+
+- Header 65px; smaller mark; 15px wordmark at 0.07em; 11px nav centred at 680px; 11px status.
+- Timeline column 928px, so the rail sits at 515px. Intro title 42px/-0.05em; first day banner at y=305 (22px text) with a darker tag chip.
+- Entries: 22px/-0.02em titles; neutral grey bylines; text 68px from the rail centre on both sides; node level with the title baseline; 2px arm and ring with a 4px centre dot; photo fans 266×102.
+- Right column: 424px cards, 42px from the right, 78px from the top, 13px from the bottom. Map card head 55px with a 16px title. Detail panel with a 26px title, 11px meta, 13px note, 12px Maps link, and a sentence-case photo count ("1 photo" / "16 photos").
+- Kept on purpose: the thin chevron pager (user preferred it to the mock's round arrows), no title underlines, the two-track rail, and the 3px rail width (the mock's ~4px would shift the dotted-lane and transit geometry).
+- Fixed along the way: left-side nodes were 3px right of the rail centre (right side was centred), and entries without photos (lodging) were vertically centred below their connector because entries are buttons.
+
 ## Preliminary findings (to be confirmed per part)
 
 Things noticed during the first capture pass. Each gets decided in its part's review.
@@ -60,7 +71,7 @@ Things noticed during the first capture pass. Each gets decided in its part's re
 - ~~**P3:** lodging check-out is the hard-coded string `2026-05-17 · 11:00`. Place tags fall back to `Walk` for missing categories.~~ Fixed by the data separation.
 - ~~**P7:** the multi-day span is keyed to `entry_id === 12`. The chip text ("Coast Path Walk · day N") and the end label ("15:40 · END") are literal strings in `Client.tsx`. The span's photos are borrowed from Carmel Beach (entry 1), so the day album counts them twice (Day 1 shows 30 photos; there are 27).~~ Fixed by the data separation.
 - ~~**P8:** map bounds, the initial centre, "3 DAYS" and the timezone label `PT` are hard-coded for the sample.~~ Fixed by the data separation.
-- **P10:** the pager footer says "1 PHOTOS" for a single photo (no singular form).
+- ~~**P10:** the pager footer says "1 PHOTOS" for a single photo (no singular form).~~ Fixed in the style pass.
 - **P10:** the photo-sequence panel in `mock/image-e55ca7ac` has an eyebrow and a date; these were removed by a later written decision (no eyebrows). Confirm.
 - ~~**P13 (bug):** clicking a timeline entry doesn't scroll to it. `choose()` uses `offsetTop`, which is measured from the entry's day section (`position: relative`), not the rail. It scrolls to the wrong place (e.g. clicking the Day 2 transit scrolls to the top).~~ Fixed in Part 1.
 - **P13:** the map-to-photo marker and photo-location dot work. Numbered pins are the place order across the whole trip.

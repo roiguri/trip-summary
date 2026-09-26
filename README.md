@@ -20,7 +20,11 @@ The timeline rail scrolls within a fixed viewport; the right-hand map and detail
 
 ## Data contract
 
-The SQLite core tables `destinations`, `trips`, `places`, `wishlist`, `itinerary` mirror the supplied schema, including the `one_current_trip` index. A prototype-only `photos` table holds sample image references and photo coordinates. The current trip is selected by `is_current=1` and the timezone comes from `destinations.timezone`, not from the browser or a Denver fixture. This is an illustrative viewer, not yet a complete importer or editor. No real trip data should be committed to this repository.
+The SQLite core tables `destinations`, `trips`, `places`, `wishlist`, `itinerary` mirror the supplied schema, including the `one_current_trip` index. Prototype-only `days` and `photos` tables hold day titles and photo references with coordinates. The current trip is selected by `is_current=1` and the timezone comes from `destinations.timezone`, not from the browser or a Denver fixture. This is an illustrative viewer, not yet a complete importer or editor. No real trip data should be committed to this repository.
+
+## Hosted preview
+
+`npm run build && npm run start`, then `npm run snapshot` writes a static, relative-path copy of the page to `preview/` (git-ignored) for hosting as a private review page. Map tiles do not load there.
 
 ## Project docs
 
