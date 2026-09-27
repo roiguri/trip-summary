@@ -369,7 +369,15 @@ export default function Client({ trip }: { trip: Trip }) {
               </button>
               <div className="entries">
                 {d.continuing.map((s) => (
-                  <div className={`multi-day-chip ${laneClass(s.lane)}`} key={s.id}>
+                  <div
+                    className={`multi-day-chip ${laneClass(s.lane)}`}
+                    key={s.id}
+                    style={
+                      {
+                        '--outer': Math.max(0, ...d.continuing.map((c) => c.lane)),
+                      } as React.CSSProperties
+                    }
+                  >
                     {s.title} · {s.final ? 'final day' : `day ${s.dayNumber}`}
                   </div>
                 ))}

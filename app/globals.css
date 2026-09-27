@@ -1756,3 +1756,7 @@ button:disabled {
   border-left-color: var(--lane-edge);
   color: var(--lane-text);
 }
+/* Later-day labels clear every lane running that day (same 13px gap as with one lane). */
+.multi-day-chip {
+  margin-left: calc(20px + var(--outer, 0) * 9px);
+}
