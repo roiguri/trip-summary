@@ -35,7 +35,7 @@ This document records the agreed visual direction for the local trip-summary pro
 ## Multi-day lanes and ends (user decisions)
 
 - Overlapping multi-day events run in side-by-side lanes, 9px apart (+9px, +18px, … right of the rail centre); each takes the lowest lane that is free when it starts.
-- A lane ends by easing into the rail through a smooth curve (~36px) with the same 12px dot spacing, finishing at the centre of the end diamond, behind the diamond. The END label sits close to the diamond (10px gap).
+- A lane ends by easing into the rail with the same 12px dot spacing all the way: it leaves ~24px above the diamond and arrives diagonally at the diamond's centre, behind the diamond. The END label sits close to the diamond (10px gap).
 - Later-day labels sit ~20px under the day banner.
 
 ## Final visual correction, September 26
