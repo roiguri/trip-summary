@@ -210,6 +210,18 @@ export default function Client({ trip }: { trip: Trip }) {
   const [collapsed, setCollapsed] = useState(false);
   const [arrows, setArrows] = useState('a');
   const [focus, setFocus] = useState<Photo | null>(null);
+  // Multi-day focus: the hovered span, else the selected one; its lane, labels and end marker
+  // are emphasised and other lanes fade (only when more than one lane is drawn).
+  const [hoverSpan, setHoverSpan] = useState<string | null>(null);
+  const focusSpan = hoverSpan ?? (selected?.span_end && !album ? selected.id : null);
+  const spanFocus = (id: string) =>
+    focusSpan === id ? 'is-focus' : focusSpan && spanLanes.length > 1 ? 'is-dim' : '';
+  const hoverProps = (id: string) => ({
+    onMouseEnter: () => setHoverSpan(id),
+    onMouseLeave: () => setHoverSpan((h) => (h === id ? null : h)),
+    onFocus: () => setHoverSpan(id),
+    onBlur: () => setHoverSpan((h) => (h === id ? null : h)),
+  });
   const [spanLanes, setSpanLanes] = useState<
     { id: string; top: number; height: number; lane: number }[]
   >([]);
@@ -340,7 +352,9 @@ export default function Client({ trip }: { trip: Trip }) {
           {spanLanes.map((lane) => (
             <div
               key={lane.id}
-              className={`multiday-span ${laneClass(lane.lane)}`}
+              className={`multiday-span ${laneClass(lane.lane)} ${spanFocus(lane.id)}`}
+              onMouseEnter={() => setHoverSpan(lane.id)}
+              onMouseLeave={() => setHoverSpan((h) => (h === lane.id ? null : h))}
               style={
                 {
                   top: lane.top,
@@ -369,9 +383,14 @@ export default function Client({ trip }: { trip: Trip }) {
               </button>
               <div className="entries">
                 {d.continuing.map((s) => (
-                  <div
-                    className={`multi-day-chip ${laneClass(s.lane)}`}
+                  <button
+                    className={`multi-day-chip ${laneClass(s.lane)} ${spanFocus(s.id)}`}
                     key={s.id}
+                    {...hoverProps(s.id)}
+                    onClick={() => {
+                      const start = days.flatMap((x) => x.entries).find((e) => e.id === s.id);
+                      if (start) choose(start);
+                    }}
                     style={
                       {
                         '--outer': Math.max(0, ...d.continuing.map((c) => c.lane)),
@@ -379,12 +398,13 @@ export default function Client({ trip }: { trip: Trip }) {
                     }
                   >
                     {s.title} · {s.final ? 'final day' : `day ${s.dayNumber}`}
-                  </div>
+                  </button>
                 ))}
                 {timelineItems(d).map((item) =>
                   item.kind === 'end' ? (
                     <div
-                      className={`multiday-end ${laneClass(item.lane)}`}
+                      className={`multiday-end ${laneClass(item.lane)} ${spanFocus(item.id)}`}
+                      {...hoverProps(item.id)}
                       data-span-id={item.id}
                       data-lane={item.lane}
                       key={`end-${item.id}`}
@@ -400,6 +420,7 @@ export default function Client({ trip }: { trip: Trip }) {
                       data-entry-id={item.entry.id}
                       className={`entry ${item.entry.span_end ? 'multiday-start' : ''} ${selected?.id === item.entry.id && !album ? 'active' : ''} type-${item.entry.type} ${item.index % 2 === 0 ? 'entry-left' : 'entry-right'}`}
                       onClick={() => choose(item.entry)}
+                      {...(item.entry.span_end ? hoverProps(item.entry.id) : {})}
                     >
                       <span className="entry-node">
                         {item.entry.type === 'transit' && (

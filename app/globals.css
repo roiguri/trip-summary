@@ -1760,3 +1760,57 @@ button:disabled {
 .multi-day-chip {
   margin-left: calc(20px + var(--outer, 0) * 9px);
 }
+/* Multi-day focus (hover, keyboard focus or selection): the event's lane, end curve, diamond and
+   labels strengthen; other lanes fade to 35% when more than one lane is drawn. */
+.multiday-span,
+.multiday-end,
+.multi-day-chip {
+  transition:
+    opacity 0.15s ease,
+    background-color 0.15s ease;
+}
+.multiday-span {
+  pointer-events: auto;
+  cursor: pointer;
+}
+/* A 13px-wide invisible hover area around the 2px dot lane. */
+.multiday-span::before {
+  content: '';
+  position: absolute;
+  inset: 0 -3px;
+}
+.is-dim {
+  opacity: 0.35;
+}
+.multiday-span.is-focus {
+  background-image: radial-gradient(
+    circle at 3px 3px,
+    var(--lane-strong) 0 1.4px,
+    transparent 1.65px
+  );
+}
+.multiday-end.is-focus .lane-curve {
+  fill: var(--lane-strong);
+}
+.multiday-end.is-focus .lane-curve circle {
+  r: 1.4px;
+}
+.multiday-end.is-focus .diamond {
+  background: var(--lane-edge);
+}
+.multi-day-chip {
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.multi-day-chip.is-focus {
+  background: color-mix(in srgb, var(--lane-edge) 40%, #f0f2e8);
+}
+.multi-day-chip:focus-visible {
+  outline: 2px solid var(--lane-strong);
+  outline-offset: 2px;
+}
+/* The end marker's hover area is the diamond and its label only, not the whole row. */
+.multiday-end {
+  width: max-content;
+}
