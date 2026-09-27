@@ -272,7 +272,9 @@ export default function Client({ trip }: { trip: Trip }) {
         if (!id || !a) continue;
         const top = a.getBoundingClientRect().top - rt.top + 20;
         const end = b.getBoundingClientRect().top - rt.top + 9;
-        lanes.push({ id, top, height: Math.max(0, end - top), lane: Number(b.dataset.lane) || 0 });
+        const lane = Number(b.dataset.lane);
+        if (lane < 0) continue;
+        lanes.push({ id, top, height: Math.max(0, end - top), lane });
       }
       setSpanLanes(lanes);
     }
@@ -338,7 +340,7 @@ export default function Client({ trip }: { trip: Trip }) {
           {spanLanes.map((lane) => (
             <div
               key={lane.id}
-              className="multiday-span"
+              className={`multiday-span ${laneClass(lane.lane)}`}
               style={
                 {
                   top: lane.top,
@@ -367,20 +369,20 @@ export default function Client({ trip }: { trip: Trip }) {
               </button>
               <div className="entries">
                 {d.continuing.map((s) => (
-                  <div className="multi-day-chip" key={s.id}>
+                  <div className={`multi-day-chip ${laneClass(s.lane)}`} key={s.id}>
                     {s.title} · {s.final ? 'final day' : `day ${s.dayNumber}`}
                   </div>
                 ))}
                 {timelineItems(d).map((item) =>
                   item.kind === 'end' ? (
                     <div
-                      className="multiday-end"
+                      className={`multiday-end ${laneClass(item.lane)}`}
                       data-span-id={item.id}
                       data-lane={item.lane}
                       key={`end-${item.id}`}
-                      style={{ '--lane': item.lane } as React.CSSProperties}
+                      style={{ '--lane': Math.max(0, item.outer) } as React.CSSProperties}
                     >
-                      <LaneCurve lane={item.lane} />
+                      {item.lane >= 0 && <LaneCurve lane={item.lane} />}
                       <span className="diamond" />
                       <small>{[item.time, 'END'].filter(Boolean).join(' · ')}</small>
                     </div>
@@ -672,12 +674,14 @@ export default function Client({ trip }: { trip: Trip }) {
 
 type TimelineItem =
   | { kind: 'entry'; entry: Entry; index: number }
-  | { kind: 'end'; id: string; time: string | null; lane: number };
+  | { kind: 'end'; id: string; time: string | null; lane: number; outer: number };
 /** A day's entries plus the end markers of multi-day spans, in time order; `index` drives left/right alternation. */
 function timelineItems(d: Day): TimelineItem[] {
   const items: TimelineItem[] = d.entries.map((entry, index) => ({ kind: 'entry', entry, index }));
-  for (const end of d.spanEnds) {
-    const at = items.findIndex((x) => x.kind === 'entry' && !!end.time && x.entry.time > end.time);
+  const timeOf = (x: TimelineItem) => (x.kind === 'entry' ? x.entry.time : x.time);
+  const ends = [...d.spanEnds].sort((a, b) => (a.time ?? '99').localeCompare(b.time ?? '99'));
+  for (const end of ends) {
+    const at = items.findIndex((x) => !!end.time && (timeOf(x) ?? '') > end.time);
     items.splice(at === -1 ? items.length : at, 0, { kind: 'end', ...end });
   }
   return items;
@@ -749,4 +753,9 @@ function LaneCurve({ lane }: { lane: number }) {
       ))}
     </svg>
   );
+}
+
+/** Lane colour class: lane-0..2 for drawn lanes, lane-x for spans shown without a line. */
+function laneClass(lane: number) {
+  return lane < 0 ? 'lane-x' : `lane-${lane}`;
 }

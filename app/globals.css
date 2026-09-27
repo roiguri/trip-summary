@@ -1714,3 +1714,45 @@ button:disabled {
 .multiday-end .diamond {
   z-index: 2;
 }
+/* Lane colours (user decision): each drawn lane has its own muted colour, carried by its dots,
+   end curve, diamond, END label and the edge of its later-day labels. Spans beyond the 3-lane cap
+   (lane-x) have no line; their labels and end marker are neutral grey. */
+.lane-0 {
+  --lane-dot: #739d7c;
+  --lane-strong: #638e70;
+  --lane-edge: #9cb7a0;
+  --lane-text: #76937e;
+}
+.lane-1 {
+  --lane-dot: #b39247;
+  --lane-strong: #967631;
+  --lane-edge: #d2bc84;
+  --lane-text: #957c45;
+}
+.lane-2 {
+  --lane-dot: #9a7292;
+  --lane-strong: #7e5876;
+  --lane-edge: #c4a8be;
+  --lane-text: #8a6983;
+}
+.lane-x {
+  --lane-strong: #8b938b;
+  --lane-edge: #c9cec6;
+  --lane-text: #858c85;
+}
+.multiday-span {
+  background-image: radial-gradient(circle at 3px 3px, var(--lane-dot) 0 1px, transparent 1.25px);
+}
+.lane-curve {
+  fill: var(--lane-dot);
+}
+.multiday-end {
+  color: var(--lane-text);
+}
+.multiday-end .diamond {
+  border-color: var(--lane-strong);
+}
+.multi-day-chip {
+  border-left-color: var(--lane-edge);
+  color: var(--lane-text);
+}

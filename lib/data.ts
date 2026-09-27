@@ -46,7 +46,8 @@ export type Day = {
   /** Multi-day entries that started on an earlier day and continue through this one. */
   continuing: SpanDay[];
   /** Multi-day entries that end on this day, with their end time. */
-  spanEnds: { id: string; time: string | null; lane: number }[];
+  /** `outer` is the outermost lane still drawn at that moment, so the END label can clear it. */
+  spanEnds: { id: string; time: string | null; lane: number; outer: number }[];
 };
 export type Trip = {
   title: string;
@@ -77,6 +78,8 @@ type ItemRow = {
 };
 type PhotoRow = Omit<Photo, 'id'> & { photo_id: number; entry_id: number | null };
 
+/** Most multi-day lanes drawn side by side (user decision). */
+const MAX_LANES = 3;
 const DAY_MS = 86_400_000;
 const addDays = (date: string, n: number) =>
   new Date(Date.parse(`${date}T00:00:00Z`) + n * DAY_MS).toISOString().slice(0, 10);
@@ -153,7 +156,8 @@ export function getTrip(): Trip {
     i.item_type !== 'lodging' && !!i.end_date && i.end_date > i.start_date;
   const spans = events.filter(isSpan);
   // Overlapping spans get side-by-side lanes: each takes the lowest lane whose previous span has
-  // ended by the time it starts.
+  // ended by the time it starts. At most MAX_LANES run at once; a span that finds no free lane
+  // gets lane -1 and is shown without a line (start entry, day labels and end marker only).
   const laneOf = new Map<number, number>();
   const laneEnds: string[] = [];
   const at = (date: string, time: string | null, fallback: string) => `${date} ${time ?? fallback}`;
@@ -162,8 +166,8 @@ export function getTrip(): Trip {
   )) {
     const start = at(sp.start_date, sp.start_time, '00:00');
     let lane = laneEnds.findIndex((end) => end <= start);
-    if (lane === -1) lane = laneEnds.push('') - 1;
-    laneEnds[lane] = at(sp.end_date!, sp.end_time, '23:59');
+    if (lane === -1 && laneEnds.length < MAX_LANES) lane = laneEnds.push('') - 1;
+    if (lane !== -1) laneEnds[lane] = at(sp.end_date!, sp.end_time, '23:59');
     laneOf.set(sp.entry_id, lane);
   }
 
@@ -248,11 +252,21 @@ export function getTrip(): Trip {
         })),
       spanEnds: spans
         .filter((s) => s.end_date === date)
-        .map((s) => ({
-          id: `i${s.entry_id}`,
-          time: s.end_time,
-          lane: laneOf.get(s.entry_id) ?? 0,
-        })),
+        .map((s) => {
+          const t = at(s.end_date!, s.end_time, '23:59');
+          const running = spans.filter(
+            (o) =>
+              (laneOf.get(o.entry_id) ?? -1) >= 0 &&
+              at(o.start_date, o.start_time, '00:00') <= t &&
+              t <= at(o.end_date!, o.end_time, '23:59'),
+          );
+          return {
+            id: `i${s.entry_id}`,
+            time: s.end_time,
+            lane: laneOf.get(s.entry_id) ?? -1,
+            outer: Math.max(-1, ...running.map((o) => laneOf.get(o.entry_id) ?? -1)),
+          };
+        }),
     };
   });
 

@@ -1,5 +1,5 @@
 {
-  "$comment": "Small fictional trip that differs from the sample in every dimension (dates, timezone, day count, overlapping multi-day spans, transit mode). Used to check the UI has no sample-specific code. Images reuse the sample photos.",
+  "$comment": "Small fictional trip that differs from the sample in every dimension (dates, timezone, day count, up to four overlapping multi-day spans (one beyond the 3-lane cap), transit mode). Used to check the UI has no sample-specific code. Images reuse the sample photos.",
   "destination": {
     "name": "Kansai",
     "kind": "region",
@@ -53,6 +53,16 @@
       "key": "rail-pass",
       "title": "Kansai Rail Pass",
       "category": "pass"
+    },
+    {
+      "key": "festival",
+      "title": "Plum Blossom Festival",
+      "category": "festival"
+    },
+    {
+      "key": "bike",
+      "title": "Rental Bike",
+      "category": "rental"
     }
   ],
   "itinerary": [
@@ -123,6 +133,26 @@
       "start_time": "08:00",
       "end_time": "18:00",
       "notes": "Two days of unlimited regional trains."
+    },
+    {
+      "key": "festival-span",
+      "type": "place",
+      "place": "festival",
+      "start_date": "2027-03-02",
+      "end_date": "2027-03-03",
+      "start_time": "10:00",
+      "end_time": "20:00",
+      "notes": "Stalls and lanterns along the river."
+    },
+    {
+      "key": "bike-span",
+      "type": "place",
+      "place": "bike",
+      "start_date": "2027-03-02",
+      "end_date": "2027-03-03",
+      "start_time": "12:00",
+      "end_time": "16:00",
+      "notes": "Two-day rental from the station."
     }
   ],
   "photos": [
