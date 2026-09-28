@@ -252,8 +252,8 @@ export function getTrip(): Trip {
         id: `${single ? 'p' : 'c'}${head.photo_id}`,
         day: date,
         type: single ? 'photo' : 'cluster',
-        // A loose photo is titled by its caption (user decision), else a generic title.
-        title: single ? head.caption || 'A moment on the journey' : `${group.length} photos`,
+        // A loose photo is titled by its caption; without one it has no title, only its time (user decision).
+        title: single ? head.caption : `${group.length} photos`,
         time: head.time,
         // A cluster shows a time range only when its photos span more than one minute.
         end_time:

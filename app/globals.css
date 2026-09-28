@@ -2120,16 +2120,16 @@ button:disabled {
   display: none;
 }
 
-/* Part 4: a cluster is a small spread deck of up to three cards, each partly visible (user decision);
+/* Part 4: a cluster is a small spread deck of up to three cards, each well visible (user decision);
    the first photo is on top and the deck hugs the rail side like other entries. */
 .entry.type-cluster .stack {
-  width: calc(108px + (var(--n, 1) - 1) * 40px);
+  width: calc(108px + (var(--n, 1) - 1) * 62px);
 }
 .entry-left.type-cluster .stack {
   margin-left: auto;
 }
 .entry.type-cluster .stack img {
-  left: calc(4px + var(--i) * 40px);
+  left: calc(4px + var(--i) * 62px);
   z-index: calc(3 - var(--i));
   transform: rotate(-5deg);
 }
@@ -2140,4 +2140,16 @@ button:disabled {
 .entry.type-cluster .stack img:nth-child(3) {
   top: 1px;
   transform: rotate(8deg);
+}
+
+/* A loose photo without a caption has no title (user decision): its time is the first line, and the
+   node and arm are level with it. */
+.entry.no-title .entry-content small {
+  margin-top: 0;
+}
+.entry.no-title:not(.type-note):not(.type-transit) .entry-node {
+  top: 7px;
+}
+.entry.no-title:not(.type-note):not(.type-transit) .entry-content:before {
+  top: 13px;
 }

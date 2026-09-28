@@ -497,7 +497,7 @@ export default function Client({ trip }: { trip: Trip }) {
                     <button
                       key={item.entry.id}
                       data-entry-id={item.entry.id}
-                      className={`entry ${item.entry.span_end ? 'multiday-start' : ''} ${selected && selected.id === (item.entry.stay?.stayId ?? item.entry.id) && !album ? 'active' : ''} type-${item.entry.type} ${item.index % 2 === 0 ? 'entry-left' : 'entry-right'}`}
+                      className={`entry ${item.entry.span_end ? 'multiday-start' : ''} ${selected && selected.id === (item.entry.stay?.stayId ?? item.entry.id) && !album ? 'active' : ''} type-${item.entry.type} ${item.entry.title ? '' : 'no-title'} ${item.index % 2 === 0 ? 'entry-left' : 'entry-right'}`}
                       onClick={() =>
                         item.entry.stay?.role === 'checkout'
                           ? choose(resolveStay(item.entry), item.entry.day)
@@ -531,7 +531,7 @@ export default function Client({ trip }: { trip: Trip }) {
                             : undefined
                         }
                       >
-                        <strong>{item.entry.title}</strong>
+                        {item.entry.title && <strong>{item.entry.title}</strong>}
                         <small>
                           {item.entry.type === 'cluster' || item.entry.type === 'photo'
                             ? // The card already says "photo"; the byline is just the time (user decision).
@@ -651,7 +651,9 @@ export default function Client({ trip }: { trip: Trip }) {
             key={`${album || selected?.id}-${photoPage}`}
           >
             <div className="panel-body">
-              <h2>{album ? days.find((d) => d.date === album)?.title : selected?.title}</h2>
+              {(album ? days.find((d) => d.date === album)?.title : selected?.title) && (
+                <h2>{album ? days.find((d) => d.date === album)?.title : selected?.title}</h2>
+              )}
               {!album && selected && (
                 <div className="meta">
                   {selected.type === 'cluster' ? (
