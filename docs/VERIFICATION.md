@@ -111,7 +111,7 @@ Sampled from `mock/app-locked-geometry-final-full` (positions relative to the ra
 
 ### Part 5: Transit stop (agreed with changes)
 
-- Text moved close to the stop: 40px from the rail centre, as in the locked mock (was 72px, the place-entry column).
+- Text moved close to the stop (user decision, closer than the mock's ~40px): 26px from the rail centre, 10px past the disc. When multi-day lanes are running at the leg's start, the text sits 10px past the outermost one instead (the data layer passes it as `outer`; the Day 5 shuttle clears three lanes at 37px). It was 72px, the place-entry column.
 - The disc stays level with the title's first line (Part 3 rule), and the teal travel segment is now a fixed 110px centred on the disc (it was the entry's height shifted up, so the disc sat off-centre). Back-to-back legs (Day 6 train and flight) join into one teal stretch.
 - Icons (user request: better looking): Lucide line icons (ISC licence) in one style for car, train, flight, bus, ferry, walk and bike, 18px, stroke 1.75.
 - Mode (user decision: no schema change yet): the core schema has no transport mode, so the data layer derives it from the leg's title (train/rail, flight/airport, bus/shuttle, ferry/boat, bike, walk; else car). Where mode is stored is a Phase 1 data-design question; Google Maps Timeline provides one per movement.

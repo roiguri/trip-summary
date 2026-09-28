@@ -33,6 +33,9 @@ export type Entry = {
   stay: { role: 'checkin' | 'checkout'; stayId: string } | null;
   /** Transit: how the leg was travelled (drives the icon). */
   mode: TransitMode | null;
+  /** Transit: the outermost multi-day lane running when the leg starts (-1 if none), so its text can
+   *  sit close to the rail but clear of the lanes. */
+  outer?: number;
 };
 export type TransitMode = 'car' | 'train' | 'flight' | 'bus' | 'ferry' | 'walk' | 'bike';
 
@@ -294,6 +297,21 @@ export function getTrip(): Trip {
       });
     }
     entries.sort((a, b) => a.time.localeCompare(b.time));
+    for (const e of entries)
+      if (e.type === 'transit') {
+        const t = `${date} ${e.time || '00:00'}`;
+        e.outer = Math.max(
+          -1,
+          ...spans
+            .filter(
+              (o) =>
+                (laneOf.get(o.entry_id) ?? -1) >= 0 &&
+                at(o.start_date, o.start_time, '00:00') <= t &&
+                t <= at(o.end_date!, o.end_time, '23:59'),
+            )
+            .map((o) => laneOf.get(o.entry_id) ?? -1),
+        );
+      }
     const endOfDay = `${date} 23:59`;
     const lanesAtEndOfDay = spans.filter(
       (o) =>

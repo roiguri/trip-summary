@@ -565,6 +565,11 @@ export default function Client({ trip }: { trip: Trip }) {
                           : choose(item.entry)
                       }
                       {...(item.entry.span_end ? hoverProps(item.entry.id) : {})}
+                      style={
+                        item.entry.outer !== undefined
+                          ? ({ '--outer': item.entry.outer } as React.CSSProperties)
+                          : undefined
+                      }
                     >
                       <span className="entry-node">
                         {item.entry.mode && <TransitIcon mode={item.entry.mode} />}
