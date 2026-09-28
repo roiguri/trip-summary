@@ -22,7 +22,7 @@ Phase 0 goal: confirm that the prototype is implemented correctly against the re
 | 2   | Rail and day banners (rail, multi-day lane, day tag)                                   | geometry mock, `captures/wayfarer-locked-rail-*`                                                 | pending             |
 | 3   | Place / lodging entries (connector, title, byline, photo fan)                          | geometry mock, `mock/roi-shot-cards`                                                             | agreed with changes |
 | 4   | Loose photo and cluster entries                                                        | `mock/roi-shot-cards`, `captures/wayfarer-photo-cards-compare-*`                                 | agreed with changes |
-| 5   | Transit stop                                                                           | `mock/transit-locked-zoom`, `captures/wayfarer-transit-rail-compare-*`                           | pending             |
+| 5   | Transit stop                                                                           | `mock/transit-locked-zoom`, `captures/wayfarer-transit-rail-compare-*`                           | agreed with changes |
 | 6   | Notes (tape, LTR/RTL)                                                                  | geometry mock, `captures/wayfarer-locked-notes`                                                  | agreed with changes |
 | 7   | Multi-day span (start block, day chips, dot lane, end diamond)                         | geometry mock, `captures/wayfarer-locked-multiday-end`                                           | pending             |
 | 8   | Map card (layout, ratios, markers, route, Whole trip, day emphasis)                    | `mock/trip-real-map-whole-final`, `mock/trip-real-map-day-final`, `mock/panel-ratio-large`       | pending             |
@@ -108,6 +108,15 @@ Sampled from `mock/app-locked-geometry-final-full` (positions relative to the ra
 - Connector alignment (user decision, differs from the mocks): the node and arm point at the middle of the title's first line (cap-height centre), not its baseline. Both mocks put the arm at the baseline, which reads as aligned with the whole title + byline block. Measured: node and arm moved up 11px and now sit exactly on the cap-height centre for places, lodging, photos and clusters, on both sides; a wrapped title keeps the line on its first line. Multi-day lanes still start from the node's centre.
 - Caption under the photos (user decision (a)): places and stay check-ins show their full note under the photo fan (or under the byline when there are no photos), at most as wide as the fan (266px). Styled with notes in Part 6 (paper slip). Notes longer than two lines are clamped with "See more" / "See less"; the toggle doesn't select the entry. The Kansai fixture has a long note to exercise it.
 - The transit disc (Part 5) follows the same rule: it was centred on the title + times + route block and now sits on the title's first line; its teal travel segment moves up 12.5px with it so the disc stays centred on it.
+
+### Part 5: Transit stop (agreed with changes)
+
+- Text moved close to the stop (user decision, closer than the mock's ~40px): 26px from the rail centre, 10px past the disc. When multi-day lanes are running at the leg's start, the text sits 10px past the outermost one instead (the data layer passes it as `outer`; the Day 5 shuttle clears three lanes at 37px). It was 72px, the place-entry column.
+- The disc stays level with the title's first line (Part 3 rule), and the teal travel segment is now a fixed 110px centred on the disc (it was the entry's height shifted up, so the disc sat off-centre). Back-to-back legs (Day 6 train and flight) join into one teal stretch.
+- Icons (user request: better looking): Lucide line icons (ISC licence) in one style for car, train, flight, bus, ferry, walk and bike, 18px, stroke 1.75.
+- Mode (user decision: no schema change yet): the core schema has no transport mode, so the data layer derives it from the leg's title (train/rail, flight/airport, bus/shuttle, ferry/boat, bike, walk; else car). Where mode is stored is a Phase 1 data-design question; Google Maps Timeline provides one per movement.
+- Time zones: one label when both ends share it ("09:00 → 09:45 (PT)"), a label on each end otherwise ("12:30 PT → 15:55 MT"; the flight used to show only "(PT)").
+- Sample: a bus leg (Day 5 shuttle) added to the edge-case days.
 
 ### Part 6: Notes (agreed with changes)
 

@@ -393,6 +393,18 @@
       "notes": "Long-note test: the fog came up the canyon in about ten minutes and swallowed the whole ridge. We sat on the porch and watched the redwoods disappear one by one, then reappear as it thinned out. Somebody in the next cabin was playing guitar. Nobody talked much, and nobody minded."
     },
     {
+      "key": "shuttle-pfeiffer",
+      "type": "transit",
+      "title": "Shuttle to Pfeiffer Beach",
+      "start_date": "2026-05-19",
+      "start_time": "10:30",
+      "end_time": "10:50",
+      "from_location": "Big Sur River Lodge",
+      "to_location": "Pfeiffer Beach",
+      "departure_timezone": "America/Los_Angeles",
+      "arrival_timezone": "America/Los_Angeles"
+    },
+    {
       "key": "pfeiffer-visit",
       "type": "place",
       "place": "pfeiffer-beach",

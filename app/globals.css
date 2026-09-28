@@ -2153,3 +2153,27 @@ button:disabled {
 .entry.no-title:not(.type-note):not(.type-transit) .entry-content:before {
   top: 13px;
 }
+
+/* Part 5: transit. The text sits close to the stop: 10px past the disc (rail + 26px), or 10px past
+   the outermost multi-day lane running at that time (lanes are at +9/+18/+27px; `--outer` comes
+   from the data layer). It was 72px, the place-entry column. The disc stays level with the title's first line, and the teal
+   travel segment is a fixed 110px centred on the disc (it was the entry's height, so the disc sat
+   off-centre). Icons are Lucide line icons in one style. */
+.shell .entry.type-transit {
+  padding-left: max(24px, calc((var(--outer, -1) + 1) * 9px + 8px));
+}
+.shell .entry.type-transit::before {
+  top: calc(14.5px + 16px - 55px);
+  bottom: auto;
+  height: 110px;
+  transform: none;
+}
+.shell .entry.type-transit .transit-icon {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: #3d7a73;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
