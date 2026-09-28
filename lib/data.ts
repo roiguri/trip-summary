@@ -29,6 +29,8 @@ export type Entry = {
   arrival_timezone: string | null;
   /** Set when a place/note runs across several days: its final day, end time and lane. */
   span_end: { date: string; time: string | null; lane: number } | null;
+  /** Lodging: the check-in entry, or the check-out entry generated on the last day of the stay. */
+  stay: { role: 'checkin' | 'checkout'; stayId: string } | null;
 };
 /** A multi-day entry seen from a later day of its span. */
 export type SpanDay = {
@@ -48,6 +50,9 @@ export type Day = {
   /** Multi-day entries that end on this day, with their end time. */
   /** `outer` is the outermost lane still drawn at that moment, so the END label can clear it. */
   spanEnds: { id: string; time: string | null; lane: number; outer: number }[];
+  /** Stays slept in on the night after this day (shown as an end-of-day marker). `outer` is the
+   *  outermost multi-day lane still drawn at the end of the day, so the marker can clear it. */
+  nights: { stayId: string; title: string; outer: number }[];
 };
 export type Trip = {
   title: string;
@@ -155,6 +160,11 @@ export function getTrip(): Trip {
   const isSpan = (i: ItemRow) =>
     i.item_type !== 'lodging' && !!i.end_date && i.end_date > i.start_date;
   const spans = events.filter(isSpan);
+  // Stays (lodging with a later check-out date): check-in entry, an end-of-day marker for each
+  // night, and a check-out entry on the last day (user decision, following the locked mock).
+  const stays = events.filter(
+    (i) => i.item_type === 'lodging' && !!i.end_date && i.end_date > i.start_date,
+  );
   // Overlapping spans get side-by-side lanes: each takes the lowest lane whose previous span has
   // ended by the time it starts. At most MAX_LANES run at once; a span that finds no free lane
   // gets lane -1 and is shown without a line (start entry, day labels and end marker only).
@@ -203,7 +213,32 @@ export function getTrip(): Trip {
         span_end: isSpan(i)
           ? { date: i.end_date!, time: i.end_time, lane: laneOf.get(i.entry_id) ?? 0 }
           : null,
+        stay: i.item_type === 'lodging' ? { role: 'checkin', stayId: `i${i.entry_id}` } : null,
       }));
+
+    // A stay also appears on its last day as a check-out entry at the check-out time.
+    for (const s of stays.filter((s) => s.end_date === date && s.end_date > s.start_date))
+      entries.push({
+        id: `i${s.entry_id}-out`,
+        day: date,
+        type: 'lodging',
+        title: s.title ?? s.place_title ?? '',
+        time: s.end_time ?? '',
+        end_time: null,
+        notes: '',
+        lat: s.lat,
+        lng: s.lng,
+        maps_url: s.maps_url,
+        tags: ['Stay'],
+        photos: [],
+        check_out: null,
+        from_location: null,
+        to_location: null,
+        departure_timezone: null,
+        arrival_timezone: null,
+        span_end: null,
+        stay: { role: 'checkout', stayId: `i${s.entry_id}` },
+      });
 
     // Photos not attached to an entry: a lone photo in an hour is a moment, several are a cluster.
     const free = photoRows.filter((p) => p.date === date && p.entry_id === null);
@@ -232,9 +267,17 @@ export function getTrip(): Trip {
         departure_timezone: null,
         arrival_timezone: null,
         span_end: null,
+        stay: null,
       });
     }
     entries.sort((a, b) => a.time.localeCompare(b.time));
+    const endOfDay = `${date} 23:59`;
+    const lanesAtEndOfDay = spans.filter(
+      (o) =>
+        (laneOf.get(o.entry_id) ?? -1) >= 0 &&
+        at(o.start_date, o.start_time, '00:00') <= endOfDay &&
+        endOfDay <= at(o.end_date!, o.end_time, '23:59'),
+    );
 
     return {
       date,
@@ -267,6 +310,13 @@ export function getTrip(): Trip {
             outer: Math.max(-1, ...running.map((o) => laneOf.get(o.entry_id) ?? -1)),
           };
         }),
+      nights: stays
+        .filter((s) => s.start_date <= date && date < s.end_date!)
+        .map((s) => ({
+          stayId: `i${s.entry_id}`,
+          title: s.title ?? s.place_title ?? '',
+          outer: Math.max(-1, ...lanesAtEndOfDay.map((o) => laneOf.get(o.entry_id) ?? -1)),
+        })),
     };
   });
 

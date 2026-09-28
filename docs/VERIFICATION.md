@@ -91,6 +91,15 @@ Sampled from `mock/app-locked-geometry-final-full` (positions relative to the ra
 - Checked with the Kansai fixture (span ending mid-morning with entries after it): the lane stops at the diamond and later entries sit on the plain rail.
 - Start block: matches; the caption under its photos belongs to Part 3.
 
+### Hotel stays (new, from the Part 7 discussion)
+
+The mocks only show a single lodging entry with check-in/out in the panel. Agreed treatment (option A plus the suggested answers; see `DESIGN.md`, "Hotel stays"):
+
+- Lodging with a later `end_date` becomes a stay: check-in entry, an "End of day" marker for each night (placed after the day's last entry, clearing any running multi-day lanes), and a generated check-out entry on the last day at `end_time`. Bylines read `CHECK-IN · time` / `CHECK-OUT · time` (was `STAY · time`).
+- All three open the check-in's stay panel and show as selected together.
+- Stays with a place that has coordinates get a house map marker; numbered pins stay for places only.
+- Fixtures: the sample inn and the Kansai ryokan now link to located places; Kansai adds a second stay starting on the ryokan's check-out day to exercise the changeover.
+
 ## Preliminary findings (to be confirmed per part)
 
 Things noticed during the first capture pass. Each gets decided in its part's review.

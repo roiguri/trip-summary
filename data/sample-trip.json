@@ -86,6 +86,13 @@
       "key": "coast-path",
       "title": "Coast Path",
       "category": "walk"
+    },
+    {
+      "key": "garden-inn",
+      "title": "Carmel Garden Inn",
+      "lat": 36.558,
+      "lng": -121.918,
+      "category": "lodging"
     }
   ],
   "itinerary": [
@@ -119,6 +126,7 @@
     {
       "key": "inn",
       "type": "lodging",
+      "place": "garden-inn",
       "title": "Carmel Garden Inn",
       "start_date": "2026-05-15",
       "end_date": "2026-05-17",
