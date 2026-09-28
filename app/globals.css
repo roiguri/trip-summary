@@ -2119,3 +2119,25 @@ button:disabled {
 .shell .entry.type-note .entry-caption::before {
   display: none;
 }
+
+/* Part 4: a cluster is a small spread deck of up to three cards, each partly visible (user decision);
+   the first photo is on top and the deck hugs the rail side like other entries. */
+.entry.type-cluster .stack {
+  width: calc(108px + (var(--n, 1) - 1) * 40px);
+}
+.entry-left.type-cluster .stack {
+  margin-left: auto;
+}
+.entry.type-cluster .stack img {
+  left: calc(4px + var(--i) * 40px);
+  z-index: calc(3 - var(--i));
+  transform: rotate(-5deg);
+}
+.entry.type-cluster .stack img:nth-child(2) {
+  top: 6px;
+  transform: rotate(3deg);
+}
+.entry.type-cluster .stack img:nth-child(3) {
+  top: 1px;
+  transform: rotate(8deg);
+}

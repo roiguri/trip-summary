@@ -21,7 +21,7 @@ Phase 0 goal: confirm that the prototype is implemented correctly against the re
 | 1   | Page shell: header, intro, scroll model, backgrounds                                   | `mock/app-locked-geometry-final-full`, `mock/image-e55ca7ac`, `captures/wayfarer-locked-opening` | agreed with changes |
 | 2   | Rail and day banners (rail, multi-day lane, day tag)                                   | geometry mock, `captures/wayfarer-locked-rail-*`                                                 | pending             |
 | 3   | Place / lodging entries (connector, title, byline, photo fan)                          | geometry mock, `mock/roi-shot-cards`                                                             | agreed with changes |
-| 4   | Loose photo and cluster entries                                                        | `mock/roi-shot-cards`, `captures/wayfarer-photo-cards-compare-*`                                 | pending             |
+| 4   | Loose photo and cluster entries                                                        | `mock/roi-shot-cards`, `captures/wayfarer-photo-cards-compare-*`                                 | agreed with changes |
 | 5   | Transit stop                                                                           | `mock/transit-locked-zoom`, `captures/wayfarer-transit-rail-compare-*`                           | pending             |
 | 6   | Notes (tape, LTR/RTL)                                                                  | geometry mock, `captures/wayfarer-locked-notes`                                                  | agreed with changes |
 | 7   | Multi-day span (start block, day chips, dot lane, end diamond)                         | geometry mock, `captures/wayfarer-locked-multiday-end`                                           | pending             |
@@ -90,6 +90,14 @@ Sampled from `mock/app-locked-geometry-final-full` (positions relative to the ra
 - "15:40 · END": 11px bold `#6b8f78`, vertically centred on the diamond. Placed 18px right of the rail centre (a 10px gap from the diamond), closer than the mock's 32px (user decision). Was 10px, 20px right, slightly high.
 - Checked with the Kansai fixture (span ending mid-morning with entries after it): the lane stops at the diamond and later entries sit on the plain rail.
 - Start block: matches; the caption under its photos belongs to Part 3.
+
+### Part 4: Loose photos and clusters (agreed with changes)
+
+- Geometry already matched the mock from the style pass (100px cards, ~−4° tilt, ~12px under the byline, on the title's edge); kept.
+- Cluster (user decision): a small spread deck of up to three cards, 40px apart and tilted −5°/3°/8°, so every card is partly visible; the first photo is on top and the deck hugs the rail side. The mock showed a single card, like a lone photo.
+- Loose photo title (user decision): the photo's caption, else "A moment on the journey". Captions come from the photo data (`photos.caption`); real exports (e.g. Google Photos descriptions) are often empty, so the fallback stays. Editing captions belongs to Phase 3.
+- Byline (user decision): just the time or time range; the "PHOTO" label was redundant. A cluster whose photos share one minute shows one time, not "17:10 – 17:10".
+- For Phase 1: unattached photos are grouped by clock hour, so 20:59 and 21:01 fall into different clusters; a time-gap rule (e.g. 30 minutes) fits real data better.
 
 ### Rail continuity fix (reported during Part 4)
 
