@@ -2177,3 +2177,24 @@ button:disabled {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+
+/* Part 8: map attribution as the mock's small white chip, bottom left. */
+.map .maplibregl-control-container .maplibregl-ctrl-bottom-left {
+  display: block;
+}
+.map .maplibregl-ctrl-logo {
+  display: none;
+}
+.map .maplibregl-ctrl-bottom-left .maplibregl-ctrl-attrib {
+  margin: 0 0 8px 8px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #fffffff0;
+  box-shadow: 0 1px 3px #3b403322;
+  font-size: 9px;
+  line-height: 13px;
+  color: #3b4a40;
+}
+.map .maplibregl-ctrl-attrib a {
+  color: inherit;
+}

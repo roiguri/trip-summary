@@ -199,6 +199,12 @@ function MapView({
     });
     map.current = m;
     m.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+    // OpenStreetMap / OpenFreeMap require visible attribution (the mock shows it as a chip).
+    m.addControl(new maplibregl.AttributionControl({ compact: false }), 'bottom-left');
+    // The map is created before the right column settles; follow the container's real size so the
+    // canvas fills the card and the first fit uses the right dimensions.
+    const ro = new ResizeObserver(() => m.resize());
+    ro.observe(el.current);
     m.once('load', () => {
       const colors: Record<string, string> = {
         background: '#f8f7f1',
@@ -263,6 +269,7 @@ function MapView({
       if (whole) m.fitBounds(whole, { padding: 55, maxZoom: 11, duration: 0 });
     });
     return () => {
+      ro.disconnect();
       m.remove();
       map.current = null;
     };
