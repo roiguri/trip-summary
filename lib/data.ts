@@ -254,7 +254,11 @@ export function getTrip(): Trip {
         type: single ? 'photo' : 'cluster',
         title: single ? 'A moment on the journey' : `${group.length} photos`,
         time: head.time,
-        end_time: single ? null : group[group.length - 1].time,
+        // A cluster shows a time range only when its photos span more than one minute.
+        end_time:
+          single || group[group.length - 1].time === head.time
+            ? null
+            : group[group.length - 1].time,
         notes: '',
         lat: head.lat,
         lng: head.lng,

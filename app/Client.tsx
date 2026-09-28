@@ -534,7 +534,7 @@ export default function Client({ trip }: { trip: Trip }) {
                         <strong>{item.entry.title}</strong>
                         <small>
                           {item.entry.type === 'cluster'
-                            ? `PHOTO · ${item.entry.time} – ${item.entry.end_time}`
+                            ? `PHOTO · ${item.entry.time}${item.entry.end_time ? ' – ' + item.entry.end_time : ''}`
                             : item.entry.type === 'photo'
                               ? `PHOTO · ${item.entry.time}`
                               : item.entry.type === 'lodging'
