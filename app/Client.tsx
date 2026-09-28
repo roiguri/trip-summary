@@ -10,6 +10,53 @@ function noteDir(s: string): 'ltr' | 'rtl' {
   }
   return 'ltr';
 }
+
+/** Note text on the timeline: a place's note under its photos, and the body of a note entry. Both
+ *  share one look (user decision) and show the full text, clamped to `lines` lines with "See more"
+ *  only when it is actually cut off. Lives inside the entry button, so the toggle is a span with
+ *  button semantics and doesn't select the entry. */
+function EntryCaption({ text, lines = 2 }: { text: string; lines?: number }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [open, setOpen] = useState(false);
+  const [clamped, setClamped] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const measure = () => setClamped(el.scrollHeight > el.clientHeight + 1);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [text]);
+  const toggle = (e: React.SyntheticEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setOpen((o) => !o);
+  };
+  return (
+    <span className="entry-caption" dir={noteDir(text)}>
+      <span
+        ref={ref}
+        className={`entry-caption-text ${open ? 'open' : ''}`}
+        style={{ '--lines': lines } as React.CSSProperties}
+      >
+        {text}
+      </span>
+      {(clamped || open) && (
+        <span
+          role="button"
+          tabIndex={0}
+          className="entry-caption-more"
+          aria-expanded={open}
+          onClick={toggle}
+          onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && toggle(e)}
+        >
+          {open ? 'See less' : 'See more'}
+        </span>
+      )}
+    </span>
+  );
+}
 function zoneLabel(zone: string | null) {
   if (!zone) return '';
   try {
@@ -495,7 +542,7 @@ export default function Client({ trip }: { trip: Trip }) {
                                 : item.entry.type === 'transit'
                                   ? `${item.entry.time}${item.entry.end_time ? ' → ' + item.entry.end_time : ''}${item.entry.departure_timezone ? ' (' + zoneLabel(item.entry.departure_timezone) + ')' : ''}`
                                   : item.entry.type === 'note'
-                                    ? item.entry.time
+                                    ? `NOTE · ${item.entry.time}`
                                     : (
                                         (item.entry.tags[0] || 'PLACE') +
                                         ' · ' +
@@ -527,10 +574,12 @@ export default function Client({ trip }: { trip: Trip }) {
                               ))}
                           </span>
                         )}
+                        {item.entry.notes &&
+                          (item.entry.type === 'place' || item.entry.stay?.role === 'checkin') && (
+                            <EntryCaption text={item.entry.notes} />
+                          )}
                         {item.entry.notes && item.entry.type === 'note' && (
-                          <span className="entry-note" dir={noteDir(item.entry.notes)}>
-                            {item.entry.notes}
-                          </span>
+                          <EntryCaption text={item.entry.notes} lines={4} />
                         )}
                       </span>
                     </button>

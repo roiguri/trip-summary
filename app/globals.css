@@ -1293,8 +1293,8 @@ button:disabled {
   padding: 4px 10px;
 }
 
-/* Entries: 22px titles, neutral bylines, text 68px from the rail centre, the node level with the
-   title baseline, larger photo fans. */
+/* Entries: 22px titles, neutral bylines, text 68px from the rail centre, larger photo fans. The node
+   and arm are centred on the title's first line (cap-height centre), not its baseline (user decision). */
 .entry {
   padding-left: 65px;
 }
@@ -1311,7 +1311,7 @@ button:disabled {
   color: #7f8c84;
 }
 .entry:not(.type-note):not(.type-transit) .entry-node {
-  top: 24px;
+  top: 13px;
   border-width: 2px;
   border-color: #b98468;
 }
@@ -1323,7 +1323,7 @@ button:disabled {
   background: #b98468;
 }
 .entry:not(.type-note):not(.type-transit) .entry-content:before {
-  top: 30px;
+  top: 19px;
   width: 61px;
   border-top: 2px solid #b98468;
 }
@@ -1903,4 +1903,210 @@ button:disabled {
 }
 .map-stay.chosen-pin svg {
   fill: #fff;
+}
+
+/* Part 3: the transit disc is centred on its title's first line like every other event node (was
+   centred on the title + times + route block); its teal travel segment moves up with it so the disc stays centred on it. */
+.entry.type-transit .entry-node,
+.entry-left.type-transit .entry-node {
+  top: 14.5px;
+}
+.entry.type-transit::before {
+  transform: translateY(-12.5px);
+}
+
+/* Note text on the timeline (Parts 3 and 6): a place's note under its photos and the body of a note
+   entry share one look (user decision): the mock's paper card with tape for notes, and a small paper
+   slip for captions.
+   Alignment rule: the text block is only as wide as its text (up to a limit) and hugs the rail
+   side; inside it every line follows its own reading direction (English left, Hebrew right). */
+.entry-caption {
+  display: block;
+  width: fit-content;
+  max-width: 266px;
+  margin-top: 8px;
+  font-weight: 400;
+  white-space: normal;
+  text-align: start;
+}
+.entry-left .entry-caption {
+  margin-left: auto;
+}
+.entry-caption-text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--lines, 2);
+  line-clamp: var(--lines, 2);
+  overflow: hidden;
+}
+.entry-caption-text.open {
+  display: block;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+}
+.entry-caption-more {
+  display: inline-block;
+  margin-top: 2px;
+  color: #a86f52;
+  font-size: 11px;
+  font-style: normal;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+}
+.entry-caption-more:hover,
+.entry-caption-more:focus-visible {
+  text-decoration: underline;
+}
+
+/* Note entries are anchored in time like every other event: a rail node and arm level with the
+   note's title, then title, "NOTE · time" byline and the note text. */
+.shell .entry.type-note {
+  min-height: 0;
+  padding: 8px 0 22px 66px;
+}
+.shell .entry-left.type-note {
+  padding: 8px 70px 22px 0;
+}
+.shell .entry.type-note .entry-node {
+  display: block;
+  position: absolute;
+  top: var(--note-node, 13px);
+  left: -8.5px;
+  right: auto;
+  width: 13px;
+  height: 13px;
+  box-sizing: border-box;
+  border: 2px solid #b98468;
+  border-radius: 50%;
+  background: #fffdfa;
+  z-index: 2;
+}
+.shell .entry-left.type-note .entry-node {
+  left: auto;
+  right: -4.5px;
+}
+.shell .entry.type-note .entry-node::after {
+  content: '';
+  position: absolute;
+  top: 2.5px;
+  left: 2.5px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #b98468;
+}
+.shell .entry.type-note::before {
+  content: '';
+  position: absolute;
+  top: calc(var(--note-node, 13px) + 6px);
+  left: -1.5px;
+  width: var(--note-arm, 61px);
+  border-top: 2px solid #b98468;
+}
+.shell .entry-left.type-note::before {
+  left: auto;
+  right: 1.5px;
+  width: calc(var(--note-arm, 61px) + 3px);
+}
+.shell .entry.type-note .entry-content {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  position: relative;
+  width: fit-content;
+  max-width: 300px;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  transform: none;
+  text-align: start;
+}
+.shell .entry-left.type-note .entry-content {
+  margin-left: auto;
+}
+.shell .entry.type-note .entry-content::before,
+.shell .entry.type-note .entry-content::after {
+  display: none;
+}
+.shell .entry.type-note .entry-content strong {
+  order: 0;
+  text-align: start;
+}
+.shell .entry.type-note .entry-content small {
+  order: 1;
+  margin: 6px 0 0;
+  font-size: 11px;
+  color: #7f8c84;
+  text-align: start;
+}
+.shell .entry.type-note .entry-caption {
+  order: 2;
+  max-width: none;
+  margin-left: 0;
+}
+
+/* Paper card and tape strip (the mock's note), and the same paper as a small slip for captions. */
+.shell .entry.type-note {
+  --note-node: 25px;
+  --note-arm: 58px;
+}
+.shell .entry.type-note .entry-content {
+  display: flex;
+  padding: 14px 16px 15px;
+  background: #fff8ec;
+  border: 1px solid #edddc8;
+  box-shadow: 4px 4px 0 #e5d8c4;
+  transform: rotate(0.4deg);
+}
+.shell .entry.type-note .entry-content::after {
+  display: block;
+  content: '';
+  position: absolute;
+  top: -7px;
+  left: calc(50% - 24px);
+  width: 48px;
+  height: 11px;
+  background: #c8d9c8bd;
+  transform: rotate(-4deg);
+  box-shadow: 0 1px 1px #49644a14;
+}
+.shell .entry.type-note .entry-content strong {
+  font-size: 15px;
+  line-height: 18px;
+  letter-spacing: -0.01em;
+}
+.shell .entry-caption {
+  position: relative;
+  margin-top: 14px;
+  padding: 9px 12px 10px;
+  background: #fff8ec;
+  border: 1px solid #edddc8;
+  box-shadow: 3px 3px 0 #e8dccb;
+  font-size: 12px;
+  line-height: 17px;
+  color: #45524a;
+}
+.shell .entry-caption::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: calc(50% - 16px);
+  width: 32px;
+  height: 8px;
+  background: #c8d9c8bd;
+  transform: rotate(-4deg);
+}
+.shell .entry.type-note .entry-caption {
+  margin-top: 9px;
+  padding: 0;
+  background: none;
+  border: 0;
+  box-shadow: none;
+  font-size: 13px;
+  line-height: 19px;
+}
+.shell .entry.type-note .entry-caption::before {
+  display: none;
 }
