@@ -1847,6 +1847,15 @@ button:disabled {
   cursor: pointer;
   text-align: left;
 }
+/* The rail is each day's .entries left border. A night marker ending the day would push its bottom
+   margin outside that box (margin collapsing) and leave a 22px break in the rail before the next
+   day; the same space is kept as padding inside the box instead. */
+.stay-night:last-child {
+  margin-bottom: 0;
+}
+.entries:has(> .stay-night:last-child) {
+  padding-bottom: 22px;
+}
 .stay-night-node {
   position: absolute;
   left: -6.5px;

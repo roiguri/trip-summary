@@ -91,6 +91,10 @@ Sampled from `mock/app-locked-geometry-final-full` (positions relative to the ra
 - Checked with the Kansai fixture (span ending mid-morning with entries after it): the lane stops at the diamond and later entries sit on the plain rail.
 - Start block: matches; the caption under its photos belongs to Part 3.
 
+### Rail continuity fix (reported during Part 4)
+
+- The rail broke for 22px before the next day on every day ending with a night marker: the rail is each day's `.entries` left border, and the marker's bottom margin collapsed out of that box. The space is now padding inside the box. Checked by scanning the rail's pixel column through all six days: no breaks (only the white centres of markers and diamonds sitting on it), and every day starts at the same position as before.
+
 ### Part 3: Place / lodging entries (agreed with changes)
 
 - Connector alignment (user decision, differs from the mocks): the node and arm point at the middle of the title's first line (cap-height centre), not its baseline. Both mocks put the arm at the baseline, which reads as aligned with the whole title + byline block. Measured: node and arm moved up 11px and now sit exactly on the cap-height centre for places, lodging, photos and clusters, on both sides; a wrapped title keeps the line on its first line. Multi-day lanes still start from the node's centre.
