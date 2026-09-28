@@ -1782,19 +1782,6 @@ button:disabled {
 .is-dim {
   opacity: 0.35;
 }
-.multiday-span.is-focus {
-  background-image: radial-gradient(
-    circle at 3px 3px,
-    var(--lane-strong) 0 1.4px,
-    transparent 1.65px
-  );
-}
-.multiday-end.is-focus .lane-curve {
-  fill: var(--lane-strong);
-}
-.multiday-end.is-focus .lane-curve circle {
-  r: 1.4px;
-}
 .multiday-end.is-focus .diamond {
   background: var(--lane-edge);
 }
@@ -1813,4 +1800,31 @@ button:disabled {
 /* The end marker's hover area is the diamond and its label only, not the whole row. */
 .multiday-end {
   width: max-content;
+}
+/* Multi-day lanes are one SVG path each (LanePath in Client.tsx): the start curve, straight lane
+   and end curve share the 12px dot spacing. The start node and end diamond sit above the dots.
+   (Replaces the earlier .multiday-span background lane and per-end .lane-curve.) */
+.multiday-span,
+.lane-curve {
+  display: none;
+}
+.multiday-lane {
+  position: absolute;
+  z-index: 1;
+  overflow: visible;
+  fill: var(--lane-dot);
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+.multiday-lane path {
+  cursor: pointer;
+}
+.multiday-lane.is-focus {
+  fill: var(--lane-strong);
+}
+.multiday-lane.is-focus circle {
+  r: 1.4px;
+}
+.entry.multiday-start .entry-node {
+  z-index: 2;
 }

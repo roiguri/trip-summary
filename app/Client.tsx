@@ -222,8 +222,10 @@ export default function Client({ trip }: { trip: Trip }) {
     onFocus: () => setHoverSpan(id),
     onBlur: () => setHoverSpan((h) => (h === id ? null : h)),
   });
+  // Drawn multi-day lanes, measured in rail coordinates: start node centre (x, y0) and end
+  // diamond centre (y1, same x on the rail).
   const [spanLanes, setSpanLanes] = useState<
-    { id: string; top: number; height: number; lane: number }[]
+    { id: string; lane: number; x: number; y0: number; y1: number }[]
   >([]);
   const scroller = useRef<HTMLElement>(null);
   const rail = useRef<HTMLElement>(null);
@@ -277,22 +279,31 @@ export default function Client({ trip }: { trip: Trip }) {
       const root = rail.current;
       if (!root) return;
       const rt = root.getBoundingClientRect();
+      const centre = (el: Element) => {
+        const r = el.getBoundingClientRect();
+        return { x: r.left + r.width / 2 - rt.left, y: r.top + r.height / 2 - rt.top };
+      };
       const lanes = [];
       for (const b of root.querySelectorAll<HTMLElement>('.multiday-end')) {
         const id = b.dataset.spanId;
-        const a = root.querySelector(`.multiday-start[data-entry-id="${id}"] .entry-node`);
-        if (!id || !a) continue;
-        const top = a.getBoundingClientRect().top - rt.top + 20;
-        const end = b.getBoundingClientRect().top - rt.top + 9;
         const lane = Number(b.dataset.lane);
-        if (lane < 0) continue;
-        lanes.push({ id, top, height: Math.max(0, end - top), lane });
+        const node = root.querySelector(`.multiday-start[data-entry-id="${id}"] .entry-node`);
+        const diamond = b.querySelector('.diamond');
+        if (!id || lane < 0 || !node || !diamond) continue;
+        const start = centre(node);
+        lanes.push({ id, lane, x: start.x, y0: start.y, y1: centre(diamond).y });
       }
       setSpanLanes(lanes);
     }
     measure();
+    // Re-measure when the timeline's size changes (e.g. photos loading), not only on window resize.
+    const resize = new ResizeObserver(measure);
+    if (rail.current) resize.observe(rail.current);
     window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
+    return () => {
+      resize.disconnect();
+      window.removeEventListener('resize', measure);
+    };
   }, []);
   function choose(e: Entry) {
     const root = scroller.current;
@@ -350,19 +361,11 @@ export default function Client({ trip }: { trip: Trip }) {
         </div>
         <section className="rail" ref={rail}>
           {spanLanes.map((lane) => (
-            <div
+            <LanePath
               key={lane.id}
-              className={`multiday-span ${laneClass(lane.lane)} ${spanFocus(lane.id)}`}
-              onMouseEnter={() => setHoverSpan(lane.id)}
-              onMouseLeave={() => setHoverSpan((h) => (h === lane.id ? null : h))}
-              style={
-                {
-                  top: lane.top,
-                  height: lane.height,
-                  paddingBottom: laneCurve(lane.lane).padBottom,
-                  '--lane': lane.lane,
-                } as React.CSSProperties
-              }
+              {...lane}
+              className={`multiday-lane ${laneClass(lane.lane)} ${spanFocus(lane.id)}`}
+              onHover={(on) => setHoverSpan((h) => (on ? lane.id : h === lane.id ? null : h))}
             />
           ))}
           {days.map((d, di) => (
@@ -403,14 +406,13 @@ export default function Client({ trip }: { trip: Trip }) {
                 {timelineItems(d).map((item) =>
                   item.kind === 'end' ? (
                     <div
+                      key={`end-${item.id}`}
                       className={`multiday-end ${laneClass(item.lane)} ${spanFocus(item.id)}`}
                       {...hoverProps(item.id)}
                       data-span-id={item.id}
                       data-lane={item.lane}
-                      key={`end-${item.id}`}
                       style={{ '--lane': Math.max(0, item.outer) } as React.CSSProperties}
                     >
-                      {item.lane >= 0 && <LaneCurve lane={item.lane} />}
                       <span className="diamond" />
                       <small>{[item.time, 'END'].filter(Boolean).join(' · ')}</small>
                     </div>
@@ -717,69 +719,109 @@ function timelineItems(d: Day): TimelineItem[] {
 }
 
 /**
- * End curve of a multi-day lane. The lane runs `9 * (lane + 1)` px right of the rail and eases into
- * the rail through a smooth curve that ends at the diamond's centre (hidden behind the diamond).
- * Dots keep the lane's 12px spacing along the curve, counted back from the centre, so the straight
- * part of the lane must end where that rhythm continues: `padBottom` places its last dot there.
- * Coordinates are relative to the diamond centre (x right, y down).
+ * A multi-day lane drawn as one dotted path: it leaves the start node's centre diagonally, eases
+ * out to its lane `9 * (lane + 1)` px right of the rail, runs down, and eases back in to arrive
+ * diagonally at the end diamond's centre (the start curve mirrors the end). Dots are spaced evenly
+ * (~12px) along the whole path from the node centre to the diamond centre, so the curves and the
+ * straight part share one rhythm and both ends are mirror images; dots that land inside the node
+ * or the diamond are hidden behind them.
+ * Coordinates are relative to the start node's centre (x right, y down).
  */
 const DOT_SPACING = 12;
 const CURVE_RISE = 24;
-const laneCurves = new Map<number, { dots: [number, number][]; rise: number; padBottom: number }>();
-function laneCurve(lane: number) {
-  const cached = laneCurves.get(lane);
-  if (cached) return cached;
+type Point = [number, number];
+function lanePath(lane: number, height: number) {
   const dx = 9 * (lane + 1);
-  // Leaves the lane vertically `rise` px above the diamond and arrives diagonally (45°) at the
-  // diamond's centre, so the last visible dots point at the middle of the diamond.
-  const rise = CURVE_RISE + 6 * lane;
-  const P = [
-    [dx, -rise],
-    [dx, -rise * 0.45],
-    [dx * 0.55, -dx * 0.55],
-    [0, 0],
-  ];
-  const at = (t: number) =>
+  const rise = Math.min(CURVE_RISE + 6 * lane, height / 2);
+  const cubic = (a: Point, b: Point, c: Point, d: Point) => (t: number) =>
     [0, 1].map(
       (k) =>
-        (1 - t) ** 3 * P[0][k] +
-        3 * (1 - t) ** 2 * t * P[1][k] +
-        3 * (1 - t) * t * t * P[2][k] +
-        t ** 3 * P[3][k],
-    ) as [number, number];
-  const samples: { s: number; p: [number, number] }[] = [{ s: 0, p: at(0) }];
-  for (let k = 1; k <= 200; k++) {
-    const p = at(k / 200);
-    const q = samples[samples.length - 1];
-    samples.push({ s: q.s + Math.hypot(p[0] - q.p[0], p[1] - q.p[1]), p });
-  }
+        (1 - t) ** 3 * a[k] +
+        3 * (1 - t) ** 2 * t * b[k] +
+        3 * (1 - t) * t * t * c[k] +
+        t ** 3 * d[k],
+    ) as Point;
+  const segments = [
+    cubic([0, 0], [dx * 0.55, dx * 0.55], [dx, rise * 0.45], [dx, rise]),
+    (t: number) => [dx, rise + t * (height - 2 * rise)] as Point,
+    cubic(
+      [dx, height - rise],
+      [dx, height - rise * 0.45],
+      [dx * 0.55, height - dx * 0.55],
+      [0, height],
+    ),
+  ];
+  const samples: { s: number; p: Point }[] = [{ s: 0, p: [0, 0] }];
+  for (const seg of segments)
+    for (let k = 1; k <= 200; k++) {
+      const p = seg(k / 200);
+      const q = samples[samples.length - 1];
+      samples.push({ s: q.s + Math.hypot(p[0] - q.p[0], p[1] - q.p[1]), p });
+    }
   const length = samples[samples.length - 1].s;
-  const dots: [number, number][] = [];
-  let s = length;
-  for (; s >= -1e-6; s -= DOT_SPACING)
-    dots.push((samples.find((x) => x.s >= s - 1e-6) ?? samples[samples.length - 1]).p);
-  const firstOnCurve = s + DOT_SPACING;
-  const lastStraightY = -rise - (DOT_SPACING - firstOnCurve);
-  // The span ends 1px below the diamond centre and its dots sit 9px above its content bottom.
-  const result = { dots, rise, padBottom: -8 - lastStraightY };
-  laneCurves.set(lane, result);
-  return result;
+  // Interpolate between samples so dot spacing is exact even on the long straight segment.
+  const pointAt = (s: number): Point => {
+    const found = samples.findIndex((x) => x.s >= s);
+    // Past the last sample (rounding at the very end): use the end point.
+    if (found === -1) return samples[samples.length - 1].p;
+    const i = Math.max(1, found);
+    const a = samples[i - 1];
+    const b = samples[i] ?? a;
+    const f = b.s > a.s ? (s - a.s) / (b.s - a.s) : 0;
+    return [a.p[0] + (b.p[0] - a.p[0]) * f, a.p[1] + (b.p[1] - a.p[1]) * f];
+  };
+  // A whole number of gaps from node centre to diamond centre, so the start and end curves carry
+  // mirror-image dots; the spacing stays within a fraction of a pixel of 12px.
+  const gaps = Math.max(1, Math.round(length / DOT_SPACING));
+  const dots: Point[] = [];
+  for (let k = 0; k <= gaps; k++) dots.push(pointAt((length * k) / gaps));
+  const d =
+    `M0,0 C${dx * 0.55},${dx * 0.55} ${dx},${rise * 0.45} ${dx},${rise} ` +
+    `L${dx},${height - rise} ` +
+    `C${dx},${height - rise * 0.45} ${dx * 0.55},${height - dx * 0.55} 0,${height}`;
+  return { dots, d, dx };
 }
-function LaneCurve({ lane }: { lane: number }) {
-  const { dots, rise } = laneCurve(lane);
-  const pad = 3;
-  const width = 9 * (lane + 1) + pad * 2;
+function LanePath({
+  lane,
+  x,
+  y0,
+  y1,
+  className,
+  onHover,
+}: {
+  lane: number;
+  x: number;
+  y0: number;
+  y1: number;
+  className: string;
+  onHover: (on: boolean) => void;
+}) {
+  const height = Math.max(0, y1 - y0);
+  const { dots, d, dx } = useMemo(() => lanePath(lane, height), [lane, height]);
+  const pad = 8;
   return (
     <svg
-      className="lane-curve"
-      width={width}
-      height={rise + pad * 2}
-      style={{ left: -2 - pad, top: 8 - rise - pad }}
+      className={className}
+      width={dx + pad * 2}
+      height={height + pad * 2}
+      style={{ left: x - pad, top: y0 - pad }}
       aria-hidden="true"
     >
-      {dots.map(([x, y], i) => (
-        <circle key={i} cx={x + pad} cy={y + rise + pad} r={1} />
-      ))}
+      <g transform={`translate(${pad} ${pad})`}>
+        {/* A 13px-wide invisible hover band along the path. */}
+        <path
+          d={d}
+          fill="none"
+          stroke="transparent"
+          strokeWidth={13}
+          pointerEvents="stroke"
+          onMouseEnter={() => onHover(true)}
+          onMouseLeave={() => onHover(false)}
+        />
+        {dots.map(([cx, cy], i) => (
+          <circle key={i} cx={cx} cy={cy} r={1} />
+        ))}
+      </g>
     </svg>
   );
 }
