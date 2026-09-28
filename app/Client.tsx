@@ -277,13 +277,6 @@ export default function Client({ trip }: { trip: Trip }) {
   const [ratio, setRatio] = useState('large');
   const [collapsed, setCollapsed] = useState(false);
   const [arrows, setArrows] = useState('a');
-  // Temporary, while choosing (Part 6): note/caption style options A (paper card), B (margin rule)
-  // and C (annotation), switchable from a small control or `?notes=b`.
-  const [noteStyle, setNoteStyle] = useState('a');
-  useEffect(() => {
-    const q = new URLSearchParams(window.location.search).get('notes');
-    if (q && 'abc'.includes(q)) setNoteStyle(q);
-  }, []);
   const [focus, setFocus] = useState<Photo | null>(null);
   // Multi-day focus: the hovered span, else the selected one; its lane, labels and end marker
   // are emphasised and other lanes fade (only when more than one lane is drawn).
@@ -419,7 +412,7 @@ export default function Client({ trip }: { trip: Trip }) {
   }
   return (
     <main
-      className={`shell notes-${noteStyle} ${collapsed ? 'collapsed' : ''}`}
+      className={`shell ${collapsed ? 'collapsed' : ''}`}
       style={
         {
           '--map-height': ratio === 'small' ? '20%' : ratio === 'large' ? '40%' : '30%',
@@ -804,14 +797,6 @@ export default function Client({ trip }: { trip: Trip }) {
           </div>
         </div>
       )}
-      <div className="style-switch" aria-label="Note style (temporary)">
-        <small>Notes</small>
-        {(['a', 'b', 'c'] as const).map((k) => (
-          <button key={k} className={noteStyle === k ? 'on' : ''} onClick={() => setNoteStyle(k)}>
-            {k.toUpperCase()}
-          </button>
-        ))}
-      </div>
     </main>
   );
 }

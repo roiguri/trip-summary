@@ -20,10 +20,10 @@ Phase 0 goal: confirm that the prototype is implemented correctly against the re
 | --- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------- |
 | 1   | Page shell: header, intro, scroll model, backgrounds                                   | `mock/app-locked-geometry-final-full`, `mock/image-e55ca7ac`, `captures/wayfarer-locked-opening` | agreed with changes |
 | 2   | Rail and day banners (rail, multi-day lane, day tag)                                   | geometry mock, `captures/wayfarer-locked-rail-*`                                                 | pending             |
-| 3   | Place / lodging entries (connector, title, byline, photo fan)                          | geometry mock, `mock/roi-shot-cards`                                                             | in review           |
+| 3   | Place / lodging entries (connector, title, byline, photo fan)                          | geometry mock, `mock/roi-shot-cards`                                                             | agreed with changes |
 | 4   | Loose photo and cluster entries                                                        | `mock/roi-shot-cards`, `captures/wayfarer-photo-cards-compare-*`                                 | pending             |
 | 5   | Transit stop                                                                           | `mock/transit-locked-zoom`, `captures/wayfarer-transit-rail-compare-*`                           | pending             |
-| 6   | Notes (tape, LTR/RTL)                                                                  | geometry mock, `captures/wayfarer-locked-notes`                                                  | options in review   |
+| 6   | Notes (tape, LTR/RTL)                                                                  | geometry mock, `captures/wayfarer-locked-notes`                                                  | agreed with changes |
 | 7   | Multi-day span (start block, day chips, dot lane, end diamond)                         | geometry mock, `captures/wayfarer-locked-multiday-end`                                           | pending             |
 | 8   | Map card (layout, ratios, markers, route, Whole trip, day emphasis)                    | `mock/trip-real-map-whole-final`, `mock/trip-real-map-day-final`, `mock/panel-ratio-large`       | pending             |
 | 9   | Detail panel: place and lodging                                                        | `mock/panel-final-place`, `captures/wayfarer-locked-place`                                       | pending             |
@@ -91,18 +91,18 @@ Sampled from `mock/app-locked-geometry-final-full` (positions relative to the ra
 - Checked with the Kansai fixture (span ending mid-morning with entries after it): the lane stops at the diamond and later entries sit on the plain rail.
 - Start block: matches; the caption under its photos belongs to Part 3.
 
-### Part 3: Place / lodging entries (in review)
+### Part 3: Place / lodging entries (agreed with changes)
 
 - Connector alignment (user decision, differs from the mocks): the node and arm point at the middle of the title's first line (cap-height centre), not its baseline. Both mocks put the arm at the baseline, which reads as aligned with the whole title + byline block. Measured: node and arm moved up 11px and now sit exactly on the cap-height centre for places, lodging, photos and clusters, on both sides; a wrapped title keeps the line on its first line. Multi-day lanes still start from the node's centre.
-- Caption under the photos (user decision (a), as in the locked mock): places and stay check-ins show their full note under the photo fan (or under the byline when there are no photos), 11px regular `#667766`, on the title's edge and at most as wide as the fan (266px). Notes longer than two lines are clamped with "See more" / "See less"; the toggle doesn't select the entry. The Kansai fixture has a long note to exercise it.
+- Caption under the photos (user decision (a)): places and stay check-ins show their full note under the photo fan (or under the byline when there are no photos), at most as wide as the fan (266px). Styled with notes in Part 6 (paper slip). Notes longer than two lines are clamped with "See more" / "See less"; the toggle doesn't select the entry. The Kansai fixture has a long note to exercise it.
 - The transit disc (Part 5) follows the same rule: it was centred on the title + times + route block and now sits on the title's first line; its teal travel segment moves up 12.5px with it so the disc stays centred on it.
 
-### Part 6: Notes (options in review)
+### Part 6: Notes (agreed with changes)
 
 User direction: notes and place captions should look alike (the same kind of thing, one attached to an event); notes are anchored in time; better LTR/RTL alignment; see style options before choosing, one of them the paper card with tape.
 
 - Shared in all options: note entries get a rail node and arm level with the note's title (within ~1px), then title, "NOTE · time" byline and the note text. Note text and captions use one component (`EntryCaption`), clamped with "See more" (captions 2 lines, notes 4). Text blocks are only as wide as their text and hug the rail side; each line follows its own reading direction.
-- Options, switchable with the temporary A/B/C control (bottom left) or `?notes=b`: **A** paper card with tape for notes, a small paper slip for captions; **B** margin rule, a tinted block with a copper rule on the text's starting side (echoes the detail panel's note); **C** annotation, no box, serif italic (Hebrew kept upright). In B and C, note titles and bylines hug the rail like other events.
+- Chosen style (user decision, from three options: paper card, margin rule, serif annotation): the mock's **paper card with tape** for notes (13px text, 15px title, card as wide as its text up to 300px), and the same paper as a small slip with tape for place captions (12px). Inside the card every line follows its own reading direction.
 - Sample trip now carries the cases: a Hebrew place caption (Garrapata), a long English note, a longer Hebrew note.
 
 ### Hotel stays (new, from the Part 7 discussion)
