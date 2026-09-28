@@ -31,7 +31,22 @@ export type Entry = {
   span_end: { date: string; time: string | null; lane: number } | null;
   /** Lodging: the check-in entry, or the check-out entry generated on the last day of the stay. */
   stay: { role: 'checkin' | 'checkout'; stayId: string } | null;
+  /** Transit: how the leg was travelled (drives the icon). */
+  mode: TransitMode | null;
 };
+export type TransitMode = 'car' | 'train' | 'flight' | 'bus' | 'ferry' | 'walk' | 'bike';
+
+/** The core schema has no transport mode yet (where it lives is a Phase 1 data-design question), so it
+ *  is derived from the leg's title; anything unrecognised is a car. */
+function transitMode(title: string): TransitMode {
+  if (/\b(train|rail|shinkansen|metro|subway|tram)/i.test(title)) return 'train';
+  if (/\b(flight|fly|plane|airport)/i.test(title)) return 'flight';
+  if (/\b(bus|shuttle|coach)/i.test(title)) return 'bus';
+  if (/\b(ferry|boat|ship|cruise)/i.test(title)) return 'ferry';
+  if (/\b(bike|cycl)/i.test(title)) return 'bike';
+  if (/\b(walk|on foot)/i.test(title)) return 'walk';
+  return 'car';
+}
 /** A multi-day entry seen from a later day of its span. */
 export type SpanDay = {
   id: string;
@@ -214,6 +229,7 @@ export function getTrip(): Trip {
           ? { date: i.end_date!, time: i.end_time, lane: laneOf.get(i.entry_id) ?? 0 }
           : null,
         stay: i.item_type === 'lodging' ? { role: 'checkin', stayId: `i${i.entry_id}` } : null,
+        mode: i.item_type === 'transit' ? transitMode(i.title ?? i.place_title ?? '') : null,
       }));
 
     // A stay also appears on its last day as a check-out entry at the check-out time.
@@ -238,6 +254,7 @@ export function getTrip(): Trip {
         arrival_timezone: null,
         span_end: null,
         stay: { role: 'checkout', stayId: `i${s.entry_id}` },
+        mode: null,
       });
 
     // Photos not attached to an entry: a lone photo in an hour is a moment, several are a cluster.
@@ -273,6 +290,7 @@ export function getTrip(): Trip {
         arrival_timezone: null,
         span_end: null,
         stay: null,
+        mode: null,
       });
     }
     entries.sort((a, b) => a.time.localeCompare(b.time));

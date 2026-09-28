@@ -22,7 +22,7 @@ Known issues found while initializing:
 
 ## Phase 0 — Foundation and fidelity verification (no visual change unless agreed)
 
-1. **Verify the implementation against the mocks, part by part** (`docs/VERIFICATION.md`). Each of the 13 parts is reviewed side by side (mock, handoff capture, current capture) and agreed before moving on. Fixes that come out of a part are small, reviewed changes. Progress: Parts 1, 2, 3, 4 and 6 agreed; data separation done; a measured mock style pass (header, timeline, photo cards, right column, content-sized detail card) done; Part 7 (multi-day spans, lanes) done and hotel stays designed and built. Parts 3–6 and 8–13 still need their review.
+1. **Verify the implementation against the mocks, part by part** (`docs/VERIFICATION.md`). Each of the 13 parts is reviewed side by side (mock, handoff capture, current capture) and agreed before moving on. Fixes that come out of a part are small, reviewed changes. Progress: Parts 1–6 agreed; data separation done; a measured mock style pass (header, timeline, photo cards, right column, content-sized detail card) done; Part 7 (multi-day spans, lanes) done and hotel stays designed and built. Parts 3–6 and 8–13 still need their review.
 2. Tooling: Prettier (done), ESLint, `npm run typecheck`, a GitHub Actions CI job (install, typecheck, lint, build), Node pinned (`engines`, done).
 3. Screenshot guard: `scripts/capture.mjs` (done) becomes Playwright visual tests with committed baselines, taken once the parts are agreed.
 4. Refactor behind the guard: split `Client.tsx` into components (`Header`, `Timeline` + entry kinds, `MapCard`, `DetailPanel`, `Gallery`, `Lightbox`). Split `lib/data.ts` into schema, seed and typed queries. Remove sample-only hard-coding found during verification. No visual diff.
@@ -32,7 +32,7 @@ Known issues found while initializing:
 Real data integration is complex enough to be designed and agreed on before any code. Topics to work through together:
 
 - **Sources:** which exports we actually have and in which format (Google Maps Timeline on-device vs. Takeout; Google Photos Takeout vs. API; the planning/notes format; bookings/transit). We'll gather small anonymised samples, and none go into the repo.
-- **Model:** how the SQLite schema covers visits, transit, lodging, photo clusters and multi-day spans. What is imported vs. authored vs. derived.
+- **Model:** the core schema (`destinations`, `trips`, `places`, `wishlist`, `itinerary`) is the user's real one, so changes to it are deliberate and designed here. Open points found in Phase 0: a permanent home for day titles and photos (now prototype tables), photo captions and their source, a transport mode for transit legs (now derived from the title), and how loose photos are grouped. What is imported vs. authored vs. derived.
 - **Pipeline:** matching photos to places (time and location), clustering loose photos, timezone handling, deduplication, re-import without losing edits.
 - **Storage and privacy:** where the DB and photo files live, what's git-ignored, thumbnails.
 - **UX:** import flow (CLI first vs. in-app), and how review/editing corrections feed back.
