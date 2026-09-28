@@ -25,11 +25,11 @@ Phase 0 goal: confirm that the prototype is implemented correctly against the re
 | 5   | Transit stop                                                                           | `mock/transit-locked-zoom`, `captures/wayfarer-transit-rail-compare-*`                           | agreed with changes |
 | 6   | Notes (tape, LTR/RTL)                                                                  | geometry mock, `captures/wayfarer-locked-notes`                                                  | agreed with changes |
 | 7   | Multi-day span (start block, day chips, dot lane, end diamond)                         | geometry mock, `captures/wayfarer-locked-multiday-end`                                           | pending             |
-| 8   | Map card (layout, ratios, markers, route, Whole trip, day emphasis)                    | `mock/trip-real-map-whole-final`, `mock/trip-real-map-day-final`, `mock/panel-ratio-large`       | pending             |
+| 8   | Map card (layout, ratios, markers, route, Whole trip, day emphasis)                    | `mock/trip-real-map-whole-final`, `mock/trip-real-map-day-final`, `mock/panel-ratio-large`       | agreed with changes |
 | 9   | Detail panel: place and lodging                                                        | `mock/panel-final-place`, `captures/wayfarer-locked-place`                                       | pending             |
 | 10  | Detail panel: photo, cluster, day album, gallery and pager                             | `mock/image-e55ca7ac`, `captures/wayfarer-locked-single`, `-cluster`, `-pager`                   | pending             |
 | 11  | Lightbox                                                                               | `captures/wayfarer-locked-fullscreen`                                                            | pending             |
-| 12  | Collapsed right column                                                                 | no reference image; written spec in `DESIGN.md` only                                             | pending             |
+| 12  | Collapsed right column                                                                 | no reference image; written spec in `DESIGN.md` only                                             | agreed with changes |
 | 13  | Interactions: click-to-scroll, day tracking while scrolling, map pin → entry, keyboard | written spec in `DESIGN.md`                                                                      | pending             |
 
 ## Part decisions
@@ -108,6 +108,19 @@ Sampled from `mock/app-locked-geometry-final-full` (positions relative to the ra
 - Connector alignment (user decision, differs from the mocks): the node and arm point at the middle of the title's first line (cap-height centre), not its baseline. Both mocks put the arm at the baseline, which reads as aligned with the whole title + byline block. Measured: node and arm moved up 11px and now sit exactly on the cap-height centre for places, lodging, photos and clusters, on both sides; a wrapped title keeps the line on its first line. Multi-day lanes still start from the node's centre.
 - Caption under the photos (user decision (a)): places and stay check-ins show their full note under the photo fan (or under the byline when there are no photos), at most as wide as the fan (266px). Styled with notes in Part 6 (paper slip). Notes longer than two lines are clamped with "See more" / "See less"; the toggle doesn't select the entry. The Kansai fixture has a long note to exercise it.
 - The transit disc (Part 5) follows the same rule: it was centred on the title + times + route block and now sits on the title's first line; its teal travel segment moves up 12.5px with it so the disc stays centred on it.
+
+### Part 8: Map card, and the right column (agreed with changes)
+
+- Card geometry already matched `mock/panel-ratio-large` exactly (424×324 at y=78: 55px head, 239px map, 28px footer).
+- Right column (user decision, replaces "collapse both"): the map and the detail card open and close independently. Nothing is selected at first, so the map fills the column; selecting an entry shows the detail card under the map; the detail card's own × clears the selection and the map grows back; the map's × leaves the detail card alone; with both closed the timeline centres and the round button reopens the map. (This also settles Part 12, the collapsed column.)
+- Fixed: the map was created before the column settled, so for about a second its canvas was smaller than the card and the first fit was off; it now follows its container (ResizeObserver) and re-fits the same places whenever the card changes size (e.g. when the detail card opens and the map shrinks).
+- Fixed: OpenStreetMap/OpenFreeMap attribution was hidden by an old rule; it is back as the mock's small white chip (licence requirement).
+- Fixed: a view chosen before the map style finished loading was overridden by the first-load whole-trip fit.
+- Fixed (Part 13, found here): the scroll-based day tracker only reacted to a day entering its band, so after choosing an entry (which smooth-scrolls the timeline past a day boundary) the day could stay wrong and the map jumped to the previous day. It now takes the topmost day in the band and ignores scrolls started by choosing an entry.
+- Pins that would touch are merged into a pill ("3 stops", a different shape from numbered pins) that zooms in on click; merging repeats until nothing touches, and the selected pin never merges (user decision).
+- Route (user decision): round dots as in the mock, one line per day starting where the previous day ended; all days faint, the current day strong (every day in the whole-trip view).
+- Transit on the map (user decision): each leg shows its mode icon on a small teal disc halfway between the located stops before and after it; legs missing a neighbour are left off. Selected markers are drawn on top, then the current day's, then other days'.
+- Day view zooms closer (up to 14, was 11). Fixed: after "Whole trip" every pin was dimmed; all are full strength there now.
 
 ### Part 5: Transit stop (agreed with changes)
 

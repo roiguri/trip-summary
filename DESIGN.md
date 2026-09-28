@@ -21,6 +21,11 @@ This document records the agreed visual direction for the local trip-summary pro
 - Detail views cover places, single loose photos, photo clusters, lodging with check-in/out, and day albums. Photo tap opens a fullscreen viewer with keyboard Escape and arrow support.
 - Gallery pages show up to 12 photos, laid out by count (one full tile, two split, three as a mosaic, and equivalent balanced layouts for other counts). Photos keep a natural tile size and are not stretched; the detail card shrinks to its content, with the photo count and pager directly under the photos (decision of Sept 26, replacing "fill the space"). If content would outgrow the column, the rows shrink together; the panel never scrolls. Photo sequences of five use the 2x3 grid; places and albums with five use two over three. The chosen pager is style A, thin unframed chevrons. Both chevrons share an identical vector path and align optically with the page count.
 
+## Right column and map (user decisions)
+
+- The map card and the detail card open and close independently. Nothing is selected at first and the map fills the column; the detail card appears under the map when an entry is selected and has its own close button; with both closed the timeline centres.
+- Map: close pins merge into a "N stops" pill that zooms in on click; the route is a round-dot line per day (current day strong, others faint); transit legs show their mode icon between their neighbouring stops; OpenStreetMap attribution is always visible.
+
 ## Data and publication boundary
 
 - Seed only fictional Carmel/Monterey trip data, with `America/Los_Angeles` from the destination. The supplied core SQLite schema includes a unique current-trip index; the sample's extra photos table is prototype-only. No real trip data belongs in the repo.

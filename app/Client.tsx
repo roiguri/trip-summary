@@ -168,7 +168,12 @@ function MapView({
     map = useRef<MapType | null>(null),
     markers = useRef<Marker[]>([]),
     firstDay = useRef(true),
+    dayRef = useRef(day),
+    // What the map was last fitted to; re-applied when the card changes size (e.g. the detail card
+    // opens and the map shrinks), so the same places stay in view.
+    fitRef = useRef<{ bounds: Bounds; padding: number; maxZoom: number } | null>(null),
     selectedRef = useRef(onSelect);
+  dayRef.current = day;
   selectedRef.current = onSelect;
   const places = useMemo(
     () =>
@@ -185,6 +190,30 @@ function MapView({
       ),
     [trip],
   );
+  // Located stops in visit order (places and stay check-ins/outs): the route runs through them.
+  const stops = useMemo(
+    () =>
+      trip.days.flatMap((d) =>
+        d.entries.filter(
+          (e) => (e.type === 'place' || e.type === 'lodging') && e.lat != null && e.lng != null,
+        ),
+      ),
+    [trip],
+  );
+  // Transit legs have no coordinates of their own; each is shown halfway between the located stops
+  // before and after it (legs missing either neighbour are left off the map).
+  const legs = useMemo(() => {
+    const all = trip.days.flatMap((d) => d.entries);
+    const located = (x: Entry) =>
+      (x.type === 'place' || x.type === 'lodging') && x.lat != null && x.lng != null;
+    return all.flatMap((e, i) => {
+      if (e.type !== 'transit' || !e.mode) return [];
+      const prev = all.slice(0, i).reverse().find(located);
+      const next = all.slice(i + 1).find(located);
+      if (!prev || !next) return [];
+      return [{ entry: e, lng: (prev.lng! + next.lng!) / 2, lat: (prev.lat! + next.lat!) / 2 }];
+    });
+  }, [trip]);
   useEffect(() => {
     if (!el.current) return;
     const m = new maplibregl.Map({
@@ -203,7 +232,11 @@ function MapView({
     m.addControl(new maplibregl.AttributionControl({ compact: false }), 'bottom-left');
     // The map is created before the right column settles; follow the container's real size so the
     // canvas fills the card and the first fit uses the right dimensions.
-    const ro = new ResizeObserver(() => m.resize());
+    const ro = new ResizeObserver(() => {
+      m.resize();
+      const f = fitRef.current;
+      if (f) m.fitBounds(f.bounds, { padding: f.padding, maxZoom: f.maxZoom, duration: 0 });
+    });
     ro.observe(el.current);
     m.once('load', () => {
       const colors: Record<string, string> = {
@@ -244,90 +277,192 @@ function MapView({
           } else if (layer.type === 'line') m.setPaintProperty(id, 'line-color', color);
         } catch {}
       }
-      if (!m.getLayer('route')) {
+      if (!m.getSource('route')) {
+        // One dotted line per day, starting from where the previous day ended (as in the mock); all
+        // days faint, the current day (or every day in the whole-trip view) stronger.
+        const byDay = new Map<string, number[][]>();
+        let last: number[] | null = null;
+        for (const e of stops) {
+          const pt = [e.lng!, e.lat!];
+          if (!byDay.has(e.day)) byDay.set(e.day, last ? [last] : []);
+          byDay.get(e.day)!.push(pt);
+          last = pt;
+        }
         m.addSource('route', {
           type: 'geojson',
           data: {
-            type: 'Feature',
-            geometry: { type: 'LineString', coordinates: places.map((e) => [e.lng!, e.lat!]) },
-            properties: {},
+            type: 'FeatureCollection',
+            features: [...byDay]
+              .filter(([, coordinates]) => coordinates.length > 1)
+              .map(([d, coordinates]) => ({
+                type: 'Feature',
+                geometry: { type: 'LineString', coordinates },
+                properties: { day: d },
+              })),
           },
         });
+        const dots = {
+          'line-color': '#6c9e83',
+          'line-width': 3,
+          'line-dasharray': [0, 2],
+        };
         m.addLayer({
           id: 'route',
           type: 'line',
           source: 'route',
-          paint: {
-            'line-color': '#6c9e83',
-            'line-width': 2,
-            'line-dasharray': [1.5, 3],
-            'line-opacity': 0.72,
-          },
+          layout: { 'line-cap': 'round', 'line-join': 'round' },
+          paint: { ...dots, 'line-opacity': 0.3 },
+        });
+        m.addLayer({
+          id: 'route-day',
+          type: 'line',
+          source: 'route',
+          layout: { 'line-cap': 'round', 'line-join': 'round' },
+          paint: { ...dots, 'line-opacity': 0.9 },
+          filter: dayRef.current ? ['==', ['get', 'day'], dayRef.current] : ['has', 'day'],
         });
       }
+      // Keep a view already chosen before the style finished loading (e.g. a quick first click).
       const whole = boundsOf(places);
-      if (whole) m.fitBounds(whole, { padding: 55, maxZoom: 11, duration: 0 });
+      if (!fitRef.current && whole) fitRef.current = { bounds: whole, padding: 55, maxZoom: 11 };
+      const f = fitRef.current;
+      if (f) m.fitBounds(f.bounds, { padding: f.padding, maxZoom: f.maxZoom, duration: 0 });
     });
     return () => {
       ro.disconnect();
       m.remove();
       map.current = null;
     };
-  }, [places]);
+  }, [places, stops]);
   useEffect(() => {
     const m = map.current;
     if (!m) return;
-    markers.current.forEach((x) => x.remove());
-    markers.current = places.map((entry, i) => {
+    if (m.getLayer('route-day')) m.setFilter('route-day', day ? ['==', ['get', 'day'], day] : null);
+    const onDay = (e: Entry) => !day || e.day === day;
+    type Item = { entry: Entry; kind: 'place' | 'stay'; label: string };
+    const items: Item[] = [
+      ...places.map((entry, i) => ({ entry, kind: 'place' as const, label: String(i + 1) })),
+      ...stays.map((entry) => ({ entry, kind: 'stay' as const, label: '' })),
+    ];
+    const pinFor = ({ entry, kind, label }: Item) => {
       const div = document.createElement('button');
-      div.className = `map-pin ${entry.day === day ? 'day-pin' : 'dim-pin'} ${selected?.id === entry.id ? 'chosen-pin' : ''}`;
-      div.textContent = String(i + 1);
       div.title = entry.title;
       div.onclick = () => selectedRef.current(entry);
-      return new maplibregl.Marker({ element: div, anchor: 'center' })
-        .setLngLat([entry.lng!, entry.lat!])
-        .addTo(m);
-    });
-    for (const stay of stays) {
-      const div = document.createElement('button');
-      div.className = `map-stay ${selected?.id === stay.id ? 'chosen-pin' : ''}`;
-      div.title = stay.title;
-      div.innerHTML =
-        '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 7.5 8 3.5l5 4V13H9.5v-3h-3v3H3z"/></svg>';
-      div.onclick = () => selectedRef.current(stay);
-      markers.current.push(
-        new maplibregl.Marker({ element: div, anchor: 'center' })
-          .setLngLat([stay.lng!, stay.lat!])
-          .addTo(m),
-      );
-    }
-    let p = focused || (selected?.type !== 'place' ? selected?.photos[0] : null);
-    if (p?.lat != null && p?.lng != null) {
-      const div = document.createElement('div');
-      div.className = 'photo-pin';
-      div.textContent = '✦';
-      markers.current.push(
-        new maplibregl.Marker({ element: div, anchor: 'center' })
-          .setLngLat([p.lng, p.lat])
-          .addTo(m),
-      );
-    }
+      if (kind === 'place') {
+        div.className = `map-pin ${onDay(entry) ? 'day-pin' : 'dim-pin'} ${selected?.id === entry.id ? 'chosen-pin' : ''}`;
+        div.textContent = label;
+      } else {
+        div.className = `map-stay ${onDay(entry) ? '' : 'dim-pin'} ${selected?.id === entry.id ? 'chosen-pin' : ''}`;
+        div.innerHTML =
+          '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 7.5 8 3.5l5 4V13H9.5v-3h-3v3H3z"/></svg>';
+      }
+      return div;
+    };
+    // Pins that would touch on screen are merged into one bubble with their count (user decision);
+    // clicking it zooms in until they separate. The selected pin is never merged. Re-run on zoom.
+    const render = () => {
+      markers.current.forEach((x) => x.remove());
+      // Start with one group per pin and merge any two groups that would touch on screen (a pill is
+      // wider than a pin), repeating until none do. The selected pin always stays on its own.
+      type Group = { members: Item[]; x: number; y: number };
+      const groups: Group[] = items.map((it) => {
+        const pt = m.project([it.entry.lng!, it.entry.lat!]);
+        return { members: [it], x: pt.x, y: pt.y };
+      });
+      const solo = (g: Group) => g.members.some((x) => x.entry.id === selected?.id);
+      for (let merged = true; merged;) {
+        merged = false;
+        for (let i = 0; i < groups.length && !merged; i++)
+          for (let j = i + 1; j < groups.length && !merged; j++) {
+            const [a, b] = [groups[i], groups[j]];
+            if (solo(a) || solo(b)) continue;
+            const wide = a.members.length > 1 || b.members.length > 1;
+            if (Math.abs(a.x - b.x) < (wide ? 62 : 26) && Math.abs(a.y - b.y) < 26) {
+              const n = a.members.length + b.members.length;
+              a.x = (a.x * a.members.length + b.x * b.members.length) / n;
+              a.y = (a.y * a.members.length + b.y * b.members.length) / n;
+              a.members.push(...b.members);
+              groups.splice(j, 1);
+              merged = true;
+            }
+          }
+      }
+      const out: Marker[] = [];
+      groups.forEach(({ members: group }) => {
+        const a = { it: group[0] };
+        let div: HTMLElement;
+        let at: [number, number];
+        if (group.length === 1) {
+          div = pinFor(a.it);
+          at = [a.it.entry.lng!, a.it.entry.lat!];
+        } else {
+          const members = group.map((g) => g.entry);
+          div = document.createElement('button');
+          div.className = `map-cluster ${members.some(onDay) ? 'day-pin' : 'dim-pin'}`;
+          div.textContent = `${group.length} stops`;
+          div.title = members.map((e) => e.title).join(' · ');
+          const bounds = boundsOf(members)!;
+          div.onclick = () => m.fitBounds(bounds, { padding: 70, maxZoom: 15, duration: 650 });
+          at = [
+            members.reduce((sum, e) => sum + e.lng!, 0) / members.length,
+            members.reduce((sum, e) => sum + e.lat!, 0) / members.length,
+          ];
+        }
+        out.push(new maplibregl.Marker({ element: div, anchor: 'center' }).setLngLat(at).addTo(m));
+      });
+      // Stack order: other days below the current day's markers, the selected one on top.
+      const layer = (div: HTMLElement) =>
+        (div.style.zIndex = div.classList.contains('chosen-pin')
+          ? '3'
+          : div.classList.contains('dim-pin')
+            ? '1'
+            : '2');
+      for (const leg of legs) {
+        const div = document.createElement('button');
+        div.className = `map-leg ${onDay(leg.entry) ? '' : 'dim-pin'} ${selected?.id === leg.entry.id ? 'chosen-pin' : ''}`;
+        div.title = leg.entry.title;
+        div.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${TRANSIT_ICONS[leg.entry.mode!].map((d) => `<path d="${d}"/>`).join('')}</svg>`;
+        div.onclick = () => selectedRef.current(leg.entry);
+        out.push(
+          new maplibregl.Marker({ element: div, anchor: 'center' })
+            .setLngLat([leg.lng, leg.lat])
+            .addTo(m),
+        );
+      }
+      const p = focused || (selected?.type !== 'place' ? selected?.photos[0] : null);
+      if (p?.lat != null && p?.lng != null) {
+        const div = document.createElement('div');
+        div.className = 'photo-pin';
+        div.textContent = '✦';
+        out.push(
+          new maplibregl.Marker({ element: div, anchor: 'center' })
+            .setLngLat([p.lng, p.lat])
+            .addTo(m),
+        );
+      }
+      out.forEach((x) => layer(x.getElement()));
+      markers.current = out;
+    };
+    render();
+    m.on('zoomend', render);
     if (!day && !firstDay.current) {
       const whole = boundsOf(places);
-      if (whole) m.fitBounds(whole, { padding: 55, maxZoom: 11, duration: 650 });
+      if (whole) {
+        fitRef.current = { bounds: whole, padding: 55, maxZoom: 11 };
+        m.fitBounds(whole, { padding: 55, maxZoom: 11, duration: 650 });
+      }
     } else if (day && !firstDay.current) {
-      const ds = places.filter((e) => e.day === day);
-      if (ds.length)
-        m.fitBounds(
-          ds.reduce(
-            (bounds, e) => bounds.extend([e.lng!, e.lat!]),
-            new maplibregl.LngLatBounds([ds[0].lng!, ds[0].lat!], [ds[0].lng!, ds[0].lat!]),
-          ),
-          { padding: 65, maxZoom: 11, duration: 650 },
-        );
+      const ds = boundsOf(places.filter((e) => e.day === day));
+      if (ds) {
+        fitRef.current = { bounds: ds, padding: 65, maxZoom: 14 };
+        m.fitBounds(ds, { padding: 65, maxZoom: 14, duration: 650 });
+      }
     }
     firstDay.current = false;
-  }, [places, stays, day, selected, focused]);
+    return () => {
+      m.off('zoomend', render);
+    };
+  }, [places, stays, legs, day, selected, focused]);
   useEffect(() => {
     map.current?.resize();
   }, [ratio]);
@@ -368,6 +503,8 @@ export default function Client({ trip }: { trip: Trip }) {
     { id: string; lane: number; x: number; y0: number; y1: number }[]
   >([]);
   const scroller = useRef<HTMLElement>(null);
+  // While choosing an entry scrolls the timeline, the day comes from the entry, not the scroll.
+  const scrollLock = useRef(0);
   const rail = useRef<HTMLElement>(null);
   const days = trip.days;
   const entriesById = useMemo(
@@ -408,13 +545,21 @@ export default function Client({ trip }: { trip: Trip }) {
   useEffect(() => {
     const root = scroller.current;
     if (!root) return;
+    // The current day is the topmost day inside the reading band. Tracking every day in the band
+    // (not only the one that just entered) keeps it right after a smooth scroll passes a day
+    // boundary and comes back.
+    const inBand = new Set<string>();
+    const order = [...root.querySelectorAll<HTMLElement>('[data-day]')].map((e) => e.dataset.day!);
     const observer = new IntersectionObserver(
       (records) => {
-        for (const r of records)
-          if (r.isIntersecting) {
-            const id = (r.target as HTMLElement).dataset.day;
-            if (id) setDay(id);
-          }
+        for (const r of records) {
+          const id = (r.target as HTMLElement).dataset.day;
+          if (!id) continue;
+          if (r.isIntersecting) inBand.add(id);
+          else inBand.delete(id);
+        }
+        const top = order.find((d) => inBand.has(d));
+        if (top && Date.now() > scrollLock.current) setDay(top);
       },
       { root, rootMargin: '-15% 0px -65% 0px' },
     );
@@ -460,6 +605,7 @@ export default function Client({ trip }: { trip: Trip }) {
     if (target && root && !from) {
       const top =
         target.getBoundingClientRect().top - root.getBoundingClientRect().top + root.scrollTop;
+      scrollLock.current = Date.now() + 900;
       root.scrollTo({ top: Math.max(0, top - 60), behavior: 'smooth' });
     }
     setSelected(e);
