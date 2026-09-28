@@ -69,6 +69,14 @@ function MapView({
       ),
     [trip],
   );
+  // Stays with a location get a house marker (one per stay, from its check-in entry).
+  const stays = useMemo(
+    () =>
+      trip.days.flatMap((d) =>
+        d.entries.filter((e) => e.stay?.role === 'checkin' && e.lat != null && e.lng != null),
+      ),
+    [trip],
+  );
   useEffect(() => {
     if (!el.current) return;
     const m = new maplibregl.Map({
@@ -165,6 +173,19 @@ function MapView({
         .setLngLat([entry.lng!, entry.lat!])
         .addTo(m);
     });
+    for (const stay of stays) {
+      const div = document.createElement('button');
+      div.className = `map-stay ${selected?.id === stay.id ? 'chosen-pin' : ''}`;
+      div.title = stay.title;
+      div.innerHTML =
+        '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 7.5 8 3.5l5 4V13H9.5v-3h-3v3H3z"/></svg>';
+      div.onclick = () => selectedRef.current(stay);
+      markers.current.push(
+        new maplibregl.Marker({ element: div, anchor: 'center' })
+          .setLngLat([stay.lng!, stay.lat!])
+          .addTo(m),
+      );
+    }
     let p = focused || (selected?.type !== 'place' ? selected?.photos[0] : null);
     if (p?.lat != null && p?.lng != null) {
       const div = document.createElement('div');
@@ -191,7 +212,7 @@ function MapView({
         );
     }
     firstDay.current = false;
-  }, [places, day, selected, focused]);
+  }, [places, stays, day, selected, focused]);
   useEffect(() => {
     map.current?.resize();
   }, [ratio]);
@@ -230,6 +251,13 @@ export default function Client({ trip }: { trip: Trip }) {
   const scroller = useRef<HTMLElement>(null);
   const rail = useRef<HTMLElement>(null);
   const days = trip.days;
+  const entriesById = useMemo(
+    () => new Map(days.flatMap((d) => d.entries).map((e) => [e.id, e])),
+    [days],
+  );
+  // A stay's check-out entry and end-of-day markers open the stay itself (its check-in entry).
+  const resolveStay = (e: Entry) =>
+    e.stay?.role === 'checkout' ? (entriesById.get(e.stay.stayId) ?? e) : e;
   const photos = album
     ? allPhotos(days).filter((p) =>
         days
@@ -305,10 +333,12 @@ export default function Client({ trip }: { trip: Trip }) {
       window.removeEventListener('resize', measure);
     };
   }, []);
-  function choose(e: Entry) {
+  /** `from` is the day a stay was opened from (check-out or end-of-day marker): the timeline
+   *  stays where it is and that day stays current, instead of jumping back to the check-in. */
+  function choose(e: Entry, from?: string) {
     const root = scroller.current;
     const target = root?.querySelector(`[data-entry-id="${e.id}"]`);
-    if (target && root) {
+    if (target && root && !from) {
       const top =
         target.getBoundingClientRect().top - root.getBoundingClientRect().top + root.scrollTop;
       root.scrollTo({ top: Math.max(0, top - 60), behavior: 'smooth' });
@@ -318,7 +348,7 @@ export default function Client({ trip }: { trip: Trip }) {
     setPhotoPage(0);
     setActivePhoto(null);
     setFocus(null);
-    setDay(e.day);
+    setDay(from ?? e.day);
   }
   function showAlbum(d: string) {
     setDay(d);
@@ -420,8 +450,12 @@ export default function Client({ trip }: { trip: Trip }) {
                     <button
                       key={item.entry.id}
                       data-entry-id={item.entry.id}
-                      className={`entry ${item.entry.span_end ? 'multiday-start' : ''} ${selected?.id === item.entry.id && !album ? 'active' : ''} type-${item.entry.type} ${item.index % 2 === 0 ? 'entry-left' : 'entry-right'}`}
-                      onClick={() => choose(item.entry)}
+                      className={`entry ${item.entry.span_end ? 'multiday-start' : ''} ${selected && selected.id === (item.entry.stay?.stayId ?? item.entry.id) && !album ? 'active' : ''} type-${item.entry.type} ${item.index % 2 === 0 ? 'entry-left' : 'entry-right'}`}
+                      onClick={() =>
+                        item.entry.stay?.role === 'checkout'
+                          ? choose(resolveStay(item.entry), item.entry.day)
+                          : choose(item.entry)
+                      }
                       {...(item.entry.span_end ? hoverProps(item.entry.id) : {})}
                     >
                       <span className="entry-node">
@@ -457,7 +491,7 @@ export default function Client({ trip }: { trip: Trip }) {
                             : item.entry.type === 'photo'
                               ? `PHOTO · ${item.entry.time}`
                               : item.entry.type === 'lodging'
-                                ? 'STAY · ' + item.entry.time
+                                ? `${item.entry.stay?.role === 'checkout' ? 'CHECK-OUT' : 'CHECK-IN'} · ${item.entry.time}`
                                 : item.entry.type === 'transit'
                                   ? `${item.entry.time}${item.entry.end_time ? ' → ' + item.entry.end_time : ''}${item.entry.departure_timezone ? ' (' + zoneLabel(item.entry.departure_timezone) + ')' : ''}`
                                   : item.entry.type === 'note'
@@ -502,6 +536,21 @@ export default function Client({ trip }: { trip: Trip }) {
                     </button>
                   ),
                 )}
+                {d.nights.map((n) => (
+                  <button
+                    key={`night-${n.stayId}`}
+                    className={`stay-night ${selected?.id === n.stayId && !album ? 'active' : ''}`}
+                    onClick={() => {
+                      const stay = entriesById.get(n.stayId);
+                      if (stay) choose(stay, d.date);
+                    }}
+                    style={{ '--outer': Math.max(0, n.outer) } as React.CSSProperties}
+                  >
+                    <span className="stay-night-node" />
+                    <small>End of day</small>
+                    <strong>{n.title}</strong>
+                  </button>
+                ))}
               </div>
             </section>
           ))}

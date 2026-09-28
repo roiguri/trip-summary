@@ -39,6 +39,13 @@ This document records the agreed visual direction for the local trip-summary pro
 - Later-day labels sit ~20px under the day banner.
 - Hovering, focusing or selecting a multi-day event highlights its lane, labels and end marker; other lanes fade to 35% when more than one is drawn. Later-day labels are clickable and select the event.
 
+## Hotel stays (user decisions)
+
+- A stay is not a multi-day lane. It shows as a check-in entry ("CHECK-IN · 15:00"), a compact copper "End of day" marker at the bottom of every day whose night is spent there, and a check-out entry ("CHECK-OUT · 11:00") at its time on the last day.
+- The check-in entry, the end-of-day markers and the check-out entry all open the same stay panel and share its selected state.
+- On a changeover day, stay A's check-out and stay B's check-in are ordinary entries at their times, and the day ends with B's marker.
+- Stays with a location get a house marker on the map (not a numbered pin). Overnight transit is not a night.
+
 ## Final visual correction, September 26
 
 Correction (user decision, Sept 26, replacing the "two-track throughout" note): the round-dot lane belongs to multi-day events only, as the locked geometry mock shows. The plain rail is a single solid green line (4px #c4d3c7). While a multi-day span runs, a lane of 2px #739d7c round dots every 12px runs 9px right of the rail centre, from the span's start node to its end diamond. At transit the solid line turns teal through the compact icon stop; the round icon has a pale paper fill and thin teal outline. Transit type remains smaller than full place titles, with teal time and route. Later-day chips use pale paper and a muted border. Single and clustered photo cards, as well as place fans, have edge-to-edge images with light rotation, rounded corners and soft shadows, never a white instant-photo border.

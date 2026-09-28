@@ -1828,3 +1828,79 @@ button:disabled {
 .entry.multiday-start .entry-node {
   z-index: 2;
 }
+
+/* Stays (user decision, following the locked mock): check-in entry, a compact end-of-day marker
+   for each night, and a check-out entry. The end-of-day marker is one line on the rail: a small
+   copper ring, a quiet "END OF DAY" label and the stay's name, clear of any multi-day lanes. */
+.stay-night {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  width: max-content;
+  margin: 6px 0 22px;
+  padding: 0 0 0 calc(20px + var(--outer, 0) * 9px);
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  color: #293d30;
+  cursor: pointer;
+  text-align: left;
+}
+.stay-night-node {
+  position: absolute;
+  left: -6.5px;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  margin-top: -4.5px;
+  border: 2px solid #b98468;
+  border-radius: 50%;
+  background: #fffdfa;
+  z-index: 2;
+}
+.stay-night small {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8f978f;
+}
+.stay-night strong {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.stay-night:hover strong,
+.stay-night.active strong {
+  color: #ba704c;
+}
+.stay-night:focus-visible {
+  outline: 2px solid #ac7658;
+  outline-offset: 3px;
+}
+/* House marker for a stay on the map. */
+.map-stay {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 2px solid #b98468;
+  border-radius: 50%;
+  background: #fffdf8;
+  box-shadow: 0 1px 5px #3334;
+  cursor: pointer;
+}
+.map-stay svg {
+  width: 14px;
+  height: 14px;
+  fill: #b98468;
+}
+.map-stay.chosen-pin {
+  background: #c67b55;
+  transform: scale(1.13);
+}
+.map-stay.chosen-pin svg {
+  fill: #fff;
+}

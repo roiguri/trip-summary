@@ -63,6 +63,20 @@
       "key": "bike",
       "title": "Rental Bike",
       "category": "rental"
+    },
+    {
+      "key": "riverside",
+      "title": "Riverside Ryokan",
+      "lat": 35.0037,
+      "lng": 135.7718,
+      "category": "lodging"
+    },
+    {
+      "key": "shukubo",
+      "title": "Temple Lodging",
+      "lat": 34.2127,
+      "lng": 135.584,
+      "category": "lodging"
     }
   ],
   "itinerary": [
@@ -90,12 +104,23 @@
     {
       "key": "ryokan",
       "type": "lodging",
+      "place": "riverside",
       "title": "Riverside Ryokan",
       "start_date": "2027-03-02",
       "end_date": "2027-03-03",
       "start_time": "16:00",
       "end_time": "10:00",
       "notes": "Tatami room with a view of the river."
+    },
+    {
+      "key": "temple-stay",
+      "type": "lodging",
+      "place": "shukubo",
+      "start_date": "2027-03-03",
+      "end_date": "2027-03-04",
+      "start_time": "17:30",
+      "end_time": "08:00",
+      "notes": "Changeover test: checks out the day after the trip ends."
     },
     {
       "key": "pilgrim-walk",
