@@ -11,10 +11,11 @@ function noteDir(s: string): 'ltr' | 'rtl' {
   return 'ltr';
 }
 
-/** A place's note shown under its photos (user decision: the full note, clamped to a few lines,
- *  with "See more" only when it is actually cut off). Lives inside the entry button, so the toggle
- *  is a span with button semantics and doesn't select the entry. */
-function EntryCaption({ text }: { text: string }) {
+/** Note text on the timeline: a place's note under its photos, and the body of a note entry. Both
+ *  share one look (user decision) and show the full text, clamped to `lines` lines with "See more"
+ *  only when it is actually cut off. Lives inside the entry button, so the toggle is a span with
+ *  button semantics and doesn't select the entry. */
+function EntryCaption({ text, lines = 2 }: { text: string; lines?: number }) {
   const ref = useRef<HTMLSpanElement>(null);
   const [open, setOpen] = useState(false);
   const [clamped, setClamped] = useState(false);
@@ -34,7 +35,11 @@ function EntryCaption({ text }: { text: string }) {
   };
   return (
     <span className="entry-caption" dir={noteDir(text)}>
-      <span ref={ref} className={`entry-caption-text ${open ? 'open' : ''}`}>
+      <span
+        ref={ref}
+        className={`entry-caption-text ${open ? 'open' : ''}`}
+        style={{ '--lines': lines } as React.CSSProperties}
+      >
         {text}
       </span>
       {(clamped || open) && (
@@ -272,6 +277,13 @@ export default function Client({ trip }: { trip: Trip }) {
   const [ratio, setRatio] = useState('large');
   const [collapsed, setCollapsed] = useState(false);
   const [arrows, setArrows] = useState('a');
+  // Temporary, while choosing (Part 6): note/caption style options A (paper card), B (margin rule)
+  // and C (annotation), switchable from a small control or `?notes=b`.
+  const [noteStyle, setNoteStyle] = useState('a');
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get('notes');
+    if (q && 'abc'.includes(q)) setNoteStyle(q);
+  }, []);
   const [focus, setFocus] = useState<Photo | null>(null);
   // Multi-day focus: the hovered span, else the selected one; its lane, labels and end marker
   // are emphasised and other lanes fade (only when more than one lane is drawn).
@@ -407,7 +419,7 @@ export default function Client({ trip }: { trip: Trip }) {
   }
   return (
     <main
-      className={`shell ${collapsed ? 'collapsed' : ''}`}
+      className={`shell notes-${noteStyle} ${collapsed ? 'collapsed' : ''}`}
       style={
         {
           '--map-height': ratio === 'small' ? '20%' : ratio === 'large' ? '40%' : '30%',
@@ -537,7 +549,7 @@ export default function Client({ trip }: { trip: Trip }) {
                                 : item.entry.type === 'transit'
                                   ? `${item.entry.time}${item.entry.end_time ? ' → ' + item.entry.end_time : ''}${item.entry.departure_timezone ? ' (' + zoneLabel(item.entry.departure_timezone) + ')' : ''}`
                                   : item.entry.type === 'note'
-                                    ? item.entry.time
+                                    ? `NOTE · ${item.entry.time}`
                                     : (
                                         (item.entry.tags[0] || 'PLACE') +
                                         ' · ' +
@@ -574,9 +586,7 @@ export default function Client({ trip }: { trip: Trip }) {
                             <EntryCaption text={item.entry.notes} />
                           )}
                         {item.entry.notes && item.entry.type === 'note' && (
-                          <span className="entry-note" dir={noteDir(item.entry.notes)}>
-                            {item.entry.notes}
-                          </span>
+                          <EntryCaption text={item.entry.notes} lines={4} />
                         )}
                       </span>
                     </button>
@@ -794,6 +804,14 @@ export default function Client({ trip }: { trip: Trip }) {
           </div>
         </div>
       )}
+      <div className="style-switch" aria-label="Note style (temporary)">
+        <small>Notes</small>
+        {(['a', 'b', 'c'] as const).map((k) => (
+          <button key={k} className={noteStyle === k ? 'on' : ''} onClick={() => setNoteStyle(k)}>
+            {k.toUpperCase()}
+          </button>
+        ))}
+      </div>
     </main>
   );
 }

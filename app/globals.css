@@ -1915,31 +1915,28 @@ button:disabled {
   transform: translateY(-12.5px);
 }
 
-/* Part 3: a place's note under its photos, as in the locked mock ("Start early, no shade after
-   ten."): 11px #667766, on the title's edge, as wide as the photo fan. Long notes are clamped to
-   two lines with a "See more" toggle (user decision). */
+/* Note text on the timeline (Parts 3 and 6): a place's note under its photos and the body of a note
+   entry share one look (user decision). Shared rules first, then the style options A/B/C that are
+   still being chosen (`.notes-a|b|c` on the shell).
+   Alignment rule: the text block is only as wide as its text (up to a limit) and hugs the rail
+   side; inside it every line follows its own reading direction (English left, Hebrew right). */
 .entry-caption {
   display: block;
+  width: fit-content;
   max-width: 266px;
   margin-top: 8px;
-  font-size: 11px;
-  line-height: 16px;
   font-weight: 400;
-  color: #667766;
   white-space: normal;
+  text-align: start;
 }
 .entry-left .entry-caption {
   margin-left: auto;
-  text-align: right;
-}
-.entry-caption[dir='rtl'] {
-  text-align: right;
 }
 .entry-caption-text {
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
+  -webkit-line-clamp: var(--lines, 2);
+  line-clamp: var(--lines, 2);
   overflow: hidden;
 }
 .entry-caption-text.open {
@@ -1951,10 +1948,276 @@ button:disabled {
   display: inline-block;
   margin-top: 2px;
   color: #a86f52;
+  font-size: 11px;
+  font-style: normal;
+  font-family: Arial, Helvetica, sans-serif;
   font-weight: 700;
   cursor: pointer;
 }
 .entry-caption-more:hover,
 .entry-caption-more:focus-visible {
   text-decoration: underline;
+}
+
+/* Note entries are anchored in time like every other event: a rail node and arm level with the
+   note's title, then title, "NOTE · time" byline and the note text. */
+.shell .entry.type-note {
+  min-height: 0;
+  padding: 8px 0 22px 66px;
+}
+.shell .entry-left.type-note {
+  padding: 8px 70px 22px 0;
+}
+.shell .entry.type-note .entry-node {
+  display: block;
+  position: absolute;
+  top: var(--note-node, 13px);
+  left: -8.5px;
+  right: auto;
+  width: 13px;
+  height: 13px;
+  box-sizing: border-box;
+  border: 2px solid #b98468;
+  border-radius: 50%;
+  background: #fffdfa;
+  z-index: 2;
+}
+.shell .entry-left.type-note .entry-node {
+  left: auto;
+  right: -4.5px;
+}
+.shell .entry.type-note .entry-node::after {
+  content: '';
+  position: absolute;
+  top: 2.5px;
+  left: 2.5px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #b98468;
+}
+.shell .entry.type-note::before {
+  content: '';
+  position: absolute;
+  top: calc(var(--note-node, 13px) + 6px);
+  left: -1.5px;
+  width: var(--note-arm, 61px);
+  border-top: 2px solid #b98468;
+}
+.shell .entry-left.type-note::before {
+  left: auto;
+  right: 1.5px;
+  width: calc(var(--note-arm, 61px) + 3px);
+}
+.shell .entry.type-note .entry-content {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  position: relative;
+  width: fit-content;
+  max-width: 300px;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  transform: none;
+  text-align: start;
+}
+.shell .entry-left.type-note .entry-content {
+  margin-left: auto;
+}
+.shell .entry.type-note .entry-content::before,
+.shell .entry.type-note .entry-content::after {
+  display: none;
+}
+.shell .entry.type-note .entry-content strong {
+  order: 0;
+  text-align: start;
+}
+.shell .entry.type-note .entry-content small {
+  order: 1;
+  margin: 6px 0 0;
+  font-size: 11px;
+  color: #7f8c84;
+  text-align: start;
+}
+.shell .entry.type-note .entry-caption {
+  order: 2;
+  max-width: none;
+  margin-left: 0;
+}
+
+/* A: paper card and tape strip (the mock's note, now also used for captions as a small slip). */
+.shell.notes-a .entry.type-note {
+  --note-node: 25px;
+  --note-arm: 58px;
+}
+.shell.notes-a .entry.type-note .entry-content {
+  display: flex;
+  padding: 14px 16px 15px;
+  background: #fff8ec;
+  border: 1px solid #edddc8;
+  box-shadow: 4px 4px 0 #e5d8c4;
+  transform: rotate(0.4deg);
+}
+.shell.notes-a .entry.type-note .entry-content::after {
+  display: block;
+  content: '';
+  position: absolute;
+  top: -7px;
+  left: calc(50% - 24px);
+  width: 48px;
+  height: 11px;
+  background: #c8d9c8bd;
+  transform: rotate(-4deg);
+  box-shadow: 0 1px 1px #49644a14;
+}
+.shell.notes-a .entry.type-note .entry-content strong {
+  font-size: 15px;
+  line-height: 18px;
+  letter-spacing: -0.01em;
+}
+.shell.notes-a .entry-caption {
+  position: relative;
+  margin-top: 14px;
+  padding: 9px 12px 10px;
+  background: #fff8ec;
+  border: 1px solid #edddc8;
+  box-shadow: 3px 3px 0 #e8dccb;
+  font-size: 12px;
+  line-height: 17px;
+  color: #45524a;
+}
+.shell.notes-a .entry-caption::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: calc(50% - 16px);
+  width: 32px;
+  height: 8px;
+  background: #c8d9c8bd;
+  transform: rotate(-4deg);
+}
+.shell.notes-a .entry.type-note .entry-caption {
+  margin-top: 9px;
+  padding: 0;
+  background: none;
+  border: 0;
+  box-shadow: none;
+  font-size: 13px;
+  line-height: 19px;
+}
+.shell.notes-a .entry.type-note .entry-caption::before {
+  display: none;
+}
+
+/* B: margin rule, echoing the note in the detail panel (tinted block, copper rule on the side the
+   text starts from). */
+.shell.notes-b .entry.type-note {
+  --note-node: 12px;
+}
+.shell.notes-b .entry.type-note .entry-content strong {
+  font-size: 18px;
+  line-height: 21px;
+  letter-spacing: -0.015em;
+}
+.shell.notes-b .entry-caption {
+  margin-top: 10px;
+  padding: 7px 11px 8px;
+  background: #f6efe4;
+  border-inline-start: 2px solid #c9957a;
+  font-size: 12px;
+  line-height: 17px;
+  color: #3f4c44;
+}
+.shell.notes-b .entry.type-note .entry-caption {
+  margin-top: 9px;
+  padding: 9px 13px 10px;
+  font-size: 13px;
+  line-height: 19px;
+}
+
+/* C: annotation: no box, serif italic, like a handwritten margin note. */
+.shell.notes-c .entry.type-note {
+  --note-node: 12px;
+}
+.shell.notes-c .entry.type-note .entry-content strong {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 22px;
+}
+.shell.notes-c .entry-caption {
+  margin-top: 9px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  font-size: 13px;
+  line-height: 19px;
+  color: #56655b;
+}
+.shell.notes-c .entry.type-note .entry-caption {
+  margin-top: 7px;
+  font-size: 14px;
+  line-height: 21px;
+  color: #45534a;
+}
+
+/* B and C have no box around the note, so its title and byline hug the rail like every other
+   event's; only the note text follows its reading direction. */
+.shell.notes-b .entry-right.type-note .entry-content strong,
+.shell.notes-b .entry-right.type-note .entry-content small,
+.shell.notes-c .entry-right.type-note .entry-content strong,
+.shell.notes-c .entry-right.type-note .entry-content small {
+  text-align: left;
+}
+.shell.notes-b .entry-left.type-note .entry-content strong,
+.shell.notes-b .entry-left.type-note .entry-content small,
+.shell.notes-c .entry-left.type-note .entry-content strong,
+.shell.notes-c .entry-left.type-note .entry-content small {
+  text-align: right;
+}
+/* Hebrew has no true italic; keep it upright in C. */
+.shell.notes-c [dir='rtl'] .entry-caption,
+.shell.notes-c .entry-caption[dir='rtl'],
+.shell.notes-c .entry.type-note .entry-content[dir='rtl'] strong {
+  font-style: normal;
+}
+
+/* Temporary style switcher (Part 6 options). */
+.style-switch {
+  position: fixed;
+  left: 84px;
+  bottom: 22px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px 4px 10px;
+  background: #fffdfa;
+  border: 1px solid #d9dfd3;
+  border-radius: 999px;
+  box-shadow: 0 2px 8px #3b403322;
+  font-size: 11px;
+}
+.style-switch small {
+  margin-right: 4px;
+  color: #7f8c84;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.style-switch button {
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #3b4a40;
+  font-weight: 700;
+  cursor: pointer;
+}
+.style-switch button.on {
+  background: #b98468;
+  color: #fff;
 }
