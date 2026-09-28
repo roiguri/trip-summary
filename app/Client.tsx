@@ -497,7 +497,7 @@ export default function Client({ trip }: { trip: Trip }) {
                     <button
                       key={item.entry.id}
                       data-entry-id={item.entry.id}
-                      className={`entry ${item.entry.span_end ? 'multiday-start' : ''} ${selected && selected.id === (item.entry.stay?.stayId ?? item.entry.id) && !album ? 'active' : ''} type-${item.entry.type} ${item.index % 2 === 0 ? 'entry-left' : 'entry-right'}`}
+                      className={`entry ${item.entry.span_end ? 'multiday-start' : ''} ${selected && selected.id === (item.entry.stay?.stayId ?? item.entry.id) && !album ? 'active' : ''} type-${item.entry.type} ${item.entry.title ? '' : 'no-title'} ${item.index % 2 === 0 ? 'entry-left' : 'entry-right'}`}
                       onClick={() =>
                         item.entry.stay?.role === 'checkout'
                           ? choose(resolveStay(item.entry), item.entry.day)
@@ -531,23 +531,22 @@ export default function Client({ trip }: { trip: Trip }) {
                             : undefined
                         }
                       >
-                        <strong>{item.entry.title}</strong>
+                        {item.entry.title && <strong>{item.entry.title}</strong>}
                         <small>
-                          {item.entry.type === 'cluster'
-                            ? `PHOTO · ${item.entry.time} – ${item.entry.end_time}`
-                            : item.entry.type === 'photo'
-                              ? `PHOTO · ${item.entry.time}`
-                              : item.entry.type === 'lodging'
-                                ? `${item.entry.stay?.role === 'checkout' ? 'CHECK-OUT' : 'CHECK-IN'} · ${item.entry.time}`
-                                : item.entry.type === 'transit'
-                                  ? `${item.entry.time}${item.entry.end_time ? ' → ' + item.entry.end_time : ''}${item.entry.departure_timezone ? ' (' + zoneLabel(item.entry.departure_timezone) + ')' : ''}`
-                                  : item.entry.type === 'note'
-                                    ? `NOTE · ${item.entry.time}`
-                                    : (
-                                        (item.entry.tags[0] || 'PLACE') +
-                                        ' · ' +
-                                        item.entry.time
-                                      ).toUpperCase()}
+                          {item.entry.type === 'cluster' || item.entry.type === 'photo'
+                            ? // The card already says "photo"; the byline is just the time (user decision).
+                              `${item.entry.time}${item.entry.end_time ? ' – ' + item.entry.end_time : ''}`
+                            : item.entry.type === 'lodging'
+                              ? `${item.entry.stay?.role === 'checkout' ? 'CHECK-OUT' : 'CHECK-IN'} · ${item.entry.time}`
+                              : item.entry.type === 'transit'
+                                ? `${item.entry.time}${item.entry.end_time ? ' → ' + item.entry.end_time : ''}${item.entry.departure_timezone ? ' (' + zoneLabel(item.entry.departure_timezone) + ')' : ''}`
+                                : item.entry.type === 'note'
+                                  ? `NOTE · ${item.entry.time}`
+                                  : (
+                                      (item.entry.tags[0] || 'PLACE') +
+                                      ' · ' +
+                                      item.entry.time
+                                    ).toUpperCase()}
                         </small>
                         {item.entry.type === 'transit' && (
                           <span className="transit-route">
@@ -556,14 +555,16 @@ export default function Client({ trip }: { trip: Trip }) {
                           </span>
                         )}
                         {item.entry.photos.length > 0 && (
-                          <span className="stack">
+                          <span
+                            className="stack"
+                            style={
+                              {
+                                '--n': Math.min(item.entry.photos.length, 3),
+                              } as React.CSSProperties
+                            }
+                          >
                             {item.entry.photos
-                              .slice(
-                                0,
-                                item.entry.type === 'photo' || item.entry.type === 'cluster'
-                                  ? 1
-                                  : 3,
-                              )
+                              .slice(0, item.entry.type === 'photo' ? 1 : 3)
                               .map((p, i) => (
                                 <img
                                   key={p.id}
@@ -650,7 +651,9 @@ export default function Client({ trip }: { trip: Trip }) {
             key={`${album || selected?.id}-${photoPage}`}
           >
             <div className="panel-body">
-              <h2>{album ? days.find((d) => d.date === album)?.title : selected?.title}</h2>
+              {(album ? days.find((d) => d.date === album)?.title : selected?.title) && (
+                <h2>{album ? days.find((d) => d.date === album)?.title : selected?.title}</h2>
+              )}
               {!album && selected && (
                 <div className="meta">
                   {selected.type === 'cluster' ? (
