@@ -1914,3 +1914,47 @@ button:disabled {
 .entry.type-transit::before {
   transform: translateY(-12.5px);
 }
+
+/* Part 3: a place's note under its photos, as in the locked mock ("Start early, no shade after
+   ten."): 11px #667766, on the title's edge, as wide as the photo fan. Long notes are clamped to
+   two lines with a "See more" toggle (user decision). */
+.entry-caption {
+  display: block;
+  max-width: 266px;
+  margin-top: 8px;
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 400;
+  color: #667766;
+  white-space: normal;
+}
+.entry-left .entry-caption {
+  margin-left: auto;
+  text-align: right;
+}
+.entry-caption[dir='rtl'] {
+  text-align: right;
+}
+.entry-caption-text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+.entry-caption-text.open {
+  display: block;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+}
+.entry-caption-more {
+  display: inline-block;
+  margin-top: 2px;
+  color: #a86f52;
+  font-weight: 700;
+  cursor: pointer;
+}
+.entry-caption-more:hover,
+.entry-caption-more:focus-visible {
+  text-decoration: underline;
+}

@@ -94,6 +94,7 @@ Sampled from `mock/app-locked-geometry-final-full` (positions relative to the ra
 ### Part 3: Place / lodging entries (in review)
 
 - Connector alignment (user decision, differs from the mocks): the node and arm point at the middle of the title's first line (cap-height centre), not its baseline. Both mocks put the arm at the baseline, which reads as aligned with the whole title + byline block. Measured: node and arm moved up 11px and now sit exactly on the cap-height centre for places, lodging, photos and clusters, on both sides; a wrapped title keeps the line on its first line. Multi-day lanes still start from the node's centre.
+- Caption under the photos (user decision (a), as in the locked mock): places and stay check-ins show their full note under the photo fan (or under the byline when there are no photos), 11px regular `#667766`, on the title's edge and at most as wide as the fan (266px). Notes longer than two lines are clamped with "See more" / "See less"; the toggle doesn't select the entry. The Kansai fixture has a long note to exercise it.
 - The transit disc (Part 5) follows the same rule: it was centred on the title + times + route block and now sits on the title's first line; its teal travel segment moves up 12.5px with it so the disc stays centred on it.
 
 ### Hotel stays (new, from the Part 7 discussion)

@@ -10,6 +10,48 @@ function noteDir(s: string): 'ltr' | 'rtl' {
   }
   return 'ltr';
 }
+
+/** A place's note shown under its photos (user decision: the full note, clamped to a few lines,
+ *  with "See more" only when it is actually cut off). Lives inside the entry button, so the toggle
+ *  is a span with button semantics and doesn't select the entry. */
+function EntryCaption({ text }: { text: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [open, setOpen] = useState(false);
+  const [clamped, setClamped] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const measure = () => setClamped(el.scrollHeight > el.clientHeight + 1);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [text]);
+  const toggle = (e: React.SyntheticEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setOpen((o) => !o);
+  };
+  return (
+    <span className="entry-caption" dir={noteDir(text)}>
+      <span ref={ref} className={`entry-caption-text ${open ? 'open' : ''}`}>
+        {text}
+      </span>
+      {(clamped || open) && (
+        <span
+          role="button"
+          tabIndex={0}
+          className="entry-caption-more"
+          aria-expanded={open}
+          onClick={toggle}
+          onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && toggle(e)}
+        >
+          {open ? 'See less' : 'See more'}
+        </span>
+      )}
+    </span>
+  );
+}
 function zoneLabel(zone: string | null) {
   if (!zone) return '';
   try {
@@ -527,6 +569,10 @@ export default function Client({ trip }: { trip: Trip }) {
                               ))}
                           </span>
                         )}
+                        {item.entry.notes &&
+                          (item.entry.type === 'place' || item.entry.stay?.role === 'checkin') && (
+                            <EntryCaption text={item.entry.notes} />
+                          )}
                         {item.entry.notes && item.entry.type === 'note' && (
                           <span className="entry-note" dir={noteDir(item.entry.notes)}>
                             {item.entry.notes}
