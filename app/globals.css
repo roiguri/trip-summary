@@ -2198,3 +2198,22 @@ button:disabled {
 .map .maplibregl-ctrl-attrib a {
   color: inherit;
 }
+
+/* Part 8: map and detail card are independent (user decision). With nothing selected the map fills
+   the column; the detail card has its own close button, which clears the selection. */
+.right.map-only .map-card {
+  height: auto;
+  flex: 1 1 auto;
+}
+.panel {
+  position: relative;
+}
+.panel-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+}
+.panel-body h2 {
+  padding-right: 34px;
+}

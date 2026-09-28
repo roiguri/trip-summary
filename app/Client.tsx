@@ -334,16 +334,20 @@ function MapView({
   return <div className="map" ref={el} />;
 }
 export default function Client({ trip }: { trip: Trip }) {
-  const [selected, setSelected] = useState<Entry | null>(
-    trip.days.flatMap((d) => d.entries)[0] ?? null,
-  );
+  // Nothing is selected at first: the map fills the right column until an entry is chosen (user decision).
+  const [selected, setSelected] = useState<Entry | null>(null);
   const [day, setDay] = useState(trip.days[0]?.date ?? '');
   const [album, setAlbum] = useState<string | null>(null);
   const [photoPage, setPhotoPage] = useState(0);
   const [full, setFull] = useState<Photo | null>(null);
   const [activePhoto, setActivePhoto] = useState<Photo | null>(null);
   const [ratio, setRatio] = useState('large');
-  const [collapsed, setCollapsed] = useState(false);
+  // The map and the detail card open and close independently (user decision). The detail card is
+  // shown while something is selected or a day album is open; closing it clears the selection.
+  // With both closed the timeline centres and a round button brings the map back.
+  const [mapOpen, setMapOpen] = useState(true);
+  const detailsOpen = !!(selected || album);
+  const collapsed = !mapOpen && !detailsOpen;
   const [arrows, setArrows] = useState('a');
   const [focus, setFocus] = useState<Photo | null>(null);
   // Multi-day focus: the hovered span, else the selected one; its lane, labels and end marker
@@ -665,165 +669,179 @@ export default function Client({ trip }: { trip: Trip }) {
         </section>
       </section>
       {collapsed ? (
-        <button className="reopen" title="Show map and details" onClick={() => setCollapsed(false)}>
+        <button className="reopen" title="Show map" onClick={() => setMapOpen(true)}>
           ✳
         </button>
       ) : (
-        <aside className="right">
-          <section className="map-card">
-            <header className="card-head">
-              <div>
-                <small>THE JOURNEY / MAP</small>
-                <strong>{trip.destination.name}</strong>
+        <aside
+          className={`right ${mapOpen && !detailsOpen ? 'map-only' : ''} ${!mapOpen ? 'details-only' : ''}`}
+        >
+          {mapOpen && (
+            <section className="map-card">
+              <header className="card-head">
+                <div>
+                  <small>THE JOURNEY / MAP</small>
+                  <strong>{trip.destination.name}</strong>
+                </div>
+                <button className="card-close" title="Close map" onClick={() => setMapOpen(false)}>
+                  ×
+                </button>
+              </header>
+              <div className="map-wrap">
+                <MapView
+                  trip={trip}
+                  selected={selected}
+                  focused={focus}
+                  day={day}
+                  onSelect={choose}
+                  ratio={ratio}
+                />
+                <button className="whole-chip" onClick={() => setDay('')}>
+                  Whole trip
+                </button>
               </div>
+              <footer className="map-foot">
+                <span>
+                  ● {days.length} {days.length === 1 ? 'DAY' : 'DAYS'} · OSM
+                </span>
+                <span>OPENFREEMAP</span>
+              </footer>
+            </section>
+          )}
+          {detailsOpen && (
+            <section
+              className={`panel ${album ? 'panel-album' : `panel-${selected?.type}`}`}
+              key={`${album || selected?.id}-${photoPage}`}
+            >
               <button
-                className="card-close"
-                title="Collapse map and details"
-                onClick={() => setCollapsed(true)}
+                className="card-close panel-close"
+                title="Close details"
+                onClick={() => {
+                  setSelected(null);
+                  setAlbum(null);
+                  setActivePhoto(null);
+                  setFocus(null);
+                }}
               >
                 ×
               </button>
-            </header>
-            <div className="map-wrap">
-              <MapView
-                trip={trip}
-                selected={selected}
-                focused={focus}
-                day={day}
-                onSelect={choose}
-                ratio={ratio}
-              />
-              <button className="whole-chip" onClick={() => setDay('')}>
-                Whole trip
-              </button>
-            </div>
-            <footer className="map-foot">
-              <span>
-                ● {days.length} {days.length === 1 ? 'DAY' : 'DAYS'} · OSM
-              </span>
-              <span>OPENFREEMAP</span>
-            </footer>
-          </section>
-          <section
-            className={`panel ${album ? 'panel-album' : `panel-${selected?.type}`}`}
-            key={`${album || selected?.id}-${photoPage}`}
-          >
-            <div className="panel-body">
-              {(album ? days.find((d) => d.date === album)?.title : selected?.title) && (
-                <h2>{album ? days.find((d) => d.date === album)?.title : selected?.title}</h2>
-              )}
-              {!album && selected && (
-                <div className="meta">
-                  {selected.type === 'cluster' ? (
-                    ''
-                  ) : (
-                    <>
-                      {selected.day} <span>·</span>{' '}
-                    </>
-                  )}
-                  {selected.time}
-                  {selected.end_time ? ` – ${selected.end_time}` : ''}{' '}
-                  {selected.tags.map((t) => (
-                    <em key={t}>{t}</em>
-                  ))}
-                </div>
-              )}
-              {selected?.type === 'lodging' && !album && (
-                <div className="stay-info">
-                  <span>
-                    CHECK-IN
-                    <br />
-                    <b>
-                      {selected.day} · {selected.time}
-                    </b>
-                  </span>
-                  <span>
-                    CHECK-OUT
-                    <br />
-                    <b>{selected.check_out}</b>
-                  </span>
-                </div>
-              )}
-              {photos.length > 0 && (
-                <>
-                  <div
-                    className={`photos count-${Math.min(pagePhotos.length, 12)} arrows-${arrows}`}
-                  >
-                    {pagePhotos.map((p) => (
-                      <button
-                        className={`photo ${activePhoto?.id === p.id ? 'photo-active' : ''}`}
-                        key={p.id}
-                        onClick={() => pickPhoto(p)}
-                      >
-                        <img src={p.url} alt={p.caption} />
-                        <span>{p.caption}</span>
-                      </button>
+              <div className="panel-body">
+                {(album ? days.find((d) => d.date === album)?.title : selected?.title) && (
+                  <h2>{album ? days.find((d) => d.date === album)?.title : selected?.title}</h2>
+                )}
+                {!album && selected && (
+                  <div className="meta">
+                    {selected.type === 'cluster' ? (
+                      ''
+                    ) : (
+                      <>
+                        {selected.day} <span>·</span>{' '}
+                      </>
+                    )}
+                    {selected.time}
+                    {selected.end_time ? ` – ${selected.end_time}` : ''}{' '}
+                    {selected.tags.map((t) => (
+                      <em key={t}>{t}</em>
                     ))}
                   </div>
-                  <div className={`pagination pagination-${arrows}`}>
-                    <small>
-                      {photos.length} {photos.length === 1 ? 'photo' : 'photos'}
-                    </small>
-                    <div>
-                      <button
-                        aria-label="Previous photos"
-                        disabled={photoPage === 0}
-                        onClick={() => setPhotoPage((v) => v - 1)}
-                      >
-                        {arrows === 'a' ? (
-                          <svg
-                            className="pager-chevron prev-chevron"
-                            viewBox="0 0 16 16"
-                            aria-hidden="true"
-                          >
-                            <path d="M6 5 L9 8 L6 11" />
-                          </svg>
-                        ) : arrows === 'c' ? (
-                          '←'
-                        ) : (
-                          '‹'
-                        )}
-                      </button>
-                      <span>
-                        {arrows === 'b'
-                          ? `${String(photoPage + 1).padStart(2, '0')} / ${String(Math.ceil(photos.length / 12)).padStart(2, '0')}`
-                          : `${photoPage + 1} / ${Math.ceil(photos.length / 12)}`}
-                      </span>
-                      <button
-                        aria-label="Next photos"
-                        disabled={(photoPage + 1) * 12 >= photos.length}
-                        onClick={() => setPhotoPage((v) => v + 1)}
-                      >
-                        {arrows === 'a' ? (
-                          <svg className="pager-chevron" viewBox="0 0 16 16" aria-hidden="true">
-                            <path d="M6 5 L9 8 L6 11" />
-                          </svg>
-                        ) : arrows === 'c' ? (
-                          '→'
-                        ) : (
-                          '›'
-                        )}
-                      </button>
-                    </div>
+                )}
+                {selected?.type === 'lodging' && !album && (
+                  <div className="stay-info">
+                    <span>
+                      CHECK-IN
+                      <br />
+                      <b>
+                        {selected.day} · {selected.time}
+                      </b>
+                    </span>
+                    <span>
+                      CHECK-OUT
+                      <br />
+                      <b>{selected.check_out}</b>
+                    </span>
                   </div>
-                </>
-              )}
-              {!album && selected?.notes && <p className="note">{selected.notes}</p>}
-              {!album && selected?.type === 'place' && selected.lat != null && (
-                <a
-                  className="maps-link"
-                  target="_blank"
-                  rel="noreferrer"
-                  href={
-                    selected.maps_url ||
-                    `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${selected.lat},${selected.lng}`)}`
-                  }
-                >
-                  View on Google Maps ↗
-                </a>
-              )}
-            </div>
-          </section>
+                )}
+                {photos.length > 0 && (
+                  <>
+                    <div
+                      className={`photos count-${Math.min(pagePhotos.length, 12)} arrows-${arrows}`}
+                    >
+                      {pagePhotos.map((p) => (
+                        <button
+                          className={`photo ${activePhoto?.id === p.id ? 'photo-active' : ''}`}
+                          key={p.id}
+                          onClick={() => pickPhoto(p)}
+                        >
+                          <img src={p.url} alt={p.caption} />
+                          <span>{p.caption}</span>
+                        </button>
+                      ))}
+                    </div>
+                    <div className={`pagination pagination-${arrows}`}>
+                      <small>
+                        {photos.length} {photos.length === 1 ? 'photo' : 'photos'}
+                      </small>
+                      <div>
+                        <button
+                          aria-label="Previous photos"
+                          disabled={photoPage === 0}
+                          onClick={() => setPhotoPage((v) => v - 1)}
+                        >
+                          {arrows === 'a' ? (
+                            <svg
+                              className="pager-chevron prev-chevron"
+                              viewBox="0 0 16 16"
+                              aria-hidden="true"
+                            >
+                              <path d="M6 5 L9 8 L6 11" />
+                            </svg>
+                          ) : arrows === 'c' ? (
+                            '←'
+                          ) : (
+                            '‹'
+                          )}
+                        </button>
+                        <span>
+                          {arrows === 'b'
+                            ? `${String(photoPage + 1).padStart(2, '0')} / ${String(Math.ceil(photos.length / 12)).padStart(2, '0')}`
+                            : `${photoPage + 1} / ${Math.ceil(photos.length / 12)}`}
+                        </span>
+                        <button
+                          aria-label="Next photos"
+                          disabled={(photoPage + 1) * 12 >= photos.length}
+                          onClick={() => setPhotoPage((v) => v + 1)}
+                        >
+                          {arrows === 'a' ? (
+                            <svg className="pager-chevron" viewBox="0 0 16 16" aria-hidden="true">
+                              <path d="M6 5 L9 8 L6 11" />
+                            </svg>
+                          ) : arrows === 'c' ? (
+                            '→'
+                          ) : (
+                            '›'
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
+                {!album && selected?.notes && <p className="note">{selected.notes}</p>}
+                {!album && selected?.type === 'place' && selected.lat != null && (
+                  <a
+                    className="maps-link"
+                    target="_blank"
+                    rel="noreferrer"
+                    href={
+                      selected.maps_url ||
+                      `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${selected.lat},${selected.lng}`)}`
+                    }
+                  >
+                    View on Google Maps ↗
+                  </a>
+                )}
+              </div>
+            </section>
+          )}
         </aside>
       )}
       {full && (
