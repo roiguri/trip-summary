@@ -1293,8 +1293,8 @@ button:disabled {
   padding: 4px 10px;
 }
 
-/* Entries: 22px titles, neutral bylines, text 68px from the rail centre, the node level with the
-   title baseline, larger photo fans. */
+/* Entries: 22px titles, neutral bylines, text 68px from the rail centre, larger photo fans. The node
+   and arm are centred on the title's first line (cap-height centre), not its baseline (user decision). */
 .entry {
   padding-left: 65px;
 }
@@ -1311,7 +1311,7 @@ button:disabled {
   color: #7f8c84;
 }
 .entry:not(.type-note):not(.type-transit) .entry-node {
-  top: 24px;
+  top: 13px;
   border-width: 2px;
   border-color: #b98468;
 }
@@ -1323,7 +1323,7 @@ button:disabled {
   background: #b98468;
 }
 .entry:not(.type-note):not(.type-transit) .entry-content:before {
-  top: 30px;
+  top: 19px;
   width: 61px;
   border-top: 2px solid #b98468;
 }
@@ -1903,4 +1903,14 @@ button:disabled {
 }
 .map-stay.chosen-pin svg {
   fill: #fff;
+}
+
+/* Part 3: the transit disc is centred on its title's first line like every other event node (was
+   centred on the title + times + route block); its teal travel segment moves up with it so the disc stays centred on it. */
+.entry.type-transit .entry-node,
+.entry-left.type-transit .entry-node {
+  top: 14.5px;
+}
+.entry.type-transit::before {
+  transform: translateY(-12.5px);
 }

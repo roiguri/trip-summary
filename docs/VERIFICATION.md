@@ -20,7 +20,7 @@ Phase 0 goal: confirm that the prototype is implemented correctly against the re
 | --- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------- |
 | 1   | Page shell: header, intro, scroll model, backgrounds                                   | `mock/app-locked-geometry-final-full`, `mock/image-e55ca7ac`, `captures/wayfarer-locked-opening` | agreed with changes |
 | 2   | Rail and day banners (rail, multi-day lane, day tag)                                   | geometry mock, `captures/wayfarer-locked-rail-*`                                                 | pending             |
-| 3   | Place / lodging entries (connector, title, byline, photo fan)                          | geometry mock, `mock/roi-shot-cards`                                                             | pending             |
+| 3   | Place / lodging entries (connector, title, byline, photo fan)                          | geometry mock, `mock/roi-shot-cards`                                                             | in review           |
 | 4   | Loose photo and cluster entries                                                        | `mock/roi-shot-cards`, `captures/wayfarer-photo-cards-compare-*`                                 | pending             |
 | 5   | Transit stop                                                                           | `mock/transit-locked-zoom`, `captures/wayfarer-transit-rail-compare-*`                           | pending             |
 | 6   | Notes (tape, LTR/RTL)                                                                  | geometry mock, `captures/wayfarer-locked-notes`                                                  | pending             |
@@ -55,7 +55,7 @@ Measured against `mock/panel-ratio-large`, `mock/panel-final-place` and `mock/im
 
 - Header 65px; smaller mark; 15px wordmark at 0.07em; 11px nav centred at 680px; 11px status.
 - Timeline column 928px, so the rail sits at 515px. Intro title 42px/-0.05em; first day banner at y=305 (22px text) with a darker tag chip.
-- Entries: 22px/-0.02em titles; neutral grey bylines; text 68px from the rail centre on both sides; node level with the title baseline; 2px arm and ring with a 4px centre dot; photo fans 266×102.
+- Entries: 22px/-0.02em titles; neutral grey bylines; text 68px from the rail centre on both sides; node level with the title baseline (changed in Part 3); 2px arm and ring with a 4px centre dot; photo fans 266×102.
 - Right column: 424px cards, 42px from the right, 78px from the top, 13px from the bottom. Map card head 55px with a 16px title. Detail panel with a 26px title, 11px meta, 13px note, 12px Maps link, and a sentence-case photo count ("1 photo" / "16 photos").
 - Photo cards (follow-up after review): fan cards 92×98 laid side by side with ~6px overlap and tilts of −4°/+2°/−3° (were 108×92, overlapping ~35px, −4°/0°/+4°); loose-photo cards 100px squares at −4° with 8px corners; panel gallery 7px gaps and 6px corners.
 - Detail card fits its content (user decision): no stretched photos, pager right under the gallery, rows shrink only if the card would outgrow the column (checked at 900px and 800px window heights, no overflow in any state).
@@ -90,6 +90,11 @@ Sampled from `mock/app-locked-geometry-final-full` (positions relative to the ra
 - "15:40 · END": 11px bold `#6b8f78`, vertically centred on the diamond. Placed 18px right of the rail centre (a 10px gap from the diamond), closer than the mock's 32px (user decision). Was 10px, 20px right, slightly high.
 - Checked with the Kansai fixture (span ending mid-morning with entries after it): the lane stops at the diamond and later entries sit on the plain rail.
 - Start block: matches; the caption under its photos belongs to Part 3.
+
+### Part 3: Place / lodging entries (in review)
+
+- Connector alignment (user decision, differs from the mocks): the node and arm point at the middle of the title's first line (cap-height centre), not its baseline. Both mocks put the arm at the baseline, which reads as aligned with the whole title + byline block. Measured: node and arm moved up 11px and now sit exactly on the cap-height centre for places, lodging, photos and clusters, on both sides; a wrapped title keeps the line on its first line. Multi-day lanes still start from the node's centre.
+- The transit disc (Part 5) follows the same rule: it was centred on the title + times + route block and now sits on the title's first line; its teal travel segment moves up 12.5px with it so the disc stays centred on it.
 
 ### Hotel stays (new, from the Part 7 discussion)
 
