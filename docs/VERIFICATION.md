@@ -62,7 +62,7 @@ Measured against `mock/panel-ratio-large`, `mock/panel-final-place` and `mock/im
 - Kept on purpose: the thin chevron pager (user preferred it to the mock's round arrows), no title underlines. (The rail was later set to the mock's 4px in Part 2, and the dotted lane limited to multi-day events.)
 - Fixed along the way: left-side nodes were 3px right of the rail centre (right side was centred), and entries without photos (lodging) were vertically centred below their connector because entries are buttons.
 
-### Part 2: Rail and day banners (in review)
+### Part 2: Rail and day banners (agreed with changes)
 
 Sampled pixel colours and positions from `mock/app-locked-geometry-final-full` (the locked geometry) and `mock/transit-locked-zoom`, then matched them exactly at 1440×900:
 
@@ -75,6 +75,21 @@ Sampled pixel colours and positions from `mock/app-locked-geometry-final-full` (
 - First entry after a banner moved down 24px: the node now sits 77px below the banner's bottom edge (mock: 78–79px on all three days). Later-day chips sit within ~6px of the mock.
 - Seen in the mocks but belongs to Part 3: places show their note as a short caption under the photo fan ("Start early, no shade after ten."); the build doesn't.
 - Removed per-day minimum heights (600/540/470px for days 1/2/3), which were tuned to the sample and had no effect (every day's content is taller).
+
+### Part 7: Multi-day span (in review)
+
+Sampled from `mock/app-locked-geometry-final-full` (positions relative to the rail centre and the end diamond's centre):
+
+- Later-day label ("… · day 2" / "· final day"): 2px `#9cb7a0` left edge, no outline, `#f0f2e8` fill, 2px `#dfe8dc` offset shadow, 11px bold `#76937e`, 22px tall, starting 21px right of the rail centre. Was a 1px outline all round, 10px text, 21px tall.
+- Later-day labels sit ~20px under the day banner (user decision; the mock has ~57px).
+- Lane: dots are anchored to the end so the curve always lands on the 12px rhythm, whatever the span's length.
+- Lane shape (user decisions, replacing the mock's stepped bend): each lane is one dotted SVG path (`LanePath` in `Client.tsx`). It leaves the start node's centre diagonally, eases out to its lane over ~24px, runs down, and eases back in to arrive diagonally at the end diamond's centre; start and end are mirror images. Dots are spaced evenly along the whole path (a whole number of gaps, 11.9–12.0px), and dots inside the node or diamond are hidden behind them. Lanes re-measure when the timeline's size changes, not only on window resize.
+- Several multi-day events (user decisions): overlapping spans run in side-by-side lanes 9px apart (+9, +18, +27); each takes the lowest lane free at its start time (`lib/data.ts`). At most 3 lanes: a 4th concurrent span gets no line (start entry, grey day labels and end diamond only). Each lane has its own muted colour (sage `#739d7c`, ochre `#b39247`, plum `#9a7292`) carried by its dots, end curve, diamond, END label and label edge. END labels sit clear of every lane still running at that moment, and later-day labels clear every lane running that day. No "+N" indicator: overflow spans stay visible through their labels. The Kansai fixture has four overlapping spans to exercise this.
+- Focus (user decision): hovering or keyboard-focusing an event's start entry, lane, later-day label or end marker highlights that event (stronger, slightly larger dots in its lane colour, filled diamond, tinted labels); other lanes, labels and end markers fade to 35% when more than one lane is drawn. Selecting the event keeps the highlight. Later-day labels are buttons that select the event. Hover areas: a 13px band around each 2px lane; the diamond and label for end markers.
+- End diamond: 11px square rotated, 2px `#638e70` border, centred on the rail. Was a lighter 1px border and slightly larger.
+- "15:40 · END": 11px bold `#6b8f78`, vertically centred on the diamond. Placed 18px right of the rail centre (a 10px gap from the diamond), closer than the mock's 32px (user decision). Was 10px, 20px right, slightly high.
+- Checked with the Kansai fixture (span ending mid-morning with entries after it): the lane stops at the diamond and later entries sit on the plain rail.
+- Start block: matches; the caption under its photos belongs to Part 3.
 
 ## Preliminary findings (to be confirmed per part)
 

@@ -210,7 +210,23 @@ export default function Client({ trip }: { trip: Trip }) {
   const [collapsed, setCollapsed] = useState(false);
   const [arrows, setArrows] = useState('a');
   const [focus, setFocus] = useState<Photo | null>(null);
-  const [spanLanes, setSpanLanes] = useState<{ id: string; top: number; height: number }[]>([]);
+  // Multi-day focus: the hovered span, else the selected one; its lane, labels and end marker
+  // are emphasised and other lanes fade (only when more than one lane is drawn).
+  const [hoverSpan, setHoverSpan] = useState<string | null>(null);
+  const focusSpan = hoverSpan ?? (selected?.span_end && !album ? selected.id : null);
+  const spanFocus = (id: string) =>
+    focusSpan === id ? 'is-focus' : focusSpan && spanLanes.length > 1 ? 'is-dim' : '';
+  const hoverProps = (id: string) => ({
+    onMouseEnter: () => setHoverSpan(id),
+    onMouseLeave: () => setHoverSpan((h) => (h === id ? null : h)),
+    onFocus: () => setHoverSpan(id),
+    onBlur: () => setHoverSpan((h) => (h === id ? null : h)),
+  });
+  // Drawn multi-day lanes, measured in rail coordinates: start node centre (x, y0) and end
+  // diamond centre (y1, same x on the rail).
+  const [spanLanes, setSpanLanes] = useState<
+    { id: string; lane: number; x: number; y0: number; y1: number }[]
+  >([]);
   const scroller = useRef<HTMLElement>(null);
   const rail = useRef<HTMLElement>(null);
   const days = trip.days;
@@ -263,20 +279,31 @@ export default function Client({ trip }: { trip: Trip }) {
       const root = rail.current;
       if (!root) return;
       const rt = root.getBoundingClientRect();
+      const centre = (el: Element) => {
+        const r = el.getBoundingClientRect();
+        return { x: r.left + r.width / 2 - rt.left, y: r.top + r.height / 2 - rt.top };
+      };
       const lanes = [];
       for (const b of root.querySelectorAll<HTMLElement>('.multiday-end')) {
         const id = b.dataset.spanId;
-        const a = root.querySelector(`.multiday-start[data-entry-id="${id}"] .entry-node`);
-        if (!id || !a) continue;
-        const top = a.getBoundingClientRect().top - rt.top + 20;
-        const end = b.getBoundingClientRect().top - rt.top + 9;
-        lanes.push({ id, top, height: Math.max(0, end - top) });
+        const lane = Number(b.dataset.lane);
+        const node = root.querySelector(`.multiday-start[data-entry-id="${id}"] .entry-node`);
+        const diamond = b.querySelector('.diamond');
+        if (!id || lane < 0 || !node || !diamond) continue;
+        const start = centre(node);
+        lanes.push({ id, lane, x: start.x, y0: start.y, y1: centre(diamond).y });
       }
       setSpanLanes(lanes);
     }
     measure();
+    // Re-measure when the timeline's size changes (e.g. photos loading), not only on window resize.
+    const resize = new ResizeObserver(measure);
+    if (rail.current) resize.observe(rail.current);
     window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
+    return () => {
+      resize.disconnect();
+      window.removeEventListener('resize', measure);
+    };
   }, []);
   function choose(e: Entry) {
     const root = scroller.current;
@@ -334,10 +361,11 @@ export default function Client({ trip }: { trip: Trip }) {
         </div>
         <section className="rail" ref={rail}>
           {spanLanes.map((lane) => (
-            <div
+            <LanePath
               key={lane.id}
-              className="multiday-span"
-              style={{ top: lane.top, height: lane.height }}
+              {...lane}
+              className={`multiday-lane ${laneClass(lane.lane)} ${spanFocus(lane.id)}`}
+              onHover={(on) => setHoverSpan((h) => (on ? lane.id : h === lane.id ? null : h))}
             />
           ))}
           {days.map((d, di) => (
@@ -358,13 +386,33 @@ export default function Client({ trip }: { trip: Trip }) {
               </button>
               <div className="entries">
                 {d.continuing.map((s) => (
-                  <div className="multi-day-chip" key={s.id}>
+                  <button
+                    className={`multi-day-chip ${laneClass(s.lane)} ${spanFocus(s.id)}`}
+                    key={s.id}
+                    {...hoverProps(s.id)}
+                    onClick={() => {
+                      const start = days.flatMap((x) => x.entries).find((e) => e.id === s.id);
+                      if (start) choose(start);
+                    }}
+                    style={
+                      {
+                        '--outer': Math.max(0, ...d.continuing.map((c) => c.lane)),
+                      } as React.CSSProperties
+                    }
+                  >
                     {s.title} · {s.final ? 'final day' : `day ${s.dayNumber}`}
-                  </div>
+                  </button>
                 ))}
                 {timelineItems(d).map((item) =>
                   item.kind === 'end' ? (
-                    <div className="multiday-end" data-span-id={item.id} key={`end-${item.id}`}>
+                    <div
+                      key={`end-${item.id}`}
+                      className={`multiday-end ${laneClass(item.lane)} ${spanFocus(item.id)}`}
+                      {...hoverProps(item.id)}
+                      data-span-id={item.id}
+                      data-lane={item.lane}
+                      style={{ '--lane': Math.max(0, item.outer) } as React.CSSProperties}
+                    >
                       <span className="diamond" />
                       <small>{[item.time, 'END'].filter(Boolean).join(' · ')}</small>
                     </div>
@@ -374,6 +422,7 @@ export default function Client({ trip }: { trip: Trip }) {
                       data-entry-id={item.entry.id}
                       className={`entry ${item.entry.span_end ? 'multiday-start' : ''} ${selected?.id === item.entry.id && !album ? 'active' : ''} type-${item.entry.type} ${item.index % 2 === 0 ? 'entry-left' : 'entry-right'}`}
                       onClick={() => choose(item.entry)}
+                      {...(item.entry.span_end ? hoverProps(item.entry.id) : {})}
                     >
                       <span className="entry-node">
                         {item.entry.type === 'transit' && (
@@ -655,13 +704,129 @@ export default function Client({ trip }: { trip: Trip }) {
 }
 
 type TimelineItem =
-  { kind: 'entry'; entry: Entry; index: number } | { kind: 'end'; id: string; time: string | null };
+  | { kind: 'entry'; entry: Entry; index: number }
+  | { kind: 'end'; id: string; time: string | null; lane: number; outer: number };
 /** A day's entries plus the end markers of multi-day spans, in time order; `index` drives left/right alternation. */
 function timelineItems(d: Day): TimelineItem[] {
   const items: TimelineItem[] = d.entries.map((entry, index) => ({ kind: 'entry', entry, index }));
-  for (const end of d.spanEnds) {
-    const at = items.findIndex((x) => x.kind === 'entry' && !!end.time && x.entry.time > end.time);
+  const timeOf = (x: TimelineItem) => (x.kind === 'entry' ? x.entry.time : x.time);
+  const ends = [...d.spanEnds].sort((a, b) => (a.time ?? '99').localeCompare(b.time ?? '99'));
+  for (const end of ends) {
+    const at = items.findIndex((x) => !!end.time && (timeOf(x) ?? '') > end.time);
     items.splice(at === -1 ? items.length : at, 0, { kind: 'end', ...end });
   }
   return items;
+}
+
+/**
+ * A multi-day lane drawn as one dotted path: it leaves the start node's centre diagonally, eases
+ * out to its lane `9 * (lane + 1)` px right of the rail, runs down, and eases back in to arrive
+ * diagonally at the end diamond's centre (the start curve mirrors the end). Dots are spaced evenly
+ * (~12px) along the whole path from the node centre to the diamond centre, so the curves and the
+ * straight part share one rhythm and both ends are mirror images; dots that land inside the node
+ * or the diamond are hidden behind them.
+ * Coordinates are relative to the start node's centre (x right, y down).
+ */
+const DOT_SPACING = 12;
+const CURVE_RISE = 24;
+type Point = [number, number];
+function lanePath(lane: number, height: number) {
+  const dx = 9 * (lane + 1);
+  const rise = Math.min(CURVE_RISE + 6 * lane, height / 2);
+  const cubic = (a: Point, b: Point, c: Point, d: Point) => (t: number) =>
+    [0, 1].map(
+      (k) =>
+        (1 - t) ** 3 * a[k] +
+        3 * (1 - t) ** 2 * t * b[k] +
+        3 * (1 - t) * t * t * c[k] +
+        t ** 3 * d[k],
+    ) as Point;
+  const segments = [
+    cubic([0, 0], [dx * 0.55, dx * 0.55], [dx, rise * 0.45], [dx, rise]),
+    (t: number) => [dx, rise + t * (height - 2 * rise)] as Point,
+    cubic(
+      [dx, height - rise],
+      [dx, height - rise * 0.45],
+      [dx * 0.55, height - dx * 0.55],
+      [0, height],
+    ),
+  ];
+  const samples: { s: number; p: Point }[] = [{ s: 0, p: [0, 0] }];
+  for (const seg of segments)
+    for (let k = 1; k <= 200; k++) {
+      const p = seg(k / 200);
+      const q = samples[samples.length - 1];
+      samples.push({ s: q.s + Math.hypot(p[0] - q.p[0], p[1] - q.p[1]), p });
+    }
+  const length = samples[samples.length - 1].s;
+  // Interpolate between samples so dot spacing is exact even on the long straight segment.
+  const pointAt = (s: number): Point => {
+    const found = samples.findIndex((x) => x.s >= s);
+    // Past the last sample (rounding at the very end): use the end point.
+    if (found === -1) return samples[samples.length - 1].p;
+    const i = Math.max(1, found);
+    const a = samples[i - 1];
+    const b = samples[i] ?? a;
+    const f = b.s > a.s ? (s - a.s) / (b.s - a.s) : 0;
+    return [a.p[0] + (b.p[0] - a.p[0]) * f, a.p[1] + (b.p[1] - a.p[1]) * f];
+  };
+  // A whole number of gaps from node centre to diamond centre, so the start and end curves carry
+  // mirror-image dots; the spacing stays within a fraction of a pixel of 12px.
+  const gaps = Math.max(1, Math.round(length / DOT_SPACING));
+  const dots: Point[] = [];
+  for (let k = 0; k <= gaps; k++) dots.push(pointAt((length * k) / gaps));
+  const d =
+    `M0,0 C${dx * 0.55},${dx * 0.55} ${dx},${rise * 0.45} ${dx},${rise} ` +
+    `L${dx},${height - rise} ` +
+    `C${dx},${height - rise * 0.45} ${dx * 0.55},${height - dx * 0.55} 0,${height}`;
+  return { dots, d, dx };
+}
+function LanePath({
+  lane,
+  x,
+  y0,
+  y1,
+  className,
+  onHover,
+}: {
+  lane: number;
+  x: number;
+  y0: number;
+  y1: number;
+  className: string;
+  onHover: (on: boolean) => void;
+}) {
+  const height = Math.max(0, y1 - y0);
+  const { dots, d, dx } = useMemo(() => lanePath(lane, height), [lane, height]);
+  const pad = 8;
+  return (
+    <svg
+      className={className}
+      width={dx + pad * 2}
+      height={height + pad * 2}
+      style={{ left: x - pad, top: y0 - pad }}
+      aria-hidden="true"
+    >
+      <g transform={`translate(${pad} ${pad})`}>
+        {/* A 13px-wide invisible hover band along the path. */}
+        <path
+          d={d}
+          fill="none"
+          stroke="transparent"
+          strokeWidth={13}
+          pointerEvents="stroke"
+          onMouseEnter={() => onHover(true)}
+          onMouseLeave={() => onHover(false)}
+        />
+        {dots.map(([cx, cy], i) => (
+          <circle key={i} cx={cx} cy={cy} r={1} />
+        ))}
+      </g>
+    </svg>
+  );
+}
+
+/** Lane colour class: lane-0..2 for drawn lanes, lane-x for spans shown without a line. */
+function laneClass(lane: number) {
+  return lane < 0 ? 'lane-x' : `lane-${lane}`;
 }

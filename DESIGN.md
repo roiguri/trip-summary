@@ -32,6 +32,13 @@ This document records the agreed visual direction for the local trip-summary pro
 - A span begins at a full event block's rail node on day 1, follows a fine round-dot lane about 6px to the right of the green rail, uses a small paper tab on each later day, and ends at its final-day time with an unfilled diamond and end-time label. This is a separate event span from the short teal-blue transit segment.
 - The sample adds a fictional three-day Coast Path Walk specifically to exercise this treatment; the real trip database is not included.
 
+## Multi-day lanes and ends (user decisions)
+
+- Overlapping multi-day events run in side-by-side lanes, 9px apart (+9, +18, +27px right of the rail centre); each takes the lowest lane that is free when it starts. At most 3 lanes; further concurrent events have no line and grey labels. Lane colours: sage (1), ochre (2), plum (3), used for dots, end curve, diamond, END label and label edge. END labels and later-day labels clear all lanes still running.
+- A lane starts and ends the same way (mirror images): it leaves the event circle's centre diagonally, eases out to its lane over ~24px, and at the end eases back in to arrive diagonally at the diamond's centre. Dots are evenly spaced (~12px) along the whole path; those inside the circle or diamond are hidden. The END label sits close to the diamond (10px gap).
+- Later-day labels sit ~20px under the day banner.
+- Hovering, focusing or selecting a multi-day event highlights its lane, labels and end marker; other lanes fade to 35% when more than one is drawn. Later-day labels are clickable and select the event.
+
 ## Final visual correction, September 26
 
 Correction (user decision, Sept 26, replacing the "two-track throughout" note): the round-dot lane belongs to multi-day events only, as the locked geometry mock shows. The plain rail is a single solid green line (4px #c4d3c7). While a multi-day span runs, a lane of 2px #739d7c round dots every 12px runs 9px right of the rail centre, from the span's start node to its end diamond. At transit the solid line turns teal through the compact icon stop; the round icon has a pale paper fill and thin teal outline. Transit type remains smaller than full place titles, with teal time and route. Later-day chips use pale paper and a muted border. Single and clustered photo cards, as well as place fans, have edge-to-edge images with light rotation, rounded corners and soft shadows, never a white instant-photo border.

@@ -27,11 +27,17 @@ export type Entry = {
   to_location: string | null;
   departure_timezone: string | null;
   arrival_timezone: string | null;
-  /** Set when a place/note runs across several days: its final day and end time. */
-  span_end: { date: string; time: string | null } | null;
+  /** Set when a place/note runs across several days: its final day, end time and lane. */
+  span_end: { date: string; time: string | null; lane: number } | null;
 };
 /** A multi-day entry seen from a later day of its span. */
-export type SpanDay = { id: string; title: string; dayNumber: number; final: boolean };
+export type SpanDay = {
+  id: string;
+  title: string;
+  dayNumber: number;
+  final: boolean;
+  lane: number;
+};
 export type Day = {
   date: string;
   title: string;
@@ -40,7 +46,8 @@ export type Day = {
   /** Multi-day entries that started on an earlier day and continue through this one. */
   continuing: SpanDay[];
   /** Multi-day entries that end on this day, with their end time. */
-  spanEnds: { id: string; time: string | null }[];
+  /** `outer` is the outermost lane still drawn at that moment, so the END label can clear it. */
+  spanEnds: { id: string; time: string | null; lane: number; outer: number }[];
 };
 export type Trip = {
   title: string;
@@ -71,6 +78,8 @@ type ItemRow = {
 };
 type PhotoRow = Omit<Photo, 'id'> & { photo_id: number; entry_id: number | null };
 
+/** Most multi-day lanes drawn side by side (user decision). */
+const MAX_LANES = 3;
 const DAY_MS = 86_400_000;
 const addDays = (date: string, n: number) =>
   new Date(Date.parse(`${date}T00:00:00Z`) + n * DAY_MS).toISOString().slice(0, 10);
@@ -146,6 +155,21 @@ export function getTrip(): Trip {
   const isSpan = (i: ItemRow) =>
     i.item_type !== 'lodging' && !!i.end_date && i.end_date > i.start_date;
   const spans = events.filter(isSpan);
+  // Overlapping spans get side-by-side lanes: each takes the lowest lane whose previous span has
+  // ended by the time it starts. At most MAX_LANES run at once; a span that finds no free lane
+  // gets lane -1 and is shown without a line (start entry, day labels and end marker only).
+  const laneOf = new Map<number, number>();
+  const laneEnds: string[] = [];
+  const at = (date: string, time: string | null, fallback: string) => `${date} ${time ?? fallback}`;
+  for (const sp of [...spans].sort((a, b) =>
+    at(a.start_date, a.start_time, '00:00').localeCompare(at(b.start_date, b.start_time, '00:00')),
+  )) {
+    const start = at(sp.start_date, sp.start_time, '00:00');
+    let lane = laneEnds.findIndex((end) => end <= start);
+    if (lane === -1 && laneEnds.length < MAX_LANES) lane = laneEnds.push('') - 1;
+    if (lane !== -1) laneEnds[lane] = at(sp.end_date!, sp.end_time, '23:59');
+    laneOf.set(sp.entry_id, lane);
+  }
 
   const days: Day[] = dateRange(first, last).map((date) => {
     const entries: Entry[] = events
@@ -176,7 +200,9 @@ export function getTrip(): Trip {
         to_location: i.to_location,
         departure_timezone: i.departure_timezone,
         arrival_timezone: i.arrival_timezone,
-        span_end: isSpan(i) ? { date: i.end_date!, time: i.end_time } : null,
+        span_end: isSpan(i)
+          ? { date: i.end_date!, time: i.end_time, lane: laneOf.get(i.entry_id) ?? 0 }
+          : null,
       }));
 
     // Photos not attached to an entry: a lone photo in an hour is a moment, several are a cluster.
@@ -222,10 +248,25 @@ export function getTrip(): Trip {
           title: s.title ?? s.place_title ?? '',
           dayNumber: daysBetween(s.start_date, date) + 1,
           final: date === s.end_date,
+          lane: laneOf.get(s.entry_id) ?? 0,
         })),
       spanEnds: spans
         .filter((s) => s.end_date === date)
-        .map((s) => ({ id: `i${s.entry_id}`, time: s.end_time })),
+        .map((s) => {
+          const t = at(s.end_date!, s.end_time, '23:59');
+          const running = spans.filter(
+            (o) =>
+              (laneOf.get(o.entry_id) ?? -1) >= 0 &&
+              at(o.start_date, o.start_time, '00:00') <= t &&
+              t <= at(o.end_date!, o.end_time, '23:59'),
+          );
+          return {
+            id: `i${s.entry_id}`,
+            time: s.end_time,
+            lane: laneOf.get(s.entry_id) ?? -1,
+            outer: Math.max(-1, ...running.map((o) => laneOf.get(o.entry_id) ?? -1)),
+          };
+        }),
     };
   });
 

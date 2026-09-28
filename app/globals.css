@@ -1615,3 +1615,216 @@ button:disabled {
   background-repeat: repeat-y;
   background-position: 0 0;
 }
+
+/* ------------------------------------------------------------------------------------------
+   Part 7: multi-day span, sampled from mock/app-locked-geometry-final-full. Positions are
+   relative to the rail centre (x=515 at 1440px) and the end diamond's centre.
+   ------------------------------------------------------------------------------------------ */
+/* Later-day label: 2px accent edge, no outline, soft offset shadow, 11px bold, 21px right of the rail. */
+.multi-day-chip {
+  margin-left: 20px;
+  padding: 5px 10px;
+  border: 0;
+  border-left: 2px solid #9cb7a0;
+  background: #f0f2e8;
+  box-shadow: 2px 2px 0 #dfe8dc;
+  color: #76937e;
+  font-size: 11px;
+  font-weight: 700;
+}
+/* The lane's dots are anchored to the end, so the last straight dot always sits 34px above the
+   diamond centre; the old ::after bend is replaced by two stepped dots on the end marker. */
+.multiday-span {
+  padding-bottom: 26px;
+  background-origin: content-box;
+  background-clip: content-box;
+  background-position: 0 100%;
+}
+.multiday-span::after {
+  display: none;
+}
+/* END label sits closer to the diamond than in the mock (user decision): 10px gap. */
+.multiday-end {
+  padding-left: 16px;
+  color: #6b8f78;
+}
+.multiday-end small {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 16px;
+}
+.multiday-end .diamond {
+  left: -7.5px;
+  top: 2.5px;
+  width: 11px;
+  height: 11px;
+  border: 2px solid #638e70;
+}
+/* Two dots step in from the lane (+6px at -22px, +2px at -10px from the diamond centre). */
+.multiday-end::before {
+  content: '';
+  position: absolute;
+  left: -4px;
+  top: -18px;
+  width: 12px;
+  height: 20px;
+  background:
+    radial-gradient(circle at 8px 4px, #739d7c 0 1px, transparent 1.25px),
+    radial-gradient(circle at 4px 16px, #739d7c 0 1px, transparent 1.25px);
+  pointer-events: none;
+}
+/* Later-day labels sit close under the day banner (user decision): ~24px instead of the mock's ~57px. */
+.entries > .multi-day-chip:first-child {
+  margin-top: -27px;
+}
+/* End of a multi-day span (user decision): the lane keeps its 12px dot rhythm and turns into the
+   rail through a small rounded corner (radius 9px = the lane's offset), ending with a dot at the
+   diamond's centre. Relative to the diamond centre: last straight dot at y=-19, one dot on the
+   corner at (+8.8, -7), final dot at (0, 0). */
+.multiday-span {
+  padding-bottom: 11px;
+}
+.multiday-end::before {
+  left: -4px;
+  top: -2px;
+  width: 14px;
+  height: 14px;
+  z-index: 3;
+  background:
+    radial-gradient(circle at 10.78px 2.98px, #739d7c 0 1px, transparent 1.25px),
+    radial-gradient(circle at 2px 10px, #739d7c 0 1px, transparent 1.25px);
+}
+/* Multi-day lanes (user decision): overlapping spans run side by side, 9px apart. The end curve
+   is an SVG drawn per lane (LaneCurve in Client.tsx), behind the diamond. */
+.multiday-span {
+  left: calc(55.5% + 6px + var(--lane, 0) * 9px);
+}
+.multiday-end::before {
+  display: none;
+}
+.multiday-end {
+  padding-left: calc(16px + var(--lane, 0) * 9px);
+}
+.lane-curve {
+  position: absolute;
+  z-index: 1;
+  fill: #739d7c;
+  pointer-events: none;
+}
+.multiday-end .diamond {
+  z-index: 2;
+}
+/* Lane colours (user decision): each drawn lane has its own muted colour, carried by its dots,
+   end curve, diamond, END label and the edge of its later-day labels. Spans beyond the 3-lane cap
+   (lane-x) have no line; their labels and end marker are neutral grey. */
+.lane-0 {
+  --lane-dot: #739d7c;
+  --lane-strong: #638e70;
+  --lane-edge: #9cb7a0;
+  --lane-text: #76937e;
+}
+.lane-1 {
+  --lane-dot: #b39247;
+  --lane-strong: #967631;
+  --lane-edge: #d2bc84;
+  --lane-text: #957c45;
+}
+.lane-2 {
+  --lane-dot: #9a7292;
+  --lane-strong: #7e5876;
+  --lane-edge: #c4a8be;
+  --lane-text: #8a6983;
+}
+.lane-x {
+  --lane-strong: #8b938b;
+  --lane-edge: #c9cec6;
+  --lane-text: #858c85;
+}
+.multiday-span {
+  background-image: radial-gradient(circle at 3px 3px, var(--lane-dot) 0 1px, transparent 1.25px);
+}
+.lane-curve {
+  fill: var(--lane-dot);
+}
+.multiday-end {
+  color: var(--lane-text);
+}
+.multiday-end .diamond {
+  border-color: var(--lane-strong);
+}
+.multi-day-chip {
+  border-left-color: var(--lane-edge);
+  color: var(--lane-text);
+}
+/* Later-day labels clear every lane running that day (same 13px gap as with one lane). */
+.multi-day-chip {
+  margin-left: calc(20px + var(--outer, 0) * 9px);
+}
+/* Multi-day focus (hover, keyboard focus or selection): the event's lane, end curve, diamond and
+   labels strengthen; other lanes fade to 35% when more than one lane is drawn. */
+.multiday-span,
+.multiday-end,
+.multi-day-chip {
+  transition:
+    opacity 0.15s ease,
+    background-color 0.15s ease;
+}
+.multiday-span {
+  pointer-events: auto;
+  cursor: pointer;
+}
+/* A 13px-wide invisible hover area around the 2px dot lane. */
+.multiday-span::before {
+  content: '';
+  position: absolute;
+  inset: 0 -3px;
+}
+.is-dim {
+  opacity: 0.35;
+}
+.multiday-end.is-focus .diamond {
+  background: var(--lane-edge);
+}
+.multi-day-chip {
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.multi-day-chip.is-focus {
+  background: color-mix(in srgb, var(--lane-edge) 40%, #f0f2e8);
+}
+.multi-day-chip:focus-visible {
+  outline: 2px solid var(--lane-strong);
+  outline-offset: 2px;
+}
+/* The end marker's hover area is the diamond and its label only, not the whole row. */
+.multiday-end {
+  width: max-content;
+}
+/* Multi-day lanes are one SVG path each (LanePath in Client.tsx): the start curve, straight lane
+   and end curve share the 12px dot spacing. The start node and end diamond sit above the dots.
+   (Replaces the earlier .multiday-span background lane and per-end .lane-curve.) */
+.multiday-span,
+.lane-curve {
+  display: none;
+}
+.multiday-lane {
+  position: absolute;
+  z-index: 1;
+  overflow: visible;
+  fill: var(--lane-dot);
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+.multiday-lane path {
+  cursor: pointer;
+}
+.multiday-lane.is-focus {
+  fill: var(--lane-strong);
+}
+.multiday-lane.is-focus circle {
+  r: 1.4px;
+}
+.entry.multiday-start .entry-node {
+  z-index: 2;
+}
