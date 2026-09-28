@@ -10,8 +10,8 @@ TRIP_DB=/tmp/other.db npm run seed -- file.json   # into a different database
 
 Seeding replaces the database. The page reads the database on every request, so reload after seeding and don't rebuild. `npm run dev` seeds the sample automatically if no database exists.
 
-- `sample-trip.json`: the fictional Carmel/Monterey sample the design was locked against.
-- `fixtures/test-trip.json`: a small, deliberately different trip (other dates, timezone, day count, span placement, transit mode). It checks that the UI has no sample-specific code.
+- `sample-trip.json`: the fictional sample and the one preview. Days 1–3 are the clean Carmel/Monterey trip the design was locked against. Days 4–6 (Big Sur, day tag "Edge cases") hold the stress cases in one place: four overlapping multi-day events (one beyond the 3-lane cap), a hotel changeover, a stay that checks out after the trip ends, lodging with photos, long English and Hebrew notes and captions, a long title, places without photos or coordinates, a large photo cluster, and train and flight legs across time zones.
+- `fixtures/test-trip.json`: a small, deliberately different trip (other dates, timezone, day count). It only checks that the UI has no sample-specific code; edge cases live in the sample.
 
 Never commit real trip data or photos. Real data files belong outside the repo, or under a git-ignored path.
 

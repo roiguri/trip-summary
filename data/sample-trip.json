@@ -1,5 +1,5 @@
 {
-  "$comment": "Fictional sample trip. Loaded into SQLite by `npm run seed`. See data/README.md for the format.",
+  "$comment": "Fictional sample trip. Loaded into SQLite by `npm run seed`. See data/README.md for the format. Days 1-3 are the clean trip the design was locked against; days 4-6 (tagged \"Edge cases\") hold the stress cases: four overlapping multi-day events (one beyond the 3-lane cap), a hotel changeover, a stay that checks out after the trip ends, a lodging with photos, long and Hebrew notes and captions, a long title, places without photos or coordinates, a large photo cluster, and train and flight legs across time zones.",
   "destination": {
     "name": "Monterey Coast",
     "kind": "region",
@@ -11,9 +11,9 @@
   "trip": {
     "id": "sample-coast",
     "title": "Sample: Coastal Detour",
-    "subtitle": "Fictional sample · SQLite-driven",
+    "subtitle": "Fictional sample · SQLite-driven · Days 4–6 hold edge cases",
     "start_date": "2026-05-15",
-    "end_date": "2026-05-17"
+    "end_date": "2026-05-20"
   },
   "days": [
     {
@@ -30,6 +30,21 @@
       "date": "2026-05-17",
       "title": "Monterey afternoon",
       "tags": ["Coast"]
+    },
+    {
+      "date": "2026-05-18",
+      "title": "Edge cases: overlapping events",
+      "tags": ["Edge cases"]
+    },
+    {
+      "date": "2026-05-19",
+      "title": "Edge cases: changeover and notes",
+      "tags": ["Edge cases"]
+    },
+    {
+      "date": "2026-05-20",
+      "title": "Edge cases: heading home",
+      "tags": ["Edge cases"]
     }
   ],
   "places": [
@@ -92,6 +107,75 @@
       "title": "Carmel Garden Inn",
       "lat": 36.558,
       "lng": -121.918,
+      "category": "lodging"
+    },
+    {
+      "key": "point-sur",
+      "title": "Point Sur Lightstation",
+      "lat": 36.3066,
+      "lng": -121.9016,
+      "category": "landmark"
+    },
+    {
+      "key": "mcway",
+      "title": "Julia Pfeiffer Burns State Park and the McWay Falls Overlook Trail",
+      "lat": 36.1578,
+      "lng": -121.6722,
+      "category": "nature"
+    },
+    {
+      "key": "nepenthe",
+      "title": "Nepenthe",
+      "lat": 36.2213,
+      "lng": -121.758,
+      "category": "food"
+    },
+    {
+      "key": "pfeiffer-beach",
+      "title": "Pfeiffer Beach",
+      "lat": 36.2381,
+      "lng": -121.8163,
+      "category": "beach"
+    },
+    {
+      "key": "molera",
+      "title": "Andrew Molera State Park",
+      "category": "nature"
+    },
+    {
+      "key": "parks-pass",
+      "title": "Big Sur Parks Pass",
+      "category": "pass"
+    },
+    {
+      "key": "food-festival",
+      "title": "Big Sur Food & Wine Festival",
+      "category": "festival"
+    },
+    {
+      "key": "ebike",
+      "title": "Rental E-Bike",
+      "category": "rental"
+    },
+    {
+      "key": "ridge-trail",
+      "title": "Coast Ridge Trail",
+      "lat": 36.209,
+      "lng": -121.72,
+      "category": "hike"
+    },
+    {
+      "key": "river-lodge",
+      "title": "Big Sur River Lodge",
+      "lat": 36.2475,
+      "lng": -121.7812,
+      "category": "lodging"
+    },
+    {
+      "key": "ridge-cabin",
+      "title": "Ridge Cabin",
+      "lat": 36.23,
+      "lng": -121.765,
       "category": "lodging"
     }
   ],
@@ -174,7 +258,7 @@
       "start_date": "2026-05-16",
       "start_time": "11:00",
       "end_time": "12:30",
-      "notes": "פרחי בר ושביל צר שיורד אל המים. כדאי להגיע לפני הצהריים."
+      "notes": "Wildflowers and a narrow path toward the water."
     },
     {
       "key": "wander-note",
@@ -182,7 +266,7 @@
       "title": "A little time to wander",
       "start_date": "2026-05-16",
       "start_time": "14:00",
-      "notes": "Leave the afternoon open. Stop wherever the light looks good. We pulled over three times before Big Sur: once for a sea otter in the kelp, once for a roadside stand selling strawberries, and once just because the fog lifted all at once and the whole coast appeared. Nobody was in a hurry, and it was the best part of the day."
+      "notes": "Leave the afternoon open. Stop wherever the light looks good."
     },
     {
       "key": "quiet-note",
@@ -190,7 +274,7 @@
       "title": "רגע שקט בדרך",
       "start_date": "2026-05-16",
       "start_time": "15:20",
-      "notes": "לעצור ליד הים ולנשום קצת אוויר. ישבנו על הסלעים עד שהשמש התחילה לרדת."
+      "notes": "לעצור ליד הים ולנשום קצת אוויר."
     },
     {
       "key": "aquarium-visit",
@@ -209,6 +293,172 @@
       "start_time": "15:00",
       "end_time": "16:00",
       "notes": "An easy final walk by the water."
+    },
+    {
+      "key": "drive-south",
+      "type": "transit",
+      "title": "Drive to Big Sur",
+      "start_date": "2026-05-18",
+      "start_time": "07:30",
+      "end_time": "08:20",
+      "from_location": "Carmel",
+      "to_location": "Big Sur",
+      "departure_timezone": "America/Los_Angeles",
+      "arrival_timezone": "America/Los_Angeles"
+    },
+    {
+      "key": "parks-pass-span",
+      "type": "place",
+      "place": "parks-pass",
+      "start_date": "2026-05-18",
+      "end_date": "2026-05-19",
+      "start_time": "08:00",
+      "end_time": "18:00",
+      "notes": "Two days of park entry along the coast."
+    },
+    {
+      "key": "point-sur-visit",
+      "type": "place",
+      "place": "point-sur",
+      "start_date": "2026-05-18",
+      "start_time": "09:10",
+      "end_time": "10:10",
+      "notes": "A guided climb to the lighthouse on the rock."
+    },
+    {
+      "key": "festival-span",
+      "type": "place",
+      "place": "food-festival",
+      "start_date": "2026-05-18",
+      "end_date": "2026-05-19",
+      "start_time": "10:00",
+      "end_time": "20:00",
+      "notes": "Tasting tents along the river, both days."
+    },
+    {
+      "key": "mcway-visit",
+      "type": "place",
+      "place": "mcway",
+      "start_date": "2026-05-18",
+      "start_time": "11:15",
+      "end_time": "12:30",
+      "notes": "Long-note test: the overlook trail is short and flat, but the view of the waterfall dropping straight onto the beach is worth the crowds. Go early, before the tour buses, and walk past the first viewpoint to the stone terrace at the end, where the old house used to stand. Bring a layer; the wind off the water is colder than it looks."
+    },
+    {
+      "key": "ebike-span",
+      "type": "place",
+      "place": "ebike",
+      "start_date": "2026-05-18",
+      "end_date": "2026-05-19",
+      "start_time": "12:00",
+      "end_time": "16:00",
+      "notes": "Two-day rental from the lodge."
+    },
+    {
+      "key": "ridge-span",
+      "type": "place",
+      "place": "ridge-trail",
+      "title": "Coast Ridge Trail",
+      "start_date": "2026-05-18",
+      "end_date": "2026-05-19",
+      "start_time": "13:30",
+      "end_time": "12:00",
+      "notes": "Overflow test: a fourth overlapping event, drawn without a lane."
+    },
+    {
+      "key": "nepenthe-visit",
+      "type": "place",
+      "place": "nepenthe",
+      "start_date": "2026-05-18",
+      "start_time": "14:30",
+      "end_time": "15:30",
+      "notes": "ארוחת צהריים מאוחרת על המרפסת, עם נוף לכל החוף."
+    },
+    {
+      "key": "river-lodge-stay",
+      "type": "lodging",
+      "place": "river-lodge",
+      "start_date": "2026-05-18",
+      "end_date": "2026-05-19",
+      "start_time": "16:00",
+      "end_time": "10:00",
+      "notes": "Cabins under the redwoods, next to the river."
+    },
+    {
+      "key": "fog-note",
+      "type": "note",
+      "title": "Fog over the ridge",
+      "start_date": "2026-05-18",
+      "start_time": "18:00",
+      "notes": "Long-note test: the fog came up the canyon in about ten minutes and swallowed the whole ridge. We sat on the porch and watched the redwoods disappear one by one, then reappear as it thinned out. Somebody in the next cabin was playing guitar. Nobody talked much, and nobody minded."
+    },
+    {
+      "key": "pfeiffer-visit",
+      "type": "place",
+      "place": "pfeiffer-beach",
+      "start_date": "2026-05-19",
+      "start_time": "11:00",
+      "end_time": "12:15",
+      "notes": "בדיקת טקסט ארוך: החול כאן סגול בגלל המינרלים מהצוקים, ובשעות הבוקר המוקדמות אפשר לראות את האור עובר דרך הקשת בסלע. החניה קטנה מאוד ומתמלאת מהר, אז כדאי להגיע לפני עשר ולהביא נעליים שלא אכפת לכם שיירטבו."
+    },
+    {
+      "key": "molera-visit",
+      "type": "place",
+      "place": "molera",
+      "start_date": "2026-05-19",
+      "start_time": "14:00",
+      "end_time": "15:00",
+      "notes": "No-coordinates test: this place has no location, so no map pin."
+    },
+    {
+      "key": "long-he-note",
+      "type": "note",
+      "title": "ערב אחרון על החוף",
+      "start_date": "2026-05-19",
+      "start_time": "15:20",
+      "notes": "בדיקת פתק ארוך: ישבנו על הסלעים עד שהשמש נגעה במים, ואז עוד קצת. מישהו הביא תרמוס עם תה, ומישהו אחר מצא כלב ים שישן על החוף ממש מתחתינו. כשהתחיל להיות קר חזרנו לאט לרכב, בלי למהר, כי לא היה לאן."
+    },
+    {
+      "key": "ridge-cabin-stay",
+      "type": "lodging",
+      "place": "ridge-cabin",
+      "start_date": "2026-05-19",
+      "end_date": "2026-05-21",
+      "start_time": "17:30",
+      "end_time": "08:00",
+      "notes": "Changeover test: checks in the day the river lodge checks out, and checks out the day after the trip ends."
+    },
+    {
+      "key": "late-note",
+      "type": "note",
+      "title": "Stars",
+      "start_date": "2026-05-19",
+      "start_time": "21:00",
+      "notes": "No light pollution at all up here."
+    },
+    {
+      "key": "train-north",
+      "type": "transit",
+      "title": "Coast Starlight train from Salinas",
+      "start_date": "2026-05-20",
+      "start_time": "08:10",
+      "end_time": "09:45",
+      "from_location": "Salinas",
+      "to_location": "San Jose",
+      "departure_timezone": "America/Los_Angeles",
+      "arrival_timezone": "America/Los_Angeles"
+    },
+    {
+      "key": "flight-home",
+      "type": "transit",
+      "title": "Flight home to Denver",
+      "start_date": "2026-05-20",
+      "start_time": "12:30",
+      "end_time": "15:55",
+      "from_location": "San Jose",
+      "to_location": "Denver",
+      "departure_timezone": "America/Los_Angeles",
+      "arrival_timezone": "America/Denver"
     }
   ],
   "photos": [
@@ -625,6 +875,234 @@
       "date": "2026-05-15",
       "time": "18:30",
       "entry": "coast-path-walk"
+    },
+    {
+      "url": "/photos/coast-4.jpg",
+      "caption": "Point Sur · 1",
+      "date": "2026-05-18",
+      "time": "09:30",
+      "entry": "point-sur-visit"
+    },
+    {
+      "url": "/photos/coast-5.jpg",
+      "caption": "Point Sur · 2",
+      "date": "2026-05-18",
+      "time": "09:30",
+      "entry": "point-sur-visit"
+    },
+    {
+      "url": "/photos/coast-6.jpg",
+      "caption": "Point Sur · 3",
+      "date": "2026-05-18",
+      "time": "09:30",
+      "entry": "point-sur-visit"
+    },
+    {
+      "url": "/photos/coast-7.jpg",
+      "caption": "McWay Falls · 1",
+      "date": "2026-05-18",
+      "time": "11:40",
+      "entry": "mcway-visit"
+    },
+    {
+      "url": "/photos/coast-8.jpg",
+      "caption": "McWay Falls · 2",
+      "date": "2026-05-18",
+      "time": "11:40",
+      "entry": "mcway-visit"
+    },
+    {
+      "url": "/photos/coast-9.jpg",
+      "caption": "McWay Falls · 3",
+      "date": "2026-05-18",
+      "time": "11:40",
+      "entry": "mcway-visit"
+    },
+    {
+      "url": "/photos/coast-10.jpg",
+      "caption": "River Lodge · 1",
+      "date": "2026-05-18",
+      "time": "16:20",
+      "entry": "river-lodge-stay"
+    },
+    {
+      "url": "/photos/coast-11.jpg",
+      "caption": "River Lodge · 2",
+      "date": "2026-05-18",
+      "time": "16:20",
+      "entry": "river-lodge-stay"
+    },
+    {
+      "url": "/photos/coast-12.jpg",
+      "caption": "River Lodge · 3",
+      "date": "2026-05-18",
+      "time": "16:20",
+      "entry": "river-lodge-stay"
+    },
+    {
+      "url": "/photos/coast-13.jpg",
+      "caption": "Porch at dusk",
+      "date": "2026-05-18",
+      "time": "19:05",
+      "lat": 36.2475,
+      "lng": -121.7812
+    },
+    {
+      "url": "/photos/coast-14.jpg",
+      "caption": "Evening walk · 1",
+      "date": "2026-05-18",
+      "time": "20:10",
+      "lat": 36.25,
+      "lng": -121.785
+    },
+    {
+      "url": "/photos/coast-15.jpg",
+      "caption": "Evening walk · 2",
+      "date": "2026-05-18",
+      "time": "20:11",
+      "lat": 36.25,
+      "lng": -121.785
+    },
+    {
+      "url": "/photos/coast-16.jpg",
+      "caption": "Evening walk · 3",
+      "date": "2026-05-18",
+      "time": "20:12",
+      "lat": 36.25,
+      "lng": -121.785
+    },
+    {
+      "url": "/photos/coast-17.jpg",
+      "caption": "Evening walk · 4",
+      "date": "2026-05-18",
+      "time": "20:13",
+      "lat": 36.25,
+      "lng": -121.785
+    },
+    {
+      "url": "/photos/coast-18.jpg",
+      "caption": "Evening walk · 5",
+      "date": "2026-05-18",
+      "time": "20:14",
+      "lat": 36.25,
+      "lng": -121.785
+    },
+    {
+      "url": "/photos/coast-19.jpg",
+      "caption": "Evening walk · 6",
+      "date": "2026-05-18",
+      "time": "20:15",
+      "lat": 36.25,
+      "lng": -121.785
+    },
+    {
+      "url": "/photos/coast-20.jpg",
+      "caption": "Evening walk · 7",
+      "date": "2026-05-18",
+      "time": "20:16",
+      "lat": 36.25,
+      "lng": -121.785
+    },
+    {
+      "url": "/photos/coast-21.jpg",
+      "caption": "Evening walk · 8",
+      "date": "2026-05-18",
+      "time": "20:17",
+      "lat": 36.25,
+      "lng": -121.785
+    },
+    {
+      "url": "/photos/coast-22.jpg",
+      "caption": "Evening walk · 9",
+      "date": "2026-05-18",
+      "time": "20:18",
+      "lat": 36.25,
+      "lng": -121.785
+    },
+    {
+      "url": "/photos/coast-23.jpg",
+      "caption": "Evening walk · 10",
+      "date": "2026-05-18",
+      "time": "20:19",
+      "lat": 36.25,
+      "lng": -121.785
+    },
+    {
+      "url": "/photos/coast-24.jpg",
+      "caption": "Evening walk · 11",
+      "date": "2026-05-18",
+      "time": "20:10",
+      "lat": 36.25,
+      "lng": -121.785
+    },
+    {
+      "url": "/photos/coast-25.jpg",
+      "caption": "Evening walk · 12",
+      "date": "2026-05-18",
+      "time": "20:11",
+      "lat": 36.25,
+      "lng": -121.785
+    },
+    {
+      "url": "/photos/coast-1.jpg",
+      "caption": "Evening walk · 13",
+      "date": "2026-05-18",
+      "time": "20:12",
+      "lat": 36.25,
+      "lng": -121.785
+    },
+    {
+      "url": "/photos/coast-2.jpg",
+      "caption": "Evening walk · 14",
+      "date": "2026-05-18",
+      "time": "20:13",
+      "lat": 36.25,
+      "lng": -121.785
+    },
+    {
+      "url": "/photos/coast-3.jpg",
+      "caption": "Morning mist · 1",
+      "date": "2026-05-19",
+      "time": "08:10",
+      "lat": 36.24,
+      "lng": -121.79
+    },
+    {
+      "url": "/photos/coast-4.jpg",
+      "caption": "Morning mist · 2",
+      "date": "2026-05-19",
+      "time": "08:15",
+      "lat": 36.24,
+      "lng": -121.79
+    },
+    {
+      "url": "/photos/coast-5.jpg",
+      "caption": "Pfeiffer Beach · 1",
+      "date": "2026-05-19",
+      "time": "11:30",
+      "entry": "pfeiffer-visit"
+    },
+    {
+      "url": "/photos/coast-6.jpg",
+      "caption": "Pfeiffer Beach · 2",
+      "date": "2026-05-19",
+      "time": "11:30",
+      "entry": "pfeiffer-visit"
+    },
+    {
+      "url": "/photos/coast-7.jpg",
+      "caption": "Molera meadow",
+      "date": "2026-05-19",
+      "time": "14:20",
+      "entry": "molera-visit"
+    },
+    {
+      "url": "/photos/coast-8.jpg",
+      "caption": "Leaving the coast",
+      "date": "2026-05-20",
+      "time": "08:00",
+      "lat": 36.6777,
+      "lng": -121.6555
     }
   ]
 }

@@ -105,6 +105,11 @@ User direction: notes and place captions should look alike (the same kind of thi
 - Chosen style (user decision, from three options: paper card, margin rule, serif annotation): the mock's **paper card with tape** for notes (13px text, 15px title, card as wide as its text up to 300px), and the same paper as a small slip with tape for place captions (12px). Inside the card every line follows its own reading direction.
 - Sample trip now carries the cases: a Hebrew place caption (Garrapata), a long English note, a longer Hebrew note.
 
+### Sample trip and preview (cross-cutting)
+
+- One preview (user decision): the sample trip. Days 1–3 stay the clean locked trip (original texts restored); days 4–6 (Big Sur, tagged "Edge cases") gather every stress case from the Kansai fixture and this review, so clutter stays in one area. See `data/README.md`.
+- Found while building it, for later parts: the flight shows only the departure zone "(PT)", not the arrival zone (Part 5); whole-trip map pins overlap when places are close together (Part 8).
+
 ### Hotel stays (new, from the Part 7 discussion)
 
 The mocks only show a single lodging entry with check-in/out in the panel. Agreed treatment (option A plus the suggested answers; see `DESIGN.md`, "Hotel stays"):
