@@ -2598,3 +2598,130 @@ button:disabled {
   overflow-y: auto;
   scrollbar-width: thin;
 }
+
+/* Part 11: full-screen viewer. */
+@keyframes light-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes light-photo-in {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+}
+.lightbox {
+  background: #0f1712eb;
+  backdrop-filter: blur(6px);
+  animation: light-in 0.22s ease both;
+}
+.light-figure {
+  margin: 0;
+  display: flex;
+}
+.light-figure img {
+  display: block;
+  /* Room for the arrows: each sits 32px from the edge and is 52px wide, plus a 28px gap. */
+  max-width: min(calc(100vw - 2 * (32px + 52px + 28px)), 1200px);
+  max-height: calc(100vh - 190px);
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 24px 60px #0008;
+  animation: light-photo-in 0.22s ease both;
+}
+.lightbox .light-btn {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid #ffffff2e;
+  border-radius: 50%;
+  background: #ffffff14;
+  color: #f4f1e8;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+.lightbox .light-btn:hover,
+.lightbox .light-btn:focus-visible {
+  background: #ffffff2b;
+  border-color: #ffffff59;
+  outline: none;
+}
+.light-btn svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.light-close {
+  top: 24px;
+  right: 28px;
+  width: 40px;
+  height: 40px;
+}
+.light-close svg {
+  width: 14px;
+  height: 14px;
+}
+.light-nav {
+  top: 50%;
+  width: 52px;
+  height: 52px;
+  margin-top: -26px;
+}
+.light-nav svg {
+  width: 20px;
+  height: 20px;
+}
+.light-nav.prev {
+  left: 32px;
+}
+.light-nav.next {
+  right: 32px;
+}
+.light-bar {
+  position: absolute;
+  left: 50%;
+  bottom: 26px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  max-width: min(82vw, 1200px);
+  color: #f4f1e8;
+}
+.light-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+.light-text strong {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.light-text small {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: #f4f1e8a6;
+}
+.light-count {
+  padding: 4px 10px;
+  border: 1px solid #ffffff2e;
+  border-radius: 999px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: #f4f1e8cc;
+}
+@media (prefers-reduced-motion: reduce) {
+  .lightbox,
+  .light-figure img {
+    animation: none;
+  }
+}

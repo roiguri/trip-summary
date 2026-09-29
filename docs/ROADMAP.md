@@ -32,7 +32,7 @@ Known issues found while initializing:
 Real data integration is complex enough to be designed and agreed on before any code. Topics to work through together:
 
 - **Sources:** which exports we actually have and in which format (Google Maps Timeline on-device vs. Takeout; Google Photos Takeout vs. API; the planning/notes format; bookings/transit). We'll gather small anonymised samples, and none go into the repo.
-- **Model:** the core schema (`destinations`, `trips`, `places`, `wishlist`, `itinerary`) is the user's real one, so changes to it are deliberate and designed here. Open points found in Phase 0: a permanent home for day titles and photos (now prototype tables), photo captions and their source, a transport mode for transit legs (now derived from the title), and how loose photos are grouped. What is imported vs. authored vs. derived.
+- **Model:** the core schema (`destinations`, `trips`, `places`, `wishlist`, `itinerary`) is the user's real one, so changes to it are deliberate and designed here. Open points found in Phase 0: a permanent home for day titles and photos (now prototype tables), photo captions and their source, a transport mode for transit legs (now derived from the title), and how loose photos are grouped (groups are derived today, so they can't have their own caption; captions are per photo). What is imported vs. authored vs. derived.
 - **Pipeline:** matching photos to places (time and location), clustering loose photos, timezone handling, deduplication, re-import without losing edits.
 - **Storage and privacy:** where the DB and photo files live, what's git-ignored, thumbnails.
 - **UX:** import flow (CLI first vs. in-app), and how review/editing corrections feed back.
