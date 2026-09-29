@@ -1,0 +1,51 @@
+# Checks every pull request and every push to main: formatting, types, a production build, and the
+# interaction checks (verification Part 13) against the sample trip.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Format
+        run: npm run format:check
+
+      - name: Types
+        run: npm run typecheck
+
+      - name: Seed the sample trip
+        run: npm run seed
+
+      - name: Build
+        run: npm run build
+
+      - name: Browser for the interaction checks
+        run: npx playwright install --with-deps chromium
+
+      - name: Interaction checks
+        run: |
+          npm run start > server.log 2>&1 &
+          for i in $(seq 1 60); do curl -sf -o /dev/null http://localhost:3100 && break; sleep 1; done
+          BASE_URL=http://localhost:3100 npm run check:interactions
+
+      - name: Server log
+        if: failure()
+        run: cat server.log || true

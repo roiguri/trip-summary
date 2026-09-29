@@ -33,3 +33,5 @@ The SQLite core tables `destinations`, `trips`, `places`, `wishlist`, `itinerary
 - `docs/ROADMAP.md` — planned phases and next steps
 
 Interaction checks: with the app running, `npm run check:interactions` walks through selecting entries, map pins, day tracking, albums and the keyboard on the sample trip.
+
+CI (`.github/workflows/ci.yml`) runs on every pull request and push to `main`: `npm run format:check`, `npm run typecheck`, a production build of the seeded sample trip, and `npm run check:interactions` against it.

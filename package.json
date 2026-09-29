@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "seed": "node scripts/seed.ts",
     "snapshot": "bash scripts/snapshot.sh",
-    "check:interactions": "node scripts/check-interactions.mjs"
+    "check:interactions": "node scripts/check-interactions.mjs",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "maplibre-gl": "^5.7.3",

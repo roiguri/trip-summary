@@ -4,15 +4,15 @@ Starting point: the reconstructed prototype from the design handoff (Next.js 15 
 
 ## Where things stand
 
-| Area                                                | State                                                                                      |
-| --------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| Journey timeline, map, detail panel, lightbox       | Done, visually locked against the references                                               |
-| Wishlist / Places tabs                              | Header links only, no screens                                                              |
-| Data                                                | SQLite schema + fictional seed in `lib/data.ts`; read-only                                 |
-| Import (Google Maps Timeline, Google Photos, notes) | Parsers exist only in `legacy-vite/` (localStorage prototype), not wired into the Next app |
-| Editing / review (highlights, recommendations)      | Not started                                                                                |
-| Auth / deployment                                   | Not configured ("View-only demo"); no deploy without a separate decision                   |
-| Tooling                                             | Prettier and a screenshot capture script; no lint, tests or CI yet                         |
+| Area                                                | State                                                                                         |
+| --------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Journey timeline, map, detail panel, lightbox       | Done, visually locked against the references                                                  |
+| Wishlist / Places tabs                              | Header links only, no screens                                                                 |
+| Data                                                | SQLite schema + fictional seed in `lib/data.ts`; read-only                                    |
+| Import (Google Maps Timeline, Google Photos, notes) | Parsers exist only in `legacy-vite/` (localStorage prototype), not wired into the Next app    |
+| Editing / review (highlights, recommendations)      | Not started                                                                                   |
+| Auth / deployment                                   | Not configured ("View-only demo"); no deploy without a separate decision                      |
+| Tooling                                             | Prettier, typecheck, interaction checks and GitHub Actions CI; ESLint pending registry access |
 
 Known issues found while initializing:
 
@@ -23,7 +23,7 @@ Known issues found while initializing:
 ## Phase 0 — Foundation and fidelity verification (no visual change unless agreed)
 
 1. **Verify the implementation against the mocks, part by part** (`docs/VERIFICATION.md`). Each of the 13 parts is reviewed side by side (mock, handoff capture, current capture) and agreed before moving on. Fixes that come out of a part are small, reviewed changes. Progress: all 13 parts agreed; data separation done; a measured mock style pass (header, timeline, photo cards, right column, content-sized detail card) done; Part 7 (multi-day spans, lanes) done and hotel stays designed and built. Parts 3–6 and 8–13 still need their review.
-2. Tooling: Prettier (done), ESLint, `npm run typecheck`, a GitHub Actions CI job (install, typecheck, lint, build), Node pinned (`engines`, done).
+2. Tooling: Prettier (done, checked in CI), `npm run typecheck` (done), Node pinned (`engines`, done), a GitHub Actions CI job running format, types, build and the interaction checks on every PR (done). ESLint waits for npm registry access (it needs new packages and a lockfile update).
 3. Screenshot guard: `scripts/capture.mjs` (done) becomes Playwright visual tests with committed baselines, taken once the parts are agreed.
 4. Refactor behind the guard: split `Client.tsx` into components (`Header`, `Timeline` + entry kinds, `MapCard`, `DetailPanel`, `Gallery`, `Lightbox`). Split `lib/data.ts` into schema, seed and typed queries. Remove sample-only hard-coding found during verification. No visual diff.
 
