@@ -31,3 +31,5 @@ The SQLite core tables `destinations`, `trips`, `places`, `wishlist`, `itinerary
 - `DESIGN.md` — locked visual decisions
 - `docs/FIDELITY-CHECKLIST.md` and `docs/reference/` — reference mocks (`mock/`) and latest captures (`captures/`) from the design handoff
 - `docs/ROADMAP.md` — planned phases and next steps
+
+Interaction checks: with the app running, `npm run check:interactions` walks through selecting entries, map pins, day tracking, albums and the keyboard on the sample trip.

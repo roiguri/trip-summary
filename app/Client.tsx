@@ -585,9 +585,32 @@ export default function Client({ trip }: { trip: Trip }) {
     const a = q.get('arrows');
     if (['a', 'b', 'c'].includes(a || '')) setArrows(a!);
   }, []);
+  // Keyboard (Part 13): Escape closes the photo viewer first, then the detail card. While the viewer
+  // is open, Tab stays inside it; on closing, focus returns to where it was.
+  const lightbox = useRef<HTMLDivElement>(null);
+  const returnFocus = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (!full || !lightbox.current) return;
+    if (!lightbox.current.contains(document.activeElement)) {
+      returnFocus.current = document.activeElement as HTMLElement | null;
+      lightbox.current.querySelector<HTMLElement>('.light-close')?.focus();
+    }
+  }, [full]);
   useEffect(() => {
     function key(ev: KeyboardEvent) {
-      if (ev.key === 'Escape') setFull(null);
+      if (ev.key === 'Escape') {
+        if (full) {
+          setFull(null);
+          returnFocus.current?.focus();
+        } else if ((selected || album) && !panelClosing) closeDetails();
+      }
+      if (full && ev.key === 'Tab' && lightbox.current) {
+        const items = [...lightbox.current.querySelectorAll<HTMLElement>('button')];
+        const at = items.indexOf(document.activeElement as HTMLElement);
+        const next = (at + (ev.shiftKey ? -1 : 1) + items.length) % items.length;
+        items[next]?.focus();
+        ev.preventDefault();
+      }
       if (full && ev.key === 'ArrowRight')
         setFull(fullscreenSet[(index + 1) % fullscreenSet.length]);
       if (full && ev.key === 'ArrowLeft')
@@ -595,7 +618,7 @@ export default function Client({ trip }: { trip: Trip }) {
     }
     window.addEventListener('keydown', key);
     return () => window.removeEventListener('keydown', key);
-  }, [full, index, fullscreenSet]);
+  }, [full, index, fullscreenSet, selected, album, panelClosing]);
   useEffect(() => {
     const root = scroller.current;
     if (!root) return;
@@ -1093,11 +1116,25 @@ export default function Client({ trip }: { trip: Trip }) {
       {full && (
         /* Full-screen viewer (Part 11): blurred backdrop, framed photo, round chevron arrows, and a
            bottom bar with the caption, when it was taken and its position in the set. */
-        <div className="lightbox" onClick={() => setFull(null)}>
+        <div
+          className="lightbox"
+          ref={lightbox}
+          role="dialog"
+          aria-modal="true"
+          aria-label={full.caption || 'Photo'}
+          onClick={() => {
+            setFull(null);
+            returnFocus.current?.focus();
+          }}
+        >
           <button
             className="light-btn light-close"
             aria-label="Close"
-            onClick={() => setFull(null)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setFull(null);
+              returnFocus.current?.focus();
+            }}
           >
             <svg viewBox="0 0 16 16" aria-hidden="true">
               <path d="M4 4l8 8M12 4l-8 8" />
