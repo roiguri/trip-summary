@@ -28,7 +28,7 @@ Phase 0 goal: confirm that the prototype is implemented correctly against the re
 | 8   | Map card (layout, ratios, markers, route, Whole trip, day emphasis)                    | `mock/trip-real-map-whole-final`, `mock/trip-real-map-day-final`, `mock/panel-ratio-large`       | agreed with changes |
 | 9   | Detail panel: place and lodging                                                        | `mock/panel-final-place`, `captures/wayfarer-locked-place`                                       | agreed with changes |
 | 10  | Detail panel: photo, cluster, day album, gallery and pager                             | `mock/image-e55ca7ac`, `captures/wayfarer-locked-single`, `-cluster`, `-pager`                   | agreed with changes |
-| 11  | Lightbox                                                                               | `captures/wayfarer-locked-fullscreen`                                                            | pending             |
+| 11  | Lightbox                                                                               | `captures/wayfarer-locked-fullscreen`                                                            | in review           |
 | 12  | Collapsed right column                                                                 | no reference image; written spec in `DESIGN.md` only                                             | agreed with changes |
 | 13  | Interactions: click-to-scroll, day tracking while scrolling, map pin → entry, keyboard | written spec in `DESIGN.md`                                                                      | pending             |
 
@@ -108,6 +108,11 @@ Sampled from `mock/app-locked-geometry-final-full` (positions relative to the ra
 - Connector alignment (user decision, differs from the mocks): the node and arm point at the middle of the title's first line (cap-height centre), not its baseline. Both mocks put the arm at the baseline, which reads as aligned with the whole title + byline block. Measured: node and arm moved up 11px and now sit exactly on the cap-height centre for places, lodging, photos and clusters, on both sides; a wrapped title keeps the line on its first line. Multi-day lanes still start from the node's centre.
 - Caption under the photos (user decision (a)): places and stay check-ins show their full note under the photo fan (or under the byline when there are no photos), at most as wide as the fan (266px). Styled with notes in Part 6 (paper slip). Notes longer than two lines are clamped with "See more" / "See less"; the toggle doesn't select the entry. The Kansai fixture has a long note to exercise it.
 - The transit disc (Part 5) follows the same rule: it was centred on the title + times + route block and now sits on the title's first line; its teal travel segment moves up 12.5px with it so the disc stays centred on it.
+
+### Part 11: Full-screen viewer (in review)
+
+- Redesigned (user report: "looks bad, arrows too basic"): darker blurred backdrop; the photo framed with rounded corners and a shadow; round translucent arrow buttons with the pager's thin chevron (hidden for a single photo); a matching round close button; a bottom bar with the caption, the date and time, and a small "1 / 14" counter. Short fade in, none with reduced motion. Keyboard (←/→/Esc) and click-outside-to-close kept.
+- "Evening walk" at the bottom was the photo's own caption; the sample captions no longer carry a " · N" number (it duplicated the counter). A photo without a caption shows only its date and time.
 
 ### Part 10: Photo, cluster and day-album cards; gallery and pager (agreed with changes)
 

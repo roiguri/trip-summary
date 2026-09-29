@@ -1091,34 +1091,66 @@ export default function Client({ trip }: { trip: Trip }) {
         )}
       </aside>
       {full && (
+        /* Full-screen viewer (Part 11): blurred backdrop, framed photo, round chevron arrows, and a
+           bottom bar with the caption, when it was taken and its position in the set. */
         <div className="lightbox" onClick={() => setFull(null)}>
-          <button className="close" onClick={() => setFull(null)}>
-            ✕ CLOSE
-          </button>
           <button
-            className="lightnav prev"
-            onClick={(e) => {
-              e.stopPropagation();
-              setFull(fullscreenSet[(index - 1 + fullscreenSet.length) % fullscreenSet.length]);
-            }}
+            className="light-btn light-close"
+            aria-label="Close"
+            onClick={() => setFull(null)}
           >
-            ←
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M4 4l8 8M12 4l-8 8" />
+            </svg>
           </button>
-          <img src={full.url} alt={full.caption} onClick={(e) => e.stopPropagation()} />
-          <button
-            className="lightnav next"
-            onClick={(e) => {
-              e.stopPropagation();
-              setFull(fullscreenSet[(index + 1) % fullscreenSet.length]);
-            }}
-          >
-            →
-          </button>
-          <div className="lightcaption">
-            {full.caption}{' '}
-            <span>
-              {index + 1} / {fullscreenSet.length}
-            </span>
+          {fullscreenSet.length > 1 && (
+            <button
+              className="light-btn light-nav prev"
+              aria-label="Previous photo"
+              onClick={(e) => {
+                e.stopPropagation();
+                setFull(fullscreenSet[(index - 1 + fullscreenSet.length) % fullscreenSet.length]);
+              }}
+            >
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M10 3.5 5.5 8l4.5 4.5" />
+              </svg>
+            </button>
+          )}
+          <figure className="light-figure" onClick={(e) => e.stopPropagation()}>
+            <img key={full.id} src={full.url} alt={full.caption} />
+          </figure>
+          {fullscreenSet.length > 1 && (
+            <button
+              className="light-btn light-nav next"
+              aria-label="Next photo"
+              onClick={(e) => {
+                e.stopPropagation();
+                setFull(fullscreenSet[(index + 1) % fullscreenSet.length]);
+              }}
+            >
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M6 3.5 10.5 8 6 12.5" />
+              </svg>
+            </button>
+          )}
+          <div className="light-bar" onClick={(e) => e.stopPropagation()}>
+            <div className="light-text">
+              {full.caption && <strong dir={noteDir(full.caption)}>{full.caption}</strong>}
+              <small>
+                {new Date(`${full.date}T12:00:00`).toLocaleDateString('en-US', {
+                  weekday: 'short',
+                  month: 'short',
+                  day: 'numeric',
+                })}{' '}
+                · {full.time}
+              </small>
+            </div>
+            {fullscreenSet.length > 1 && (
+              <span className="light-count">
+                {index + 1} / {fullscreenSet.length}
+              </span>
+            )}
           </div>
         </div>
       )}
