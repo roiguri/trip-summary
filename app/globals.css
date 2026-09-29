@@ -2487,3 +2487,114 @@ button:disabled {
     animation-duration: 1ms;
   }
 }
+
+/* Part 9: detail card. A label row names the kind of entry and carries the date (user decision);
+   the metadata line holds the time and the place's tag; transit adds its mode icon and route; a
+   Hebrew note has its rule on the side its text starts from. */
+.panel-kicker {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0 40px 7px 0;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: #8b9a8d;
+}
+.panel-kicker span + span {
+  font-size: 10.5px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.panel-body .meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 9px;
+}
+.panel-body .meta-time {
+  font-weight: 700;
+}
+.panel-body .meta-mode {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #dcefe8;
+}
+.panel-body .meta-mode .transit-icon {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: #3d7a73;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.panel-body .meta-route {
+  color: #3d7a73;
+  font-weight: 700;
+}
+.panel-body .meta-route + .meta-time {
+  flex-basis: 100%;
+}
+.note[dir='rtl'] {
+  border-left: 0;
+  border-right: 3px solid #d3ae93;
+  text-align: right;
+}
+.panel-body .meta > span {
+  padding: 0;
+}
+.panel-body .meta em {
+  margin: 0;
+}
+/* Without photos the note follows the metadata line (or the stay's check-in/out) closely, with the
+   same 14px gap a stay leaves before its photos; the stay row no longer needs a rule above it. */
+.panel-body .meta:has(+ .panel-note),
+.panel-body .stay-info:has(+ .panel-note) {
+  margin-bottom: 14px;
+}
+.panel-body .meta + .panel-note,
+.panel-body .stay-info + .panel-note {
+  margin-top: 0;
+}
+.panel-body .stay-info {
+  border-top: 0;
+  padding-top: 0;
+}
+
+/* The detail card's note is the timeline's paper note without the tape (user decision): cream paper,
+   thin warm border, small offset shadow, 13px text, clamped with "See more" after four lines. */
+.panel-body .panel-note {
+  display: block;
+  width: auto;
+  max-width: none;
+  margin: 8px 3px 10px 0;
+  padding: 10px 13px 11px;
+  font-size: 13px;
+  line-height: 19px;
+  color: #3e4a42;
+  flex: none;
+}
+.panel-body .panel-note::before {
+  display: none;
+}
+.panel-body .meta + .panel-note,
+.panel-body .stay-info + .panel-note {
+  margin-top: 0;
+}
+/* The detail card fits the column: photos shrink to fit, but not below 150px; an expanded note
+   always shows in full; only if both still don't fit does the card scroll (a long title, photos and
+   an expanded long note together). */
+.panel-body .panel-note {
+  flex: none;
+}
+.panel-body .photos {
+  min-height: 150px;
+}
+.panel-body {
+  overflow-y: auto;
+  scrollbar-width: thin;
+}

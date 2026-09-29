@@ -26,7 +26,7 @@ Phase 0 goal: confirm that the prototype is implemented correctly against the re
 | 6   | Notes (tape, LTR/RTL)                                                                  | geometry mock, `captures/wayfarer-locked-notes`                                                  | agreed with changes |
 | 7   | Multi-day span (start block, day chips, dot lane, end diamond)                         | geometry mock, `captures/wayfarer-locked-multiday-end`                                           | pending             |
 | 8   | Map card (layout, ratios, markers, route, Whole trip, day emphasis)                    | `mock/trip-real-map-whole-final`, `mock/trip-real-map-day-final`, `mock/panel-ratio-large`       | agreed with changes |
-| 9   | Detail panel: place and lodging                                                        | `mock/panel-final-place`, `captures/wayfarer-locked-place`                                       | pending             |
+| 9   | Detail panel: place and lodging                                                        | `mock/panel-final-place`, `captures/wayfarer-locked-place`                                       | agreed with changes |
 | 10  | Detail panel: photo, cluster, day album, gallery and pager                             | `mock/image-e55ca7ac`, `captures/wayfarer-locked-single`, `-cluster`, `-pager`                   | pending             |
 | 11  | Lightbox                                                                               | `captures/wayfarer-locked-fullscreen`                                                            | pending             |
 | 12  | Collapsed right column                                                                 | no reference image; written spec in `DESIGN.md` only                                             | agreed with changes |
@@ -108,6 +108,16 @@ Sampled from `mock/app-locked-geometry-final-full` (positions relative to the ra
 - Connector alignment (user decision, differs from the mocks): the node and arm point at the middle of the title's first line (cap-height centre), not its baseline. Both mocks put the arm at the baseline, which reads as aligned with the whole title + byline block. Measured: node and arm moved up 11px and now sit exactly on the cap-height centre for places, lodging, photos and clusters, on both sides; a wrapped title keeps the line on its first line. Multi-day lanes still start from the node's centre.
 - Caption under the photos (user decision (a)): places and stay check-ins show their full note under the photo fan (or under the byline when there are no photos), at most as wide as the fan (266px). Styled with notes in Part 6 (paper slip). Notes longer than two lines are clamped with "See more" / "See less"; the toggle doesn't select the entry. The Kansai fixture has a long note to exercise it.
 - The transit disc (Part 5) follows the same rule: it was centred on the title + times + route block and now sits on the title's first line; its teal travel segment moves up 12.5px with it so the disc stays centred on it.
+
+### Part 9: Detail card, place and stay (agreed with changes)
+
+- The two mocks disagree (`panel-final-place`: label, note above the photos; `panel-ratio-large`: photos first). User decisions: a label row above the title names the kind of entry (THE PLACE, THE STAY, THE ROUTE, THE NOTE, A MOMENT, PHOTOS, THE DAY) and carries the date; the metadata line holds the time and, for places, the category tag; the photos come next with their count and arrows directly under them; the note comes after the photos; then "View on Google Maps".
+- Stay: check-in and check-out shown once (the check-in used to repeat in the metadata line); no "Stay" tag (the label says it); "View on Google Maps" when the stay has a location.
+- Transit: the card used to show only title and times; it now shows the mode icon, "from → to" and the times with a zone on each end when they differ ("12:30 PT → 15:55 MT").
+- A Hebrew note has its rule on the right, the side its text starts from.
+- Note style (user decision): the detail card's note is the timeline's paper note without the tape (cream paper, thin warm border, small offset shadow, 13px), clamped with "See more" after four lines (it used to be cut off at three lines with no way to read on). The card still fits the column: photos shrink but not below 150px, an expanded note shows in full, and only if both don't fit does the card scroll (of all 40 sample entries, only the Day 4 McWay card with its three-line title and long note).
+- Without photos the note follows the metadata line (or a stay's check-in/out) with a 14px gap (was 30px); the stay's check-in/out row has no rule above it any more (user report).
+- Map: a merged pill that would sit under the selected pin moves just above or below it.
 
 ### Part 8: Map card, and the right column (agreed with changes)
 
