@@ -3,21 +3,16 @@
 // its ::before/::after, reporting any difference. Stricter than the screenshots: it also sees
 // transitions, animations, cursors, and styles that only show on hover or focus.
 //
-//   BASE_A=http://localhost:3101 BASE_B=http://localhost:3100 node scripts/style-diff.mjs
-//
-// With CACHE_A=<file>, build A's snapshots are saved on the first run and reused after (for
-// comparing a series of edits against one reference build).
+//   BASE_A=http://localhost:3101 BASE_B=http://localhost:3100 npm run check:styles
 //
 // Both builds need the same seeded sample trip. The map's tiles are skipped; its markers are
 // compared without their position (it depends on tile loading).
 import { chromium } from 'playwright';
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { STATES } from './states.mjs';
 
 const A = process.env.BASE_A || 'http://localhost:3101';
 const B = process.env.BASE_B || 'http://localhost:3100';
 const MAX_REPORT = 60;
-const CACHE_A = process.env.CACHE_A;
 const PARALLEL = 4;
 
 /** Elements to hover and to focus with the keyboard, each in a state where it is on screen. */
@@ -39,36 +34,31 @@ const POINTER = {
   viewer: ['.light-close', '.light-nav.next', '.light-bar'],
 };
 
+/** In the page: every element's box and computed style, the values joined in property order. */
 function snapshot() {
-  const out = {};
-  const inMap = (el) => !!el.closest('.map');
-  const box = (el) => {
-    const r = el.getBoundingClientRect();
-    return [r.x, r.y, r.width, r.height].map((v) => Math.round(v * 10) / 10).join(',');
-  };
-  const styles = (cs, skipPosition) => {
-    const o = {};
-    for (let i = 0; i < cs.length; i++) {
-      const p = cs[i];
-      if (skipPosition && /^(transform|translate|top|left|right|bottom|inset)/.test(p)) continue;
-      o[p] = cs.getPropertyValue(p);
-    }
-    return o;
-  };
+  const props = [...getComputedStyle(document.body)];
+  const position = /^(transform|translate|top|left|right|bottom|inset)/;
+  const els = {};
+  const values = (cs, inMap) =>
+    props.map((p) => (inMap && position.test(p) ? '' : cs.getPropertyValue(p))).join('\u0001');
   const walk = (el, path) => {
     if (el.classList.contains('maplibregl-canvas-container')) return;
-    const map = inMap(el);
-    const key = `${path} ${el.tagName.toLowerCase()}${el.classList.length ? '.' + [...el.classList].join('.') : ''}`;
-    out[key] = { box: map ? '' : box(el), style: styles(getComputedStyle(el), map) };
+    const inMap = !!el.closest('.map');
+    const cls = el.classList.length ? '.' + [...el.classList].join('.') : '';
+    const key = `${path} ${el.tagName.toLowerCase()}${cls}`;
+    const r = el.getBoundingClientRect();
+    const box = inMap
+      ? ''
+      : [r.x, r.y, r.width, r.height].map((v) => Math.round(v * 10) / 10).join();
+    els[key] = [box, values(getComputedStyle(el), inMap)];
     for (const pe of ['::before', '::after']) {
       const cs = getComputedStyle(el, pe);
-      if (cs.content !== 'none' && cs.content !== 'normal')
-        out[`${key}${pe}`] = { box: '', style: styles(cs, map) };
+      if (cs.content !== 'none' && cs.content !== 'normal') els[key + pe] = ['', values(cs, inMap)];
     }
     [...el.children].forEach((c, i) => walk(c, `${path}/${i}`));
   };
   walk(document.body, '');
-  return out;
+  return { props, els };
 }
 
 async function capture(page, base, state, action) {
@@ -90,15 +80,20 @@ async function capture(page, base, state, action) {
 
 function compare(a, b) {
   const diffs = [];
-  for (const key of new Set([...Object.keys(a), ...Object.keys(b)])) {
-    if (!a[key] || !b[key]) {
-      diffs.push(`${key}: only in ${a[key] ? 'A' : 'B'}`);
+  for (const key of new Set([...Object.keys(a.els), ...Object.keys(b.els)])) {
+    const x = a.els[key],
+      y = b.els[key];
+    if (!x || !y) {
+      diffs.push(`${key}: only in ${x ? 'A' : 'B'}`);
       continue;
     }
-    if (a[key].box !== b[key].box) diffs.push(`${key}: box ${a[key].box} -> ${b[key].box}`);
-    for (const p of new Set([...Object.keys(a[key].style), ...Object.keys(b[key].style)]))
-      if (a[key].style[p] !== b[key].style[p])
-        diffs.push(`${key}: ${p}: ${a[key].style[p]} -> ${b[key].style[p]}`);
+    if (x[0] !== y[0]) diffs.push(`${key}: box ${x[0]} -> ${y[0]}`);
+    if (x[1] === y[1]) continue;
+    const xv = x[1].split('\u0001'),
+      yv = y[1].split('\u0001');
+    a.props.forEach((p, i) => {
+      if (xv[i] !== yv[i]) diffs.push(`${key}: ${p}: ${xv[i]} -> ${yv[i]}`);
+    });
   }
   return diffs;
 }
@@ -125,21 +120,16 @@ function compare(a, b) {
       await context.close();
     }
   }
-  const cached = CACHE_A && existsSync(CACHE_A) ? JSON.parse(readFileSync(CACHE_A, 'utf8')) : null;
-  const shotsA = {};
   const results = new Array(runs.length);
   let next = 0;
   async function worker() {
     while (next < runs.length) {
       const i = next++;
-      const run = runs[i];
-      const a = cached?.[label(run)] ?? (await shoot(A, run));
-      shotsA[label(run)] = a;
-      results[i] = compare(a, await shoot(B, run));
+      results[i] = compare(await shoot(A, runs[i]), await shoot(B, runs[i]));
     }
   }
   await Promise.all(Array.from({ length: PARALLEL }, worker));
-  if (CACHE_A && !cached) writeFileSync(CACHE_A, JSON.stringify(shotsA));
+  await browser.close();
   let failed = 0;
   runs.forEach((run, i) => {
     const diffs = results[i];
@@ -149,7 +139,6 @@ function compare(a, b) {
       for (const d of diffs.slice(0, MAX_REPORT)) console.log(`      ${d}`);
     } else console.log(`same  ${label(run)}`);
   });
-  await browser.close();
   console.log(
     failed ? `\n${failed} of ${runs.length} states differ` : `\nall ${runs.length} states match`,
   );

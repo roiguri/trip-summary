@@ -29,6 +29,5 @@ animations, cursors, hover and focus styles. The states are shared with the scre
 BASE_A=http://localhost:3101 BASE_B=http://localhost:3100 npm run check:styles
 ```
 
-Set `CACHE_A=<file>` to save the reference's snapshots on the first run and reuse them after. A
-difference is not always a regression (a rule that had no visible effect may be removed); each one
+A difference is not always a regression (a rule that had no visible effect may be removed); each one
 listed should be understood.
