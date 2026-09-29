@@ -27,7 +27,7 @@ Phase 0 goal: confirm that the prototype is implemented correctly against the re
 | 7   | Multi-day span (start block, day chips, dot lane, end diamond)                         | geometry mock, `captures/wayfarer-locked-multiday-end`                                           | pending             |
 | 8   | Map card (layout, ratios, markers, route, Whole trip, day emphasis)                    | `mock/trip-real-map-whole-final`, `mock/trip-real-map-day-final`, `mock/panel-ratio-large`       | agreed with changes |
 | 9   | Detail panel: place and lodging                                                        | `mock/panel-final-place`, `captures/wayfarer-locked-place`                                       | agreed with changes |
-| 10  | Detail panel: photo, cluster, day album, gallery and pager                             | `mock/image-e55ca7ac`, `captures/wayfarer-locked-single`, `-cluster`, `-pager`                   | pending             |
+| 10  | Detail panel: photo, cluster, day album, gallery and pager                             | `mock/image-e55ca7ac`, `captures/wayfarer-locked-single`, `-cluster`, `-pager`                   | agreed with changes |
 | 11  | Lightbox                                                                               | `captures/wayfarer-locked-fullscreen`                                                            | pending             |
 | 12  | Collapsed right column                                                                 | no reference image; written spec in `DESIGN.md` only                                             | agreed with changes |
 | 13  | Interactions: click-to-scroll, day tracking while scrolling, map pin → entry, keyboard | written spec in `DESIGN.md`                                                                      | pending             |
@@ -108,6 +108,14 @@ Sampled from `mock/app-locked-geometry-final-full` (positions relative to the ra
 - Connector alignment (user decision, differs from the mocks): the node and arm point at the middle of the title's first line (cap-height centre), not its baseline. Both mocks put the arm at the baseline, which reads as aligned with the whole title + byline block. Measured: node and arm moved up 11px and now sit exactly on the cap-height centre for places, lodging, photos and clusters, on both sides; a wrapped title keeps the line on its first line. Multi-day lanes still start from the node's centre.
 - Caption under the photos (user decision (a)): places and stay check-ins show their full note under the photo fan (or under the byline when there are no photos), at most as wide as the fan (266px). Styled with notes in Part 6 (paper slip). Notes longer than two lines are clamped with "See more" / "See less"; the toggle doesn't select the entry. The Kansai fixture has a long note to exercise it.
 - The transit disc (Part 5) follows the same rule: it was centred on the title + times + route block and now sits on the title's first line; its teal travel segment moves up 12.5px with it so the disc stays centred on it.
+
+### Part 10: Photo, cluster and day-album cards; gallery and pager (agreed with changes)
+
+- Already matched: the label row (A MOMENT / PHOTOS / THE DAY) and date, the mock's gallery grids (1 large, 3 as one big + two small, 5 as a 2-column grid, 12 per page), the thin pager under the photos.
+- Pager (user decision): hidden for a single photo; the count only (no arrows) when everything fits on one page.
+- Paging (user decision (a), "no layout changes when switching pages"): the grid is chosen from the whole set (up to 12 per page), so every page has the same tiles, gallery height, pager position and card height; a short last page leaves the rest of the grid empty (it used to show a few large photos, a different layout). Measured on every page of the 14-photo cluster and the 30-photo day album: identical.
+- Day album: a metadata line "Day 1 · Friday, May 15 · 30 photos" under the day title.
+- A caption-less photo shows only its time under the label, as on the timeline (kept). Clicking a photo opens the full-screen viewer (Part 11).
 
 ### Part 9: Detail card, place and stay (agreed with changes)
 

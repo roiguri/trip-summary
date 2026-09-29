@@ -942,6 +942,19 @@ export default function Client({ trip }: { trip: Trip }) {
                 {(album ? days.find((d) => d.date === album)?.title : selected?.title) && (
                   <h2>{album ? days.find((d) => d.date === album)?.title : selected?.title}</h2>
                 )}
+                {album && (
+                  <div className="meta">
+                    <span className="meta-time">
+                      Day {days.findIndex((d) => d.date === album) + 1} ·{' '}
+                      {new Date(`${album}T12:00:00`).toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        month: 'long',
+                        day: 'numeric',
+                      })}{' '}
+                      · {photos.length} {photos.length === 1 ? 'photo' : 'photos'}
+                    </span>
+                  </div>
+                )}
                 {!album && selected && selected.type !== 'lodging' && (
                   <div className="meta">
                     {selected.type === 'transit' ? (
@@ -984,9 +997,7 @@ export default function Client({ trip }: { trip: Trip }) {
                 )}
                 {photos.length > 0 && (
                   <>
-                    <div
-                      className={`photos count-${Math.min(pagePhotos.length, 12)} arrows-${arrows}`}
-                    >
+                    <div className={`photos count-${Math.min(photos.length, 12)} arrows-${arrows}`}>
                       {pagePhotos.map((p) => (
                         <button
                           className={`photo ${activePhoto?.id === p.id ? 'photo-active' : ''}`}
@@ -998,52 +1009,61 @@ export default function Client({ trip }: { trip: Trip }) {
                         </button>
                       ))}
                     </div>
-                    <div className={`pagination pagination-${arrows}`}>
-                      <small>
-                        {photos.length} {photos.length === 1 ? 'photo' : 'photos'}
-                      </small>
-                      <div>
-                        <button
-                          aria-label="Previous photos"
-                          disabled={photoPage === 0}
-                          onClick={() => setPhotoPage((v) => v - 1)}
-                        >
-                          {arrows === 'a' ? (
-                            <svg
-                              className="pager-chevron prev-chevron"
-                              viewBox="0 0 16 16"
-                              aria-hidden="true"
+                    {/* One photo: no count or arrows; one page: the count only (user decision). */}
+                    {photos.length > 1 && (
+                      <div className={`pagination pagination-${arrows}`}>
+                        <small>
+                          {photos.length} {photos.length === 1 ? 'photo' : 'photos'}
+                        </small>
+                        {photos.length > 12 && (
+                          <div>
+                            <button
+                              aria-label="Previous photos"
+                              disabled={photoPage === 0}
+                              onClick={() => setPhotoPage((v) => v - 1)}
                             >
-                              <path d="M6 5 L9 8 L6 11" />
-                            </svg>
-                          ) : arrows === 'c' ? (
-                            '←'
-                          ) : (
-                            '‹'
-                          )}
-                        </button>
-                        <span>
-                          {arrows === 'b'
-                            ? `${String(photoPage + 1).padStart(2, '0')} / ${String(Math.ceil(photos.length / 12)).padStart(2, '0')}`
-                            : `${photoPage + 1} / ${Math.ceil(photos.length / 12)}`}
-                        </span>
-                        <button
-                          aria-label="Next photos"
-                          disabled={(photoPage + 1) * 12 >= photos.length}
-                          onClick={() => setPhotoPage((v) => v + 1)}
-                        >
-                          {arrows === 'a' ? (
-                            <svg className="pager-chevron" viewBox="0 0 16 16" aria-hidden="true">
-                              <path d="M6 5 L9 8 L6 11" />
-                            </svg>
-                          ) : arrows === 'c' ? (
-                            '→'
-                          ) : (
-                            '›'
-                          )}
-                        </button>
+                              {arrows === 'a' ? (
+                                <svg
+                                  className="pager-chevron prev-chevron"
+                                  viewBox="0 0 16 16"
+                                  aria-hidden="true"
+                                >
+                                  <path d="M6 5 L9 8 L6 11" />
+                                </svg>
+                              ) : arrows === 'c' ? (
+                                '←'
+                              ) : (
+                                '‹'
+                              )}
+                            </button>
+                            <span>
+                              {arrows === 'b'
+                                ? `${String(photoPage + 1).padStart(2, '0')} / ${String(Math.ceil(photos.length / 12)).padStart(2, '0')}`
+                                : `${photoPage + 1} / ${Math.ceil(photos.length / 12)}`}
+                            </span>
+                            <button
+                              aria-label="Next photos"
+                              disabled={(photoPage + 1) * 12 >= photos.length}
+                              onClick={() => setPhotoPage((v) => v + 1)}
+                            >
+                              {arrows === 'a' ? (
+                                <svg
+                                  className="pager-chevron"
+                                  viewBox="0 0 16 16"
+                                  aria-hidden="true"
+                                >
+                                  <path d="M6 5 L9 8 L6 11" />
+                                </svg>
+                              ) : arrows === 'c' ? (
+                                '→'
+                              ) : (
+                                '›'
+                              )}
+                            </button>
+                          </div>
+                        )}
                       </div>
-                    </div>
+                    )}
                   </>
                 )}
                 {/* The same paper note as on the timeline, without the tape (user decision). */}
