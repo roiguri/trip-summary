@@ -32,6 +32,6 @@ The SQLite core tables `destinations`, `trips`, `places`, `wishlist`, `itinerary
 - `docs/FIDELITY-CHECKLIST.md` and `docs/reference/` — reference mocks (`mock/`) and latest captures (`captures/`) from the design handoff
 - `docs/ROADMAP.md` — planned phases and next steps
 
-Interaction checks: with the app running, `npm run check:interactions` walks through selecting entries, map pins, day tracking, albums and the keyboard on the sample trip.
+Interaction checks: with the app running, `npm run check:interactions` walks through selecting entries, map pins, day tracking, albums and the keyboard on the sample trip, and on a phone the timeline layout, the details sheet, the full-screen map and the menu.
 
 CI (`.github/workflows/ci.yml`) runs on every pull request and push to `main`: `npm run format:check`, `npm run typecheck`, a production build of the seeded sample trip, `npm run check:interactions` and the visual regression tests (`npm run visual`, see `tests/visual/README.md`) against it.

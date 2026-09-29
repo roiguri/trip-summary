@@ -1671,6 +1671,10 @@ button:disabled {
     margin-left: 24px;
     padding-top: 36px;
   }
+  /* The day's tag hangs over the rail here, so a later-day label starts just below it. */
+  .entries > .multi-day-chip:first-child {
+    margin-top: -4px;
+  }
 
   /* Entries: all on the right of the rail. */
   /* The text starts just past the rail, or past the day's outermost multi-day lane (lanes run at
@@ -1761,11 +1765,280 @@ button:disabled {
   .transit-route {
     white-space: normal;
   }
+}
 
-  /* Until the phone map and details land, the right column is hidden on phones. */
-  .right {
-    display: none;
-  }
+/* Phone map and details (rendered on phones only). The Map button is the desktop "Map" pill,
+   floating in the thumb zone; the map opens full screen with every day in one sideways-scrolling
+   row of pills (user decision); the details open in a bottom sheet (PhoneSheet). */
+.map-fab {
+  position: fixed;
+  right: 18px;
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 44px;
+  padding: 0 18px;
+  border: 1px solid #d5e0d3;
+  border-radius: 22px;
+  background: #fffdf8;
+  box-shadow:
+    0 9px 23px #28382e2e,
+    0 2px 6px #28382e1a;
+  color: #3f5c4b;
+  font-size: 13px;
+  font-weight: 700;
+}
+.phone-map {
+  position: fixed;
+  inset: 0;
+  z-index: 7;
+  display: flex;
+  flex-direction: column;
+  background: #d8e8e1;
+}
+.phone-map-bar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  height: 52px;
+  padding: 0 12px 0 6px;
+  border-bottom: 1px solid #e0e6dd;
+  background: #fafaf7;
+}
+.phone-map-back {
+  height: 44px;
+  padding: 0 10px;
+  border: 0;
+  background: transparent;
+  color: #3f5c4b;
+  font-size: 14px;
+  font-weight: 700;
+}
+.phone-map-title {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.whole-chip.phone-whole {
+  position: static;
+  flex: none;
+}
+.phone-map-body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+.day-pills {
+  position: absolute;
+  right: 0;
+  bottom: calc(132px + env(safe-area-inset-bottom, 0px));
+  left: 0;
+  display: flex;
+  gap: 6px;
+  padding: 4px 14px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.day-pills::-webkit-scrollbar {
+  display: none;
+}
+.day-pills button {
+  flex: none;
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid #d6e2d7;
+  border-radius: 17px;
+  background: #fffdf8;
+  box-shadow: 0 2px 4px #25352a1c;
+  color: #6e8779;
+  font-size: 12px;
+  font-weight: 700;
+}
+.day-pills button.on {
+  border-color: #3f5c4b;
+  background: #3f5c4b;
+  color: #fff;
+}
+.pin-card {
+  position: absolute;
+  right: 12px;
+  bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+  left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 100px;
+  padding: 12px;
+  border: 1px solid #d5e0d3;
+  border-radius: 18px;
+  background: #fffdf8;
+  box-shadow: 0 9px 23px #28382e2e;
+  color: #293d30;
+  text-align: left;
+}
+.pin-card img {
+  flex: none;
+  width: 76px;
+  height: 76px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+.pin-card span {
+  min-width: 0;
+}
+.pin-card small {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: #8b9a8d;
+}
+.pin-card strong {
+  display: block;
+  margin: 4px 0;
+  font-size: 15px;
+  letter-spacing: -0.03em;
+}
+.pin-card em {
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 700;
+  color: #a86f52;
+}
+/* On the phone map: pinch to zoom (no zoom buttons); the attribution chip moves to the top. */
+.phone-map .maplibregl-ctrl-top-right {
+  display: none;
+}
+.phone-map .maplibregl-ctrl-bottom-left {
+  top: 0;
+  bottom: auto;
+}
+.phone-map .maplibregl-ctrl-bottom-left .maplibregl-ctrl-attrib {
+  margin: 8px 0 0 8px;
+}
+/* The sheet. Its height is set by PhoneSheet (two thirds, full, or following a drag). */
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 8;
+  background: #1d2420;
+  opacity: 0;
+  transition: opacity var(--col-motion);
+}
+.sheet-backdrop.shown {
+  opacity: 0.24;
+}
+.phone-sheet {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 9;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #d5e0d3;
+  border-bottom: 0;
+  border-radius: 24px 24px 0 0;
+  background: #fffdf8;
+  box-shadow: 0 -8px 24px #28382e26;
+  transition:
+    height var(--col-motion),
+    border-radius var(--col-motion);
+}
+.phone-sheet.is-full {
+  border-radius: 0;
+}
+.phone-sheet.is-dragging {
+  transition: none;
+}
+.sheet-grab {
+  position: relative;
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 44px;
+  padding: 8px 12px 0 18px;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.phone-sheet.is-full .sheet-grab {
+  height: calc(44px + env(safe-area-inset-top, 0px));
+  padding-top: calc(8px + env(safe-area-inset-top, 0px));
+  border-bottom: 1px solid #e3e8df;
+}
+.sheet-handle {
+  position: absolute;
+  top: 7px;
+  left: calc(50% - 20px);
+  width: 40px;
+  height: 5px;
+  border-radius: 3px;
+  background: #cfd8cc;
+}
+.phone-sheet.is-full .sheet-handle {
+  top: calc(7px + env(safe-area-inset-top, 0px));
+}
+.sheet-grab strong {
+  overflow: hidden;
+  font-size: 14px;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.sheet-grab strong.shown {
+  opacity: 1;
+}
+.sheet-grab .card-close {
+  flex: none;
+  margin-top: 4px;
+}
+.sheet-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+/* The detail card inside the sheet: the sheet is the card. */
+.phone-sheet .panel {
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  animation: none;
+  clip-path: none;
+  width: auto;
+}
+.phone-sheet .panel-close {
+  display: none;
+}
+.phone-sheet .panel-body {
+  padding: 0 18px 22px;
+  overflow: visible;
+}
+.phone-sheet .panel-kicker {
+  margin-right: 0;
+}
+.phone-sheet .panel-body h2 {
+  margin-bottom: 14px;
+  padding-right: 0;
+  font-size: 23px;
+}
+.phone-sheet .photos {
+  min-height: 0;
 }
 
 /* ---------------------------------------------------------------------------------------------
@@ -1785,7 +2058,9 @@ button:disabled {
     animation-duration: 1ms;
   }
   .panel.from-corner,
-  .panel.from-corner.is-closing {
+  .panel.from-corner.is-closing,
+  .phone-sheet,
+  .sheet-backdrop {
     transition: none;
   }
   .lightbox,

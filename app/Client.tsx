@@ -4,9 +4,13 @@ import type { Entry, Photo, Trip } from '../lib/data';
 import { DetailPanel } from './components/DetailPanel';
 import { Header } from './components/Header';
 import { Lightbox } from './components/Lightbox';
+import { MapIcon } from './components/icons';
 import { MapCard } from './components/MapCard';
+import { PhoneMap } from './components/PhoneMap';
+import { PhoneSheet } from './components/PhoneSheet';
 import { Timeline } from './components/Timeline';
 import { allPhotos } from './lib/format';
+import { useIsPhone } from './lib/useIsPhone';
 
 /**
  * The journey page: the timeline on the left, the map card and detail card on the right, and the
@@ -39,6 +43,12 @@ export default function Client({ trip }: { trip: Trip }) {
   // Everything closed (counted from the start of the detail card's exit, so the map narrows into
   // its pill and the timeline centres while the card leaves, not after).
   const collapsed = !mapOpen && (!detailsOpen || panelClosing);
+
+  // Phones (under 768px) get their own map and details: a full-screen map opened from a floating
+  // button, where a tapped pin shows a card (`peek`), and the details in a bottom sheet.
+  const isPhone = useIsPhone();
+  const [phoneMap, setPhoneMap] = useState(false);
+  const [peek, setPeek] = useState<Entry | null>(null);
 
   const scroller = useRef<HTMLElement>(null);
   const rail = useRef<HTMLElement>(null);
@@ -94,6 +104,10 @@ export default function Client({ trip }: { trip: Trip }) {
     setActivePhoto(null);
     setFocus(null);
   }
+  function closePhoneMap() {
+    setPhoneMap(false);
+    setPeek(null);
+  }
   function pickPhoto(p: Photo) {
     setActivePhoto(p);
     setFocus(p);
@@ -104,7 +118,9 @@ export default function Client({ trip }: { trip: Trip }) {
   // then the detail card.
   useEffect(() => {
     function key(ev: KeyboardEvent) {
-      if (ev.key === 'Escape' && !full && detailsOpen && !panelClosing) closeDetails();
+      if (ev.key !== 'Escape' || full) return;
+      if (detailsOpen && !panelClosing) closeDetails();
+      else if (phoneMap && !detailsOpen) closePhoneMap();
     }
     window.addEventListener('keydown', key);
     return () => window.removeEventListener('keydown', key);
@@ -163,34 +179,84 @@ export default function Client({ trip }: { trip: Trip }) {
           onShowAlbum={showAlbum}
         />
       </section>
-      <aside className="right">
-        <MapCard
-          trip={trip}
-          open={mapOpen}
-          collapsed={collapsed}
-          onOpen={setMapOpen}
-          selected={selected}
-          focused={focus}
-          day={day}
-          onSelect={choose}
-          onWholeTrip={() => setDay('')}
-        />
-        {detailsOpen && (
-          <DetailPanel
+      {isPhone ? (
+        <>
+          {!phoneMap && (
+            <button className="map-fab" onClick={() => setPhoneMap(true)}>
+              <MapIcon /> Map
+            </button>
+          )}
+          {phoneMap && (
+            <PhoneMap
+              trip={trip}
+              day={day}
+              onDay={setDay}
+              selected={selected}
+              focused={focus}
+              peek={peek}
+              onPeek={(e) => {
+                setPeek(e);
+                setDay(e.day);
+              }}
+              onDetails={choose}
+              onClose={closePhoneMap}
+            />
+          )}
+          {detailsOpen && (
+            <PhoneSheet
+              key={album || selected?.id}
+              title={
+                album ? (days.find((d) => d.date === album)?.title ?? '') : (selected?.title ?? '')
+              }
+              closing={panelClosing}
+              onClose={closeDetails}
+            >
+              <DetailPanel
+                selected={selected}
+                album={album}
+                days={days}
+                photos={photos}
+                page={photoPage}
+                onPage={setPhotoPage}
+                activePhoto={activePhoto}
+                onPickPhoto={pickPhoto}
+                closing={panelClosing}
+                fromCorner={panelCorner.current}
+                onClose={closeDetails}
+              />
+            </PhoneSheet>
+          )}
+        </>
+      ) : (
+        <aside className="right">
+          <MapCard
+            trip={trip}
+            open={mapOpen}
+            collapsed={collapsed}
+            onOpen={setMapOpen}
             selected={selected}
-            album={album}
-            days={days}
-            photos={photos}
-            page={photoPage}
-            onPage={setPhotoPage}
-            activePhoto={activePhoto}
-            onPickPhoto={pickPhoto}
-            closing={panelClosing}
-            fromCorner={panelCorner.current}
-            onClose={closeDetails}
+            focused={focus}
+            day={day}
+            onSelect={choose}
+            onWholeTrip={() => setDay('')}
           />
-        )}
-      </aside>
+          {detailsOpen && (
+            <DetailPanel
+              selected={selected}
+              album={album}
+              days={days}
+              photos={photos}
+              page={photoPage}
+              onPage={setPhotoPage}
+              activePhoto={activePhoto}
+              onPickPhoto={pickPhoto}
+              closing={panelClosing}
+              fromCorner={panelCorner.current}
+              onClose={closeDetails}
+            />
+          )}
+        </aside>
+      )}
       {full && (
         <Lightbox photo={full} set={photos} onChange={setFull} onClose={() => setFull(null)} />
       )}

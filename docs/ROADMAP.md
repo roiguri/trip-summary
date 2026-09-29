@@ -49,15 +49,9 @@ Build what Phase 1 agreed: the importers (porting `legacy-vite/src/lib/importers
 - Trip picker (the schema already supports multiple trips with one `is_current`).
 - Export/backup.
 
-## Phase 4 — Mobile: design (its own step)
+## Phase 4 — Mobile
 
-Nothing has been discussed or designed for mobile yet; the locked design is desktop (1440×900) only. First decide together:
-
-- Which uses matter on a phone (browsing a finished trip, logging during the trip, sharing).
-- How the rail + map + detail layout translates (e.g. map as sheet/toggle, detail as full-screen sheet, rail single-sided).
-- Mocks for the key screens, agreed the same part-by-part way as Phase 0.
-
-Then implementation as its own step.
+Designed with mock options and agreed (`docs/VERIFICATION.md`, "Mobile"): a one-column timeline, a full-screen map with every day in one row, and a details sheet. Phone layout built (under 768px). Next: tablet (768–1199px) and the swipeable photo viewer.
 
 ## Phase 5 — Remaining screens
 
@@ -72,4 +66,4 @@ Then implementation as its own step.
 
 ## Immediate next step
 
-Phase 0, item 1: walk through verification part 1 (page shell and scroll model) and agree on it.
+Mobile: tablet (768–1199px) and the swipeable photo viewer. Then Phase 1 (real data design).

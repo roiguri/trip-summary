@@ -172,6 +172,16 @@ User direction: notes and place captions should look alike (the same kind of thi
 - Chosen style (user decision, from three options: paper card, margin rule, serif annotation): the mock's **paper card with tape** for notes (13px text, 15px title, card as wide as its text up to 300px), and the same paper as a small slip with tape for place captions (12px). Inside the card every line follows its own reading direction.
 - Sample trip now carries the cases: a Hebrew place caption (Garrapata), a long English note, a longer Hebrew note.
 
+### Mobile: phone layout (agreed, three rounds of mock options)
+
+Options were drawn as phone screens of the sample trip (390×844) and chosen together.
+
+- **Timeline (option 1A):** the rail runs 24px from the left edge with every entry on its right. Points are plain copper rings (no dot) with a short connector to the title (user pick after round 2); they sit on the rail centre, level with the title's first line (checked in `npm run check:interactions`). On days with multi-day lanes the text column moves past the outermost lane and the connector reaches it. Transit discs, stays, END markers, later-day labels and notes keep their desktop look; the first later-day label starts below the day's tag, which hangs over the rail on a phone. The header keeps the brand; the nav and the demo notice move into a menu.
+- **Map (option 2A):** a floating "Map" button (the desktop pill, in the thumb zone) opens a full-screen map: a top bar with "‹ Timeline", the day and "Whole trip"; every day as a pill in one row that scrolls sideways, where the pills always were (user decision: no "more", no vertical list); tapping a pin shows its card, whose "Details" opens the details sheet over the map. Pinch to zoom (no zoom buttons); the attribution chip moves to the top. The map loads only when opened.
+- **Details (option 3A):** a bottom sheet. It opens at two thirds of the screen, or at the entry's own height if less. Dragging the handle up, or scrolling the content, takes it to full height: all of its content, up to the whole screen, where the top flattens and the title pins beside × once the large one scrolls away. Dragging down, pulling down at the top of the content, ×, tapping outside or Escape go back to two thirds and then close. The title and the time/tag line keep the desktop card's gap (user report on round 2).
+- Tests: 10 phone states in `npm run visual` (390×844) and 13 phone interaction checks. Desktop unchanged (`npm run check:styles` against `main` differs only by the hidden menu button).
+- Still to do: tablet (768–1199px) and the swipeable photo viewer.
+
 ### Sample trip and preview (cross-cutting)
 
 - One preview (user decision): the sample trip. Days 1–3 stay the clean locked trip (original texts restored); days 4–6 (Big Sur, tagged "Edge cases") gather every stress case from the Kansai fixture and this review, so clutter stays in one area. See `data/README.md`.
