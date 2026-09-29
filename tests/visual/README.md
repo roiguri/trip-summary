@@ -14,3 +14,20 @@ To be reproducible, the tests render text in Liberation Sans from `fonts/` (SIL 
 see `fonts/LICENSE`; it is the page's Arial fallback on Linux), hide the map's tile canvas (tiles load
 from the internet; pins and markers stay), and turn off animations. A state fails when more than
 0.1% of its pixels change.
+
+## Style comparison (for CSS refactors)
+
+`npm run check:styles` is a stricter, slower check for changes that should not change anything. It
+loads every state above from two running builds, plus hover and keyboard-focus states of the
+interactive elements and two reduced-motion states, and compares the computed style and box of
+every element and of its `::before`/`::after`. It sees what screenshots can't: transitions,
+animations, cursors, hover and focus styles. The states are shared with the screenshots
+(`scripts/states.mjs`).
+
+```sh
+# the reference build (e.g. main, in a worktree) on 3101, the change on 3100
+BASE_A=http://localhost:3101 BASE_B=http://localhost:3100 npm run check:styles
+```
+
+A difference is not always a regression (a rule that had no visible effect may be removed); each one
+listed should be understood.

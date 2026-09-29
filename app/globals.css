@@ -1,3 +1,16 @@
+/* WAYFARER journey page. Sections follow the page: base, header, timeline (rail, entries by type,
+   notes, multi-day spans, stays), right column (map card, map markers, detail card, gallery),
+   photo viewer, reduced motion. Measurements come from the locked mocks in docs/reference at
+   1440x900; "user decision" marks choices agreed during Phase 0 (see docs/VERIFICATION.md). */
+
+/* ---------------------------------------------------------------------------------------------
+   Base
+   --------------------------------------------------------------------------------------------- */
+:root {
+  /* One motion for the whole right column (user request): the map card, the detail card and the
+     timeline's slide share this duration and curve. */
+  --col-motion: 0.34s cubic-bezier(0.4, 0, 0.2, 1);
+}
 * {
   box-sizing: border-box;
 }
@@ -21,1229 +34,40 @@ button:disabled {
   height: 100dvh;
   overflow: hidden;
 }
+
+/* ---------------------------------------------------------------------------------------------
+   Header: 65px tall, nav centred at 680px.
+   --------------------------------------------------------------------------------------------- */
 .header {
-  height: 62px;
-  border-bottom: 1px solid #e0e6dd;
-  background: #fafaf7;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 34px;
   position: relative;
   z-index: 4;
-}
-.brand {
-  font-size: 15px;
-  letter-spacing: 0.17em;
-  font-weight: 800;
-}
-.brand-mark {
-  font-size: 20px;
-  margin-right: 10px;
-  color: #426451;
-}
-.nav {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 31px;
-  font-weight: 700;
-  font-size: 10px;
-  color: #8b9c8b;
-  letter-spacing: 0.03em;
-}
-.nav-active {
-  color: #283b32;
-}
-.status {
-  font-size: 10px;
-  color: #91a193;
-}
-.left {
-  height: calc(100dvh - 62px);
-  width: min(870px, calc(100vw - 480px));
-  position: relative;
-  overflow: auto;
-  scrollbar-width: thin;
-  scrollbar-color: #d7dcd1 transparent;
-}
-/* The intro scrolls away with the timeline; its 220px box keeps the rail's opening position. */
-.intro {
-  height: 220px;
-  padding: 46px 0 0 60px;
-}
-.kicker {
-  font-size: 11px;
-  letter-spacing: 0.16em;
-  font-weight: 800;
-  margin-bottom: 11px;
-}
-.intro h1 {
-  font-size: 38px;
-  letter-spacing: -0.055em;
-  line-height: 1.15;
-  margin: 0;
-  font-weight: 750;
-}
-.intro p {
-  font-size: 11px;
-  color: #92998c;
-  margin-top: 17px;
-}
-.rail {
-  position: relative;
-  padding: 0 0 120px;
-}
-.day-section {
-  position: relative;
-}
-.day-banner {
-  position: relative;
-  left: calc(55.5% - 168px);
-  width: 260px;
-  border: 0;
-  background: #dbe9d6;
-  color: #273d30;
-  padding: 11px 14px 10px;
-  text-align: left;
-  transform: rotate(-1.8deg);
-  box-shadow: 3px 4px 0 #c8d6c5;
-  z-index: 2;
-  font-size: 18px;
-  font-weight: 750;
-  letter-spacing: -0.035em;
-  white-space: nowrap;
-}
-.day-section:nth-of-type(even) .day-banner {
-  background: #f3d1bb;
-  box-shadow: 3px 4px 0 #e5b99e;
-  transform: rotate(1deg);
-}
-.day-banner small {
-  display: block;
-  position: absolute;
-  top: calc(100% - 2px);
-  left: 10px;
-  background: #f1f4e9;
-  border: 1px solid #d1dcc9;
-  border-radius: 14px;
-  padding: 4px 9px;
-  color: #70806b;
-  font-size: 10px;
-  letter-spacing: 0;
-  font-weight: 500;
-  transform: rotate(2deg);
-}
-.entries {
-  position: relative;
-  margin-left: 55.5%;
-  border-left: 3px solid #bfd1c1;
-  min-height: 520px;
-  padding-top: 26px;
-}
-.entry {
-  display: block;
-  position: relative;
-  border: 0;
-  background: transparent;
-  color: #293d30;
-  width: 355px;
-  min-height: 124px;
-  padding: 8px 0 16px 62px;
-  text-align: left;
-}
-.entry:focus-visible,
-.day-banner:focus-visible {
-  outline: 2px solid #ac7658;
-}
-.entry-left {
-  left: -355px;
-  padding: 8px 62px 16px 0;
-  text-align: right;
-}
-.entry-right {
-  left: 0;
-}
-.entry-node {
-  position: absolute;
-  top: 15px;
-  left: -8px;
-  border: 2px solid #c67c57;
-  color: #c67c57;
-  background: #fffdfa;
-  border-radius: 50%;
-  width: 13px;
-  height: 13px;
-  font-size: 18px;
-  line-height: 6px;
-  text-align: center;
-}
-.entry-left .entry-node {
-  left: auto;
-  right: -8px;
-}
-.entry.type-transit .entry-node {
-  border: 0;
-  background: #dcefe8;
-  border-radius: 50%;
-  width: 33px;
-  height: 33px;
-  left: -17px;
-  top: 8px;
-  font-size: 17px;
-  line-height: 32px;
-  color: #397b78;
-}
-.entry.type-note .entry-node {
-  display: none;
-}
-.entry-content {
-  display: block;
-}
-.entry-content:before {
-  content: '';
-  position: absolute;
-  top: 21px;
-  left: 0;
-  width: 56px;
-  border-top: 2px solid #c88865;
-}
-.entry-left .entry-content:before {
-  left: auto;
-  right: 0;
-}
-.entry-content strong {
-  font-size: 20px;
-  font-weight: 750;
-  letter-spacing: -0.04em;
-  display: block;
-  line-height: 1.08;
-  text-decoration: underline;
-  text-decoration-color: #8eb59b;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 4px;
-}
-.entry-content small {
-  display: block;
-  margin-top: 5px;
-  font-size: 10px;
-  font-weight: 700;
-  color: #78927d;
-}
-.entry.active .entry-content strong {
-  color: #ba704c;
-}
-.stack {
-  height: 95px;
-  display: block;
-  position: relative;
-  margin: 21px 0 12px;
-  width: 245px;
-}
-.entry-left .stack {
-  margin-left: auto;
-}
-.stack img {
-  position: absolute;
-  width: 100px;
-  height: 85px;
-  object-fit: cover;
-  top: 4px;
-  left: calc(var(--i) * 67px);
-  box-shadow: 0 6px 10px #3b403322;
-  border-radius: 3px;
-  transform: rotate(calc((var(--i) - 1) * 4deg));
-  border: 1px solid #e7e5db;
-}
-.entry.type-note {
-  min-height: 112px;
-  padding-top: 0;
-}
-.entry.type-note .entry-content {
-  background: #fff8ec;
-  border: 1px solid #edddc8;
-  padding: 15px 18px;
-  box-shadow: 4px 4px 0 #e5d8c4;
-  transform: rotate(0.7deg);
-}
-.entry.type-note .entry-content:before {
-  display: none;
-}
-.entry.type-note strong {
-  font-size: 13px;
-  text-decoration: none;
-}
-.entry-note {
-  display: block;
-  font-size: 10px;
-  margin-top: 7px;
-}
-.entry.type-transit {
-  min-height: 100px;
-}
-.entry.type-transit .entry-content:before {
-  display: none;
-}
-.shell.collapsed .left {
-  width: min(900px, 100%);
-  margin: auto;
-}
-.reopen {
-  position: fixed;
-  right: 45px;
-  top: 95px;
-  border: 1px solid #cddccf;
-  border-radius: 50%;
-  background: #fdfcf8;
-  color: #426451;
-  width: 48px;
-  height: 48px;
-  box-shadow: 0 8px 20px #3332;
-}
-.right {
-  position: fixed;
-  z-index: 3;
-  right: max(40px, calc((100vw - 1370px) / 2 + 88px));
-  top: 74px;
-  bottom: 16px;
-  width: 400px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  pointer-events: none;
-}
-.right > * {
-  pointer-events: auto;
-}
-.map-card,
-.panel {
-  background: #fffdf8;
-  border: 1px solid #d5e0d3;
-  border-radius: 24px;
-  box-shadow:
-    0 9px 23px #28382e22,
-    0 2px 6px #28382e12;
-  overflow: hidden;
-}
-.map-card {
-  height: var(--map-height);
-  min-height: 165px;
-  display: flex;
-  flex-direction: column;
-  flex: none;
-}
-.card-head {
-  height: 51px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 20px;
-  flex: none;
-}
-.card-head small {
-  display: block;
-  font-size: 8px;
-  font-weight: 800;
-  letter-spacing: 0.16em;
-  color: #8aa58d;
-}
-.card-head strong {
-  display: block;
-  font-size: 14px;
-  margin-top: 3px;
-}
-.card-close {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 1px solid #d5e1d4;
-  background: #fffdf8;
-  color: #5b7b65;
-  font-size: 21px;
-  line-height: 16px;
-}
-.map-wrap {
-  flex: 1;
-  position: relative;
-  min-height: 0;
-}
-.map {
-  height: 100%;
-  width: 100%;
-  background: #d8e8e1;
-}
-.whole-chip {
-  position: absolute;
-  left: 13px;
-  top: 12px;
-  border: 1px solid #d6e2d7;
-  border-radius: 30px;
-  background: #fffdf8;
-  padding: 7px 13px;
-  color: #516b59;
-  font-weight: 750;
-  font-size: 10px;
-  box-shadow: 0 2px 4px #25352a22;
-}
-.map-foot {
-  height: 28px;
-  flex: none;
-  padding: 8px 15px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 8px;
-  font-weight: 750;
-  letter-spacing: 0.13em;
-  color: #a1b6a3;
-}
-.map-foot span:first-child {
-  color: #7f9c82;
-}
-.map-foot span:first-letter {
-  color: #c78261;
-}
-.maplibregl-control-container .maplibregl-ctrl-bottom-left {
-  display: none;
-}
-.map-pin {
-  border-radius: 50%;
-  height: 27px;
-  width: 27px;
-  border: 2px solid #c67b55;
-  color: #be714d;
-  background: #fffdf8;
-  box-shadow: 0 1px 5px #3334;
-  font-weight: 700;
-  font-size: 12px;
-  padding: 0;
-}
-.map-pin.dim-pin {
-  opacity: 0.5;
-}
-.map-pin.day-pin {
-  opacity: 1;
-}
-.map-pin.chosen-pin {
-  background: #c67b55;
-  color: #fff;
-  transform: scale(1.13);
-}
-.photo-pin {
-  background: #a0d4c5;
-  border: 2px solid white;
-  color: #426a62;
-  border-radius: 50%;
-  width: 28px;
-  height: 28px;
-  display: grid;
-  place-items: center;
-}
-.maplibregl-ctrl-top-right {
-  top: auto !important;
-  bottom: 12px !important;
-  right: 10px !important;
-}
-.panel {
-  flex: 1;
-  min-height: 0;
-}
-.panel-body {
-  height: 100%;
-  overflow: hidden;
-  padding: 20px 22px 15px;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-.panel-body h2 {
-  font-size: 24px;
-  letter-spacing: -0.045em;
-  margin: 0 0 11px;
-  line-height: 1.1;
-  flex: none;
-}
-.meta {
-  font-size: 10px;
-  color: #819887;
-  font-weight: 700;
-  margin-bottom: 14px;
-  flex: none;
-}
-.meta span {
-  padding: 0 4px;
-}
-.meta em {
-  font-size: 9px;
-  font-style: normal;
-  background: #edf4e9;
-  border: 1px solid #d4e2cf;
-  border-radius: 15px;
-  padding: 4px 7px;
-  color: #6d866f;
-  margin-left: 5px;
-}
-.photos {
-  flex: 1;
-  min-height: 0;
-  display: grid;
-  gap: 5px;
-}
-.photo {
-  padding: 0;
-  border: 0;
-  border-radius: 5px;
-  min-width: 0;
-  min-height: 0;
-  overflow: hidden;
-  background: #e2e7db;
-  position: relative;
-}
-.photo img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-.photo span {
-  display: none;
-}
-.photo-active {
-  outline: 3px solid #c7805c;
-  outline-offset: -3px;
-}
-.photos.count-1 {
-  grid-template-columns: 1fr;
-  grid-template-rows: 1fr;
-}
-.photos.count-2 {
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: 1fr;
-}
-.photos.count-3 {
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-}
-.photos.count-3 .photo:first-child {
-  grid-row: span 2;
-}
-.photos.count-4 {
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-}
-.photos.count-5 {
-  grid-template-columns: repeat(6, 1fr);
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-}
-.photos.count-5 .photo {
-  grid-column: span 2;
-}
-.photos.count-5 .photo:nth-child(-n + 2) {
-  grid-column: span 3;
-}
-.photos.count-6 {
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-}
-.photos.count-7,
-.photos.count-8 {
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-}
-.photos.count-7 .photo:first-child {
-  grid-column: span 2;
-}
-.photos.count-9 {
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(3, minmax(0, 1fr));
-}
-.photos.count-10 {
-  grid-template-columns: repeat(5, 1fr);
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-}
-.photos.count-11,
-.photos.count-12 {
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(3, minmax(0, 1fr));
-}
-.photos.count-11 .photo:last-child {
-  grid-column: span 2;
-}
-.pagination {
-  height: 30px;
-  flex: none;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  color: #9bab9c;
-}
-.pagination small {
-  font-size: 10px;
-}
-.pagination div {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  font-size: 10px;
-}
-.pagination button {
-  width: 22px;
-  height: 22px;
-  border: 0;
-  background: transparent;
-  color: #648b70;
-  font-size: 23px;
-  line-height: 18px;
-}
-.pagination-b div span {
-  padding: 5px 9px;
-  border-radius: 15px;
-  background: #eef2e9;
-}
-.pagination-c {
-  position: relative;
-}
-.pagination-c button {
-  background: #fffcf4;
-  border: 1px solid #d8e3d5;
-  border-radius: 50%;
-  height: 27px;
-  width: 27px;
-  box-shadow: 0 2px 7px #3333;
-  font-size: 17px;
-}
-.pagination-c button:last-child {
-  position: absolute;
-  right: 5px;
-  bottom: 39px;
-}
-.pagination-c button:first-child {
-  position: absolute;
-  left: 5px;
-  bottom: 39px;
-}
-.pagination-c div span {
-  position: absolute;
-  right: 35px;
-  bottom: 1px;
-}
-.note {
-  font-size: 11px;
-  line-height: 1.4;
-  border-left: 2px solid #d39978;
-  background: #fcf5e9;
-  padding: 10px 12px;
-  margin: 7px 0 5px;
-  max-height: 55px;
-  overflow: hidden;
-  flex: none;
-}
-.maps-link {
-  font-size: 10px;
-  color: #739477;
-  text-decoration: none;
-  margin-top: 3px;
-  flex: none;
-}
-.stay-info {
-  display: flex;
-  gap: 25px;
-  font-size: 9px;
-  color: #94a696;
-  border-top: 1px solid #e3e9df;
-  padding-top: 12px;
-  margin-bottom: 14px;
-}
-.stay-info b {
-  font-size: 11px;
-  color: #334837;
-}
-.lightbox {
-  position: fixed;
-  z-index: 10;
-  inset: 0;
-  background: #17251ce8;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.lightbox img {
-  max-width: 80vw;
-  max-height: 78vh;
-  object-fit: contain;
-}
-.lightbox button {
-  background: transparent;
-  border: 0;
-  color: white;
-}
-.close {
-  position: absolute;
-  right: 35px;
-  top: 30px;
-  font-size: 12px;
-  letter-spacing: 0.12em;
-}
-.lightnav {
-  font-size: 35px;
-  position: absolute;
-  top: 50%;
-}
-.lightnav.prev {
-  left: 35px;
-}
-.lightnav.next {
-  right: 35px;
-}
-.lightcaption {
-  position: absolute;
-  bottom: 30px;
-  color: #fff;
-  font-size: 14px;
-}
-.lightcaption span {
-  margin-left: 15px;
-  font-size: 11px;
-}
-.shell.collapsed .left {
-  width: 100%;
-  margin: 0;
-}
-.shell.collapsed .rail {
-  width: min(900px, 100%);
-  margin: 0 auto;
-}
-/* Minimal pager: a single vector path is mirrored, with no disabled opacity shift. */
-.pagination-a div {
-  height: 30px;
-  align-items: center;
-  gap: 7px;
-}
-.pagination-a div span {
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-}
-.pagination-a button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 24px;
-  width: 24px;
-  font-size: 0;
-  line-height: 0;
-  padding: 0;
-}
-.pagination-a button:disabled {
-  opacity: 1;
-}
-.pagination-a .pager-chevron {
-  display: block;
-  width: 16px;
-  height: 16px;
-  fill: none;
-  stroke: #648b70;
-  stroke-width: 1.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  flex: none;
-  translate: 0 -1px;
-}
-.pagination-a .prev-chevron {
-  transform: rotate(180deg);
-}
-/* Timeline labels are plain type in the locked WAYFARER design. */
-.entry-content strong,
-.entry:hover .entry-content strong,
-.entry:focus-visible .entry-content strong {
-  text-decoration: none;
-}
-
-/* Entry connectors share one geometry: rail center, single dot, and a 56px arm. */
-.entry:not(.type-note):not(.type-transit) .entry-node {
-  left: -8px;
-  right: auto;
-  top: 15px;
-  width: 13px;
-  height: 13px;
-  border: 1.5px solid #c67c57;
-  background: #fffdfa;
-  color: transparent;
-  line-height: 0;
-  font-size: 0;
-  z-index: 2;
-}
-.entry-left:not(.type-note):not(.type-transit) .entry-node {
-  left: auto;
-  right: -8px;
-}
-.entry:not(.type-note):not(.type-transit) .entry-node::after {
-  content: '';
-  position: absolute;
-  left: 4px;
-  top: 4px;
-  width: 2px;
-  height: 2px;
-  border-radius: 50%;
-  background: #c67c57;
-}
-.entry:not(.type-note):not(.type-transit) .entry-content:before {
-  left: -1.5px;
-  right: auto;
-  top: 21px;
-  width: 58px;
-  border-top: 1.5px solid #c88865;
-}
-.entry-left:not(.type-note):not(.type-transit) .entry-content:before {
-  left: auto;
-  right: -1.5px;
-}
-.entry.type-transit {
-  min-height: 100px;
-}
-.entry.type-transit .entry-content {
-  padding-top: 0;
-}
-.entry.type-transit .entry-content strong {
-  font-size: 16px;
-}
-.entry.type-transit .entry-content small,
-.transit-route {
-  display: block;
-  font-size: 10px;
-  font-weight: 600;
-  color: #78927d;
-  margin-top: 3px;
-}
-.entry.type-transit .entry-content:before {
-  display: none;
-}
-.entry.type-transit .entry-node {
-  left: -17px;
-  right: auto;
-  top: 8px;
-}
-.entry-left.type-transit .entry-node {
-  left: auto;
-  right: -17px;
-}
-.entry.type-note .entry-content {
-  position: relative;
-  direction: inherit;
-  text-align: start;
-  padding: 15px 18px;
-}
-.entry.type-note .entry-content::after {
-  content: '';
-  position: absolute;
-  top: -7px;
-  left: 41%;
-  width: 48px;
-  height: 11px;
-  background: #c8d9c8bd;
-  transform: rotate(-4deg);
-  box-shadow: 0 1px 1px #49644a14;
-}
-.entry.type-note .entry-content strong,
-.entry.type-note .entry-note {
-  text-align: start;
-}
-.entry.type-note .entry-note {
-  direction: inherit;
-}
-.entry.type-note .entry-content[dir='rtl'] {
-  direction: rtl;
-  text-align: right;
-}
-.entry.type-note .entry-content[dir='ltr'] {
-  direction: ltr;
-  text-align: left;
-}
-.entry.type-note .entry-note[dir='rtl'] {
-  direction: rtl;
-  text-align: right;
-}
-.entry.type-note .entry-note[dir='ltr'] {
-  direction: ltr;
-  text-align: left;
-}
-.entry.type-note .entry-content[dir='ltr'] .entry-note {
-  direction: ltr;
-  text-align: left;
-}
-.entry.type-note .entry-content[dir='rtl'] .entry-note {
-  direction: rtl;
-  text-align: right;
-}
-
-/* Transit is a quiet, compact rail stop, not a place-entry connector. */
-.entry.type-transit {
-  width: 355px;
-  left: 0;
-  min-height: 110px;
-  padding: 16px 0 28px 70px;
-  text-align: left;
-}
-.entry.type-transit .entry-node,
-.entry-left.type-transit .entry-node {
-  position: absolute;
-  left: -18px;
-  right: auto;
-  top: 25px;
-  width: 37px;
-  height: 37px;
-  border: 1px solid #a9d4cd;
-  border-radius: 50%;
-  background: #dcefe8;
-  color: #397b78;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2;
-  box-shadow: none;
-}
-.entry.type-transit .transit-icon {
-  width: 20px;
-  height: 20px;
-  fill: none;
-  stroke: #417f78;
-  stroke-width: 1.7;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.entry.type-transit .entry-content strong {
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 1.15;
-  letter-spacing: -0.025em;
-}
-.entry.type-transit .entry-content small {
-  font-size: 10px;
-  line-height: 1.35;
-  margin-top: 4px;
-  text-transform: none;
-  letter-spacing: 0;
-}
-.entry.type-transit .transit-route {
-  font-size: 11px;
-  line-height: 1.35;
-  color: #689289;
-  white-space: nowrap;
-  margin-top: 4px;
-}
-/* The active stop keeps the same ink as the locked timeline; only its rail dot marks selection. */
-.entry.active .entry-content strong {
-  color: #293d30;
-}
-/* Notes put their timestamp above the heading, as on the paper cards in the reference. */
-.entry.type-note .entry-content {
-  display: flex;
-  flex-direction: column;
-}
-.entry.type-note .entry-content small {
-  order: 0;
-  margin: 0 0 7px;
-  font-size: 10px;
-  color: #bc805e;
-}
-.entry.type-note .entry-content strong {
-  order: 1;
-}
-.entry.type-note .entry-content .entry-note {
-  order: 2;
-}
-/* Keep the small mode badge close to the 32px reference stop. */
-.entry.type-transit .entry-node,
-.entry-left.type-transit .entry-node {
-  width: 32px;
-  height: 32px;
-  left: -16px;
-  top: 27px;
-}
-.entry.type-transit .transit-icon {
-  width: 18px;
-  height: 18px;
-}
-/* The journey's transit leg is a teal dotted line; the rest of the rail stays green. */
-.entry.type-transit::before {
-  content: '';
-  position: absolute;
-  left: -3px;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background-color: #fffdfa;
-  background-image: radial-gradient(circle, #609b91 1.2px, transparent 1.4px);
-  background-size: 3px 10px;
-  background-position: center top;
-  z-index: 1;
-}
-.entry.type-transit .entry-node {
-  z-index: 2;
-}
-.entry.type-transit .entry-content small {
-  color: #61948d;
-  font-weight: 500;
-}
-.entry.type-transit .transit-route {
-  color: #61948d;
-  font-weight: 500;
-}
-/* A continuing overnight stay is a small rail-side chip, not a new full entry. */
-.multi-day-chip {
-  position: relative;
-  margin: 3px 0 14px 18px;
-  display: table;
-  padding: 4px 9px;
-  background: #eff2e9;
-  border: 1px solid #d3e1ce;
-  box-shadow: 1px 2px 0 #e4e9dd;
-  color: #6a9276;
-  font-size: 10px;
-  font-weight: 600;
-}
-/* Loose photo moments are single small, lightly tilted prints; place galleries keep their three-card fan. */
-.entry.type-photo .stack,
-.entry.type-cluster .stack {
-  height: 107px;
-  width: 110px;
-  margin-top: 19px;
-}
-.entry.type-photo .stack img,
-.entry.type-cluster .stack img {
-  width: 93px;
-  height: 93px;
-  left: 5px;
-  top: 0;
-  transform: rotate(-5deg);
-  box-shadow: 0 6px 9px #3b403329;
-  border: 3px solid #faf9f2;
-  border-bottom-width: 7px;
-}
-.entry.type-cluster .stack img {
-  transform: rotate(-4deg);
-}
-.sequence-eyebrow {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 9px;
-  letter-spacing: 0.16em;
-  font-weight: 700;
-  color: #9bad9b;
-  margin-bottom: 8px;
-}
-.sequence-eyebrow span:last-child {
-  letter-spacing: 0;
-  font-weight: 400;
-}
-.panel-body:has(.sequence-eyebrow) .meta {
-  font-weight: 500;
-  color: #63877c;
-}
-/* Three-day example: a second dotted lane grows from the start node, hugs the rail 6px to its right, and ends at a hollow diamond. */
-.rail {
-  --rail-x: calc(870px * 0.555);
-}
-.multiday-span {
-  position: absolute;
-  left: calc(55.5% + 4px);
-  width: 3px;
-  background-image: radial-gradient(circle, #6f9f84 1.2px, transparent 1.4px);
-  background-size: 3px 9px;
-  z-index: 1;
-  pointer-events: none;
-}
-.multiday-end {
-  position: relative;
-  height: 70px;
-  margin-top: 12px;
-  display: flex;
-  align-items: flex-start;
-  padding: 0 0 0 18px;
-  color: #729786;
-  font-size: 10px;
-  font-weight: 600;
-}
-.multiday-end .diamond {
-  position: absolute;
-  left: -7px;
-  top: 2px;
-  width: 12px;
-  height: 12px;
-  background: #fffdfa;
-  border: 1.5px solid #6f9f84;
-  transform: rotate(45deg);
-  z-index: 2;
-}
-.multiday-end small {
-  font-size: 10px;
-  margin-top: 0;
-}
-/* The duration lane lives beside the rail, while transit has its own short teal segment. */
-.entry.type-transit::before {
-  z-index: 3;
-}
-/* The final dot run bends gently back to the hollow diamond in the locked geometry. */
-.multiday-span {
-  border-bottom-left-radius: 15px;
-}
-
-/* A sequence of five keeps two columns like the locked sequence panel. */
-.panel-body .photos.count-5 {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-template-rows: repeat(3, minmax(0, 1fr));
-}
-.panel-body .photos.count-5 .photo,
-.panel-body .photos.count-5 .photo:nth-child(-n + 2) {
-  grid-column: auto;
-}
-/* Keep the transit disc clean: short teal dots flank the disc, not through it. */
-.entry.type-transit::before {
-  background-image: none;
-  background-color: #fffdfa;
-}
-.entry.type-transit::after {
-  content: '';
-  position: absolute;
-  left: -3px;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background-image: radial-gradient(circle, #609b91 1.2px, transparent 1.4px);
-  background-size: 3px 10px;
-  z-index: 4;
-  pointer-events: none;
-  mask-image: linear-gradient(to bottom, #000 0 26px, transparent 26px 58px, #000 58px);
-}
-.entry.type-transit .entry-node {
-  z-index: 5;
-}
-.multiday-span {
-  background-repeat: repeat-y;
-  background-clip: content-box;
-  padding-bottom: 14px;
-}
-.multiday-span::after {
-  content: '';
-  position: absolute;
-  left: -7px;
-  bottom: -1px;
-  width: 12px;
-  height: 15px;
-  background:
-    radial-gradient(circle at 9px 1px, #6f9f84 1.2px, transparent 1.4px),
-    radial-gradient(circle at 8px 5px, #6f9f84 1.2px, transparent 1.4px),
-    radial-gradient(circle at 6px 9px, #6f9f84 1.2px, transparent 1.4px);
-  mask-image: none;
-}
-/* Locked two-track treatment: a solid rail and distinct, round dots 7px to its right. */
-.multiday-span {
-  left: calc(55.5% + 5px);
-  width: 7px;
-  background-image: radial-gradient(circle at 3px 3px, #6f9f84 0 1px, transparent 1.25px);
-  background-size: 7px 10px;
-  background-position: 0 0;
-}
-.entry.type-transit::before {
-  left: -3px;
-  width: 3px;
-  background: #63a39b;
-  z-index: 3;
-}
-.entry.type-transit::after {
-  left: 5px;
-  width: 7px;
-  top: 0;
-  bottom: 0;
-  background: radial-gradient(circle at 3px 3px, #6f9f84 0 1px, transparent 1.25px) 0 0/7px 10px
-    repeat-y;
-  mask-image: none;
-  z-index: 4;
-}
-.entry.type-transit .entry-node,
-.entry-left.type-transit .entry-node {
-  background: #f2f7f1;
-  border: 1px solid #a7d0c7;
-  color: #397b78;
-  z-index: 5;
-}
-.entry.type-transit .entry-content strong {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0;
-}
-.entry.type-transit .entry-content small,
-.entry.type-transit .transit-route {
-  color: #548b84;
-}
-.multi-day-chip {
-  background: #f3f5ed;
-  border: 1px solid #d9e0d1;
-  box-shadow: 1px 2px 0 #e8ece2;
-  color: #436c5f;
-}
-/* The locked journal has a continuous pair: solid rail, then round-dot track. */
-.entries {
-  background-image: radial-gradient(circle at 3px 3px, #749d85 0 1px, transparent 1.25px);
-  background-size: 7px 10px;
-  background-position: 5px 0;
-  background-repeat: repeat-y;
-}
-.multiday-span {
-  background: none;
-}
-.entry.type-transit::after {
-  background: none;
-}
-/* Photos fill each tilted card edge-to-edge; no instant-photo frame. */
-.stack img,
-.entry.type-photo .stack img,
-.entry.type-cluster .stack img {
-  border: 0;
-  border-radius: 4px;
-  box-shadow: 0 6px 10px #3b403329;
-}
-/* Exact paper-card treatment is edge-to-edge with a shallow rounded corner. */
-.entry.type-photo .stack img,
-.entry.type-cluster .stack img {
-  border: 0 !important;
-  border-radius: 5px;
-  box-shadow: 0 6px 10px #3b403329;
-}
-.entry.type-place .stack img,
-.entry.type-lodging .stack img {
-  border: 0;
-  border-radius: 4px;
-}
-
-/* ------------------------------------------------------------------------------------------
-   Part 2 style pass: values measured from docs/reference/mock (panel-ratio-large,
-   panel-final-place, image-e55ca7ac) at 1440x900. Kept together here until the Phase 0
-   refactor folds them into the base rules. The pager keeps the thin chevrons (style A).
-   ------------------------------------------------------------------------------------------ */
-
-/* Header: 65px tall, smaller mark, tighter wordmark, 11px nav/status, nav centred at 680px. */
-.header {
   height: 65px;
   padding: 0 35px;
+  border-bottom: 1px solid #e0e6dd;
+  background: #fafaf7;
 }
 .brand {
   font-size: 15px;
+  font-weight: 800;
   letter-spacing: 0.07em;
 }
 .brand-mark {
-  font-size: 14px;
   margin-right: 8px;
+  color: #426451;
+  font-size: 14px;
   letter-spacing: 0;
 }
 .nav {
+  position: absolute;
   left: calc(50% - 40px);
+  transform: translateX(-50%);
+  display: flex;
   gap: 28px;
   font-size: 11px;
+  font-weight: 700;
   letter-spacing: 0;
   color: #7f9383;
 }
@@ -1255,183 +79,241 @@ button:disabled {
   color: #7d8a80;
 }
 
-/* Timeline column: 928px wide so the rail sits at 515px; intro and first banner as in the mock. */
+/* ---------------------------------------------------------------------------------------------
+   Timeline column: 928px wide so the rail sits at 515px. With the right column closed, the scroll
+   container spans the window and its content takes its full 928px width (the side-by-side width
+   is narrower on smaller windows, which cut content off), sliding to the centre with a transform so
+   the timeline isn't re-laid out on every frame. On reopening, the container narrows only after
+   the content has slid back.
+   --------------------------------------------------------------------------------------------- */
 .left {
-  height: calc(100dvh - 65px);
+  position: relative;
   width: min(928px, calc(100vw - 512px));
+  height: calc(100dvh - 65px);
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #d7dcd1 transparent;
+  transition: width 0s linear 0.34s;
 }
+.left > .intro,
+.left > .rail {
+  width: min(928px, calc(100vw - 512px));
+  transition: transform var(--col-motion);
+}
+.shell.collapsed .left {
+  width: 100vw;
+  margin: 0;
+  transition: width 0s;
+}
+.shell.collapsed .left > .intro,
+.shell.collapsed .left > .rail {
+  width: min(928px, 100vw);
+  margin: 0;
+  transform: translateX(calc((100vw - min(928px, 100vw)) / 2));
+}
+/* The intro scrolls away with the timeline; its 244px box keeps the rail's opening position. */
 .intro {
   height: 244px;
   padding: 52px 0 0 65px;
 }
-.intro h1 {
-  font-size: 42px;
-  letter-spacing: -0.05em;
-  margin-top: 0;
-}
-.intro .kicker {
+.kicker {
   margin-bottom: 5px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+.intro h1 {
+  margin: 0;
+  font-size: 42px;
+  font-weight: 750;
+  line-height: 1.15;
+  letter-spacing: -0.05em;
 }
 .intro p {
   margin-top: 18px;
+  font-size: 11px;
   color: #8e968f;
 }
+
+/* ---------------------------------------------------------------------------------------------
+   Rail and day banners. The rail is each day's .entries left border (4px #c4d3c7, centred at
+   x=515); markers are placed relative to it.
+   --------------------------------------------------------------------------------------------- */
+.rail {
+  position: relative;
+  padding: 0 0 120px;
+}
+.day-section {
+  position: relative;
+}
 .day-banner {
+  position: relative;
   left: calc(55.5% - 178px);
+  z-index: 2;
   width: max-content;
   min-width: 250px;
   padding: 15px 16px 11px;
+  border: 0;
+  background: #dcead6;
+  box-shadow: 3px 4px 0 #c3d6bb;
+  transform: rotate(-1.8deg);
+  color: #26342c;
   font-size: 22px;
+  font-weight: 750;
   letter-spacing: -0.05em;
+  white-space: nowrap;
+  text-align: left;
+}
+.day-section:nth-of-type(even) .day-banner {
+  background: #f6d1b7;
+  box-shadow: 3px 4px 0 #e7b99c;
+  transform: rotate(1deg);
 }
 .day-banner small {
-  font-size: 11px;
-  letter-spacing: 0;
-  color: #3b4a40;
-  background: #f4f5ec;
-  border-color: #d5dccb;
+  position: absolute;
+  top: calc(100% - 2px);
+  left: 10px;
+  display: block;
   padding: 4px 10px;
+  border: 1px solid #d6e1ca;
+  border-radius: 14px;
+  background: #f4f5ec;
+  transform: rotate(2deg);
+  color: #3b4a40;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+.entries {
+  position: relative;
+  min-height: 520px;
+  margin-left: calc(55.5% - 2px);
+  padding-top: 50px;
+  border-left: 4px solid #c4d3c7;
 }
 
-/* Entries: 22px titles, neutral bylines, text 68px from the rail centre, larger photo fans. The node
-   and arm are centred on the title's first line (cap-height centre), not its baseline (user decision). */
+/* ---------------------------------------------------------------------------------------------
+   Entries. Each event is a button on alternating sides of the rail: a node on the rail, an arm
+   to the text, the title, a byline, then photos and a note. The node and arm are level with the
+   title's first line (user decision). Entries are top-aligned (buttons centre their content).
+   --------------------------------------------------------------------------------------------- */
 .entry {
-  padding-left: 65px;
-}
-.entry-left {
-  padding-left: 0;
-  padding-right: 71px;
-}
-.entry-content strong {
-  font-size: 22px;
-  letter-spacing: -0.02em;
-}
-.entry-content small {
-  margin-top: 7px;
-  color: #7f8c84;
-}
-.entry:not(.type-note):not(.type-transit) .entry-node {
-  top: 13px;
-  border-width: 2px;
-  border-color: #b98468;
-}
-.entry:not(.type-note):not(.type-transit) .entry-node::after {
-  left: 2.5px;
-  top: 2.5px;
-  width: 4px;
-  height: 4px;
-  background: #b98468;
-}
-.entry:not(.type-note):not(.type-transit) .entry-content:before {
-  top: 19px;
-  width: 61px;
-  border-top: 2px solid #b98468;
-}
-/* Entries are buttons, which centre their content vertically; entries without photos (lodging)
-   then dropped below their connector. Top-align them like the mock's "Cedar House". */
-.entry:not(.type-note):not(.type-transit) {
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+  width: 355px;
+  min-height: 124px;
+  padding: 8px 0 16px 66px;
+  border: 0;
+  background: transparent;
+  color: #293d30;
+  text-align: left;
 }
-/* Left-side nodes were 3px right of the rail centre; centre them like the right side. */
-.entry-left:not(.type-note):not(.type-transit) .entry-node {
-  right: -5px;
+.entry-left {
+  left: -355px;
+  padding: 8px 70px 16px 0;
+  text-align: right;
 }
-.entry-left:not(.type-note):not(.type-transit) .entry-content:before {
+.entry-right {
+  left: 0;
+}
+.entry:focus-visible,
+.day-banner:focus-visible {
+  outline: 2px solid #ac7658;
+}
+/* The node: a copper ring with a dot, centred on the rail. */
+.entry-node {
+  position: absolute;
+  top: 13px;
+  left: -8.5px;
+  z-index: 2;
+  width: 13px;
+  height: 13px;
+  border: 2px solid #b98468;
+  border-radius: 50%;
+  background: #fffdfa;
+  color: transparent;
+  font-size: 0;
+  line-height: 0;
+  text-align: center;
+}
+.entry-left .entry-node {
+  left: auto;
+  right: -4.5px;
+}
+.entry:not(.type-transit) .entry-node::after {
+  content: '';
+  position: absolute;
+  top: 2.5px;
+  left: 2.5px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #b98468;
+}
+.entry-content {
+  display: block;
+}
+/* The arm from the node to the text. */
+.entry-content::before {
+  content: '';
+  position: absolute;
+  top: 19px;
+  left: -1.5px;
+  width: 61px;
+  border-top: 2px solid #b98468;
+}
+.entry-left .entry-content::before {
+  left: auto;
   right: 1.5px;
   width: 64px;
 }
+.entry-content strong {
+  display: block;
+  font-size: 22px;
+  font-weight: 750;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+}
+.entry-content small {
+  display: block;
+  margin-top: 7px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #7f8c84;
+}
+/* A loose photo without a caption has no title (user decision): its time is the first line, and
+   the node and arm are level with it. */
+.entry.no-title .entry-node {
+  top: 7px;
+}
+.entry.no-title .entry-content::before {
+  top: 13px;
+}
+.entry.no-title .entry-content small {
+  margin-top: 0;
+}
+
+/* Photo fan: up to three ~92x98 cards side by side with a few px of overlap and irregular tilts. */
 .stack {
+  position: relative;
+  display: block;
   width: 266px;
   height: 102px;
-  margin-top: 10px;
+  margin: 10px 0 12px;
+}
+.entry-left .stack {
+  margin-left: auto;
 }
 .stack img {
-  width: 108px;
-  height: 92px;
-  left: calc(var(--i) * 73px);
-}
-
-/* Right column: 424px cards, 42px from the right edge, 78px from the top, 13px from the bottom. */
-.right {
-  right: max(40px, calc((100vw - 1370px) / 2 + 7px));
-  top: 78px;
-  bottom: 13px;
-  width: 424px;
-}
-.card-head {
-  height: 55px;
-  padding: 0 16px 0 18px;
-  border-bottom: 1px solid #e3e8df;
-}
-.card-head small {
-  letter-spacing: 0.2em;
-  color: #8b9a8d;
-}
-.card-head strong {
-  font-size: 16px;
-  letter-spacing: -0.06em;
-  color: #2a3a30;
-}
-.card-close {
-  width: 29px;
-  height: 29px;
-  color: #3f5c4b;
-}
-.whole-chip {
-  left: 14px;
-  top: 15px;
-  font-size: 11px;
-  letter-spacing: 0.01em;
-  color: #3d4f44;
-  padding: 7px 12px;
-}
-
-/* Detail panel: 24px inset, 26px title, 11-13px supporting text. */
-.panel-body {
-  padding: 22px 23px 16px;
-}
-.panel-body h2 {
-  font-size: 26px;
-  letter-spacing: -0.06em;
-  margin-bottom: 13px;
-}
-.meta {
-  font-size: 11px;
-  color: #6e8779;
-  margin-bottom: 23px;
-}
-.meta em {
-  font-size: 11px;
-  padding: 3px 8px;
-}
-.pagination small {
-  font-size: 11px;
-  color: #9aa39b;
-}
-.note {
-  font-size: 13px;
-  line-height: 1.45;
-  border-left: 3px solid #d3ae93;
-  background: #f8f2e9;
-  color: #3e4a42;
-  padding: 9px 13px;
-  max-height: 64px;
-}
-.maps-link {
-  font-size: 12px;
-  color: #7c9483;
-}
-
-/* Photo cards, measured from the mocks: fan cards are ~92x98 (slightly portrait), laid side by side
-   with a few px of overlap and irregular tilts; loose photos are 100px squares tilted -4deg. */
-.stack img {
-  width: 92px;
-  height: 98px;
+  position: absolute;
   top: 2px;
   left: calc(var(--i) * 86px);
-  border-radius: 5px;
+  width: 92px;
+  height: 98px;
+  object-fit: cover;
+  border-radius: 4px;
   box-shadow: 0 8px 14px #3b403330;
 }
 .stack img:nth-child(1) {
@@ -1443,280 +325,259 @@ button:disabled {
 .stack img:nth-child(3) {
   transform: rotate(-3deg);
 }
+/* A loose photo is a single 100px print tilted -4deg; a cluster is a small spread deck of up to
+   three such prints, each well visible, the first on top (user decision). */
 .entry.type-photo .stack,
 .entry.type-cluster .stack {
   width: 108px;
   height: 108px;
-  margin-top: 10px;
+}
+.entry.type-cluster .stack {
+  width: calc(108px + (var(--n, 1) - 1) * 62px);
 }
 .entry.type-photo .stack img,
 .entry.type-cluster .stack img {
+  left: 4px;
   width: 100px;
   height: 100px;
-  left: 4px;
-  top: 2px;
   border-radius: 8px;
+  box-shadow: 0 6px 10px #3b403329;
   transform: rotate(-4deg);
 }
-/* Panel gallery, as in the mocks: 7px gutters and 6px corners. */
-.photos {
-  gap: 7px;
+.entry.type-cluster .stack img {
+  left: calc(4px + var(--i) * 62px);
+  z-index: calc(3 - var(--i));
+  transform: rotate(-5deg);
 }
-.photo {
-  border-radius: 6px;
+.entry.type-cluster .stack img:nth-child(2) {
+  top: 6px;
+  transform: rotate(3deg);
 }
-
-/* Detail card fits its content: photos keep a natural size instead of stretching to fill the
-   column, so the count/pager sits directly under them. When content would outgrow the column,
-   the card and the gallery rows shrink together (the panel never scrolls). */
-.panel {
-  flex: 0 1 auto;
-  display: flex;
-  flex-direction: column;
-}
-.panel-body {
-  height: auto;
-  flex: 0 1 auto;
-}
-.photos {
-  flex: 0 1 auto;
-  --row: 110px;
-}
-.photos.count-1 {
-  --row: 250px;
-  grid-template-rows: minmax(0, var(--row));
-}
-.photos.count-2 {
-  --row: 150px;
-  grid-template-rows: minmax(0, var(--row));
-}
-.photos.count-3 {
-  --row: 105px;
-}
-.photos.count-4 {
-  --row: 125px;
-}
-.photos.count-6 {
-  --row: 95px;
-}
-.photos.count-7,
-.photos.count-8 {
-  --row: 80px;
-}
-.photos.count-9 {
-  --row: 90px;
-}
-.photos.count-10 {
-  --row: 70px;
-}
-.photos.count-11,
-.photos.count-12 {
-  --row: 76px;
-}
-.photos.count-3,
-.photos.count-4,
-.photos.count-6,
-.photos.count-7,
-.photos.count-8,
-.photos.count-10 {
-  grid-template-rows: repeat(2, minmax(0, var(--row)));
-}
-.photos.count-9,
-.photos.count-11,
-.photos.count-12,
-.panel-body .photos.count-5 {
-  grid-template-rows: repeat(3, minmax(0, var(--row)));
-}
-.panel-body .photos.count-5 {
-  --row: 120px;
-}
-.pagination {
-  margin-top: 4px;
-}
-/* Five photos: photo sequences keep the mock's 2x3 grid; places and day albums, which also show a
-   note, use the shorter two-over-three layout so the tiles keep their shape. */
-.panel:not(.panel-cluster) .panel-body .photos.count-5 {
-  --row: 110px;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, var(--row)));
-}
-.panel:not(.panel-cluster) .panel-body .photos.count-5 .photo {
-  grid-column: span 2;
-}
-.panel:not(.panel-cluster) .panel-body .photos.count-5 .photo:nth-child(-n + 2) {
-  grid-column: span 3;
+.entry.type-cluster .stack img:nth-child(3) {
+  top: 1px;
+  transform: rotate(8deg);
 }
 
-/* ------------------------------------------------------------------------------------------
-   Part 2: rail and day banners, sampled from mock/app-locked-geometry-final-full and
-   mock/transit-locked-zoom. Rail 4px #c4d3c7 at x=513-516 (1440px); round-dot lane 2px #739d7c
-   dots every 12px, centred 9px right of the rail centre. Rail-relative markers move with it.
-   ------------------------------------------------------------------------------------------ */
-.entries {
-  margin-left: calc(55.5% - 2px);
-  border-left: 4px solid #c4d3c7;
-  background-image: radial-gradient(circle at 3px 3px, #739d7c 0 1px, transparent 1.25px);
-  background-size: 7px 12px;
-  background-position: 4px 0;
-}
-.entry {
-  padding-left: 66px;
-}
-.entry-left {
-  padding-left: 0;
-  padding-right: 70px;
-}
-.entry:not(.type-note):not(.type-transit) .entry-node {
-  left: -8.5px;
-}
-.entry-left:not(.type-note):not(.type-transit) .entry-node {
-  left: auto;
-  right: -4.5px;
-}
-.entry.type-transit .entry-node {
-  left: -18.5px;
+/* Transit is a compact stop: a 32px teal disc with the mode's Lucide icon, level with the title's
+   first line, on a fixed 110px teal segment of the rail centred on the disc. The text sits 10px
+   past the disc (rail + 26px), or 10px past the outermost multi-day lane running at that time
+   (lanes are at +9/+18/+27px; `--outer` comes from the data layer). Always on the right. */
+.entry.type-transit {
+  display: block;
+  left: 0;
+  min-height: 110px;
+  padding: 16px 0 28px max(24px, calc((var(--outer, -1) + 1) * 9px + 8px));
+  text-align: left;
 }
 .entry.type-transit::before {
-  left: -4px;
-  width: 4px;
-}
-.multiday-span {
-  left: calc(55.5% + 3px);
-}
-.multiday-end .diamond {
-  left: -8px;
-}
-.day-banner {
-  background: #dcead6;
-  box-shadow: 3px 4px 0 #c3d6bb;
-  color: #26342c;
-}
-.day-section:nth-of-type(even) .day-banner {
-  background: #f6d1b7;
-  box-shadow: 3px 4px 0 #e7b99c;
-}
-.day-banner small {
-  border-color: #d6e1ca;
-}
-/* First entry sits ~78px below the banner's bottom edge on every day of the locked mock. */
-.entries {
-  padding-top: 50px;
-}
-/* The round-dot lane belongs to multi-day events only (locked geometry mock; user decision):
-   no lane along the plain rail, the same 2px #739d7c dots every 12px at +9px while a span runs. */
-.entries {
-  background-image: none;
-}
-.multiday-span {
-  left: calc(55.5% + 6px);
-  width: 7px;
-  background-image: radial-gradient(circle at 3px 3px, #739d7c 0 1px, transparent 1.25px);
-  background-size: 7px 12px;
-  background-repeat: repeat-y;
-  background-position: 0 0;
-}
-
-/* ------------------------------------------------------------------------------------------
-   Part 7: multi-day span, sampled from mock/app-locked-geometry-final-full. Positions are
-   relative to the rail centre (x=515 at 1440px) and the end diamond's centre.
-   ------------------------------------------------------------------------------------------ */
-/* Later-day label: 2px accent edge, no outline, soft offset shadow, 11px bold, 21px right of the rail. */
-.multi-day-chip {
-  margin-left: 20px;
-  padding: 5px 10px;
-  border: 0;
-  border-left: 2px solid #9cb7a0;
-  background: #f0f2e8;
-  box-shadow: 2px 2px 0 #dfe8dc;
-  color: #76937e;
-  font-size: 11px;
-  font-weight: 700;
-}
-/* The lane's dots are anchored to the end, so the last straight dot always sits 34px above the
-   diamond centre; the old ::after bend is replaced by two stepped dots on the end marker. */
-.multiday-span {
-  padding-bottom: 26px;
-  background-origin: content-box;
-  background-clip: content-box;
-  background-position: 0 100%;
-}
-.multiday-span::after {
-  display: none;
-}
-/* END label sits closer to the diamond than in the mock (user decision): 10px gap. */
-.multiday-end {
-  padding-left: 16px;
-  color: #6b8f78;
-}
-.multiday-end small {
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 16px;
-}
-.multiday-end .diamond {
-  left: -7.5px;
-  top: 2.5px;
-  width: 11px;
-  height: 11px;
-  border: 2px solid #638e70;
-}
-/* Two dots step in from the lane (+6px at -22px, +2px at -10px from the diamond centre). */
-.multiday-end::before {
   content: '';
   position: absolute;
+  top: calc(14.5px + 16px - 55px);
   left: -4px;
-  top: -18px;
-  width: 12px;
-  height: 20px;
-  background:
-    radial-gradient(circle at 8px 4px, #739d7c 0 1px, transparent 1.25px),
-    radial-gradient(circle at 4px 16px, #739d7c 0 1px, transparent 1.25px);
-  pointer-events: none;
-}
-/* Later-day labels sit close under the day banner (user decision): ~24px instead of the mock's ~57px. */
-.entries > .multi-day-chip:first-child {
-  margin-top: -27px;
-}
-/* End of a multi-day span (user decision): the lane keeps its 12px dot rhythm and turns into the
-   rail through a small rounded corner (radius 9px = the lane's offset), ending with a dot at the
-   diamond's centre. Relative to the diamond centre: last straight dot at y=-19, one dot on the
-   corner at (+8.8, -7), final dot at (0, 0). */
-.multiday-span {
-  padding-bottom: 11px;
-}
-.multiday-end::before {
-  left: -4px;
-  top: -2px;
-  width: 14px;
-  height: 14px;
   z-index: 3;
-  background:
-    radial-gradient(circle at 10.78px 2.98px, #739d7c 0 1px, transparent 1.25px),
-    radial-gradient(circle at 2px 10px, #739d7c 0 1px, transparent 1.25px);
+  width: 4px;
+  height: 110px;
+  background: #63a39b;
 }
-/* Multi-day lanes (user decision): overlapping spans run side by side, 9px apart. The end curve
-   is an SVG drawn per lane (LaneCurve in Client.tsx), behind the diamond. */
-.multiday-span {
-  left: calc(55.5% + 6px + var(--lane, 0) * 9px);
+.entry.type-transit .entry-node {
+  top: 14.5px;
+  left: -18.5px;
+  right: auto;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #a7d0c7;
+  background: #f2f7f1;
+  color: #397b78;
+  font-size: 17px;
+  line-height: 32px;
 }
-.multiday-end::before {
+.entry.type-transit .transit-icon {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: #3d7a73;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.entry.type-transit .entry-content::before {
   display: none;
 }
-.multiday-end {
-  padding-left: calc(16px + var(--lane, 0) * 9px);
+.entry.type-transit .entry-content strong {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: 0;
 }
-.lane-curve {
+.entry.type-transit .entry-content small,
+.transit-route {
+  display: block;
+  margin-top: 4px;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.35;
+  color: #548b84;
+}
+.transit-route {
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+/* A note entry is anchored in time like every other event (user decision): a rail node and arm
+   level with its title, then the mock's paper card with a tape strip holding the title, the
+   "NOTE · time" byline and the text. The arm hangs off the entry, as the card is tilted. Inside
+   the card every line follows its own reading direction (English left, Hebrew right). */
+.entry.type-note {
+  display: block;
+  min-height: 0;
+  padding-bottom: 22px;
+}
+.entry.type-note .entry-node {
+  top: 25px;
+}
+.entry.type-note::before {
+  content: '';
   position: absolute;
-  z-index: 1;
-  fill: #739d7c;
-  pointer-events: none;
+  top: 31px;
+  left: -1.5px;
+  width: 58px;
+  border-top: 2px solid #b98468;
 }
-.multiday-end .diamond {
-  z-index: 2;
+.entry-left.type-note::before {
+  left: auto;
+  right: 1.5px;
+  width: 61px;
 }
-/* Lane colours (user decision): each drawn lane has its own muted colour, carried by its dots,
-   end curve, diamond, END label and the edge of its later-day labels. Spans beyond the 3-lane cap
-   (lane-x) have no line; their labels and end marker are neutral grey. */
+.entry.type-note .entry-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: fit-content;
+  max-width: 300px;
+  padding: 14px 16px 15px;
+  border: 1px solid #edddc8;
+  background: #fff8ec;
+  box-shadow: 4px 4px 0 #e5d8c4;
+  transform: rotate(0.4deg);
+  text-align: start;
+}
+.entry-left.type-note .entry-content {
+  margin-left: auto;
+}
+.entry.type-note .entry-content::before {
+  display: none;
+}
+.entry.type-note .entry-content::after {
+  content: '';
+  position: absolute;
+  top: -7px;
+  left: calc(50% - 24px);
+  width: 48px;
+  height: 11px;
+  background: #c8d9c8bd;
+  box-shadow: 0 1px 1px #49644a14;
+  transform: rotate(-4deg);
+}
+.entry.type-note .entry-content strong {
+  font-size: 15px;
+  line-height: 18px;
+  letter-spacing: -0.01em;
+  text-align: start;
+}
+.entry.type-note .entry-content small {
+  order: 1;
+  margin: 6px 0 0;
+  font-size: 11px;
+  text-align: start;
+}
+.entry.type-note .entry-caption {
+  order: 2;
+  max-width: none;
+  margin: 9px 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  font-size: 13px;
+  line-height: 19px;
+}
+
+/* A place's or stay's note on the timeline, under its photos: the same paper as a note entry, as a
+   small taped slip (user decision). It is only as wide as its text (up to a limit) and hugs the
+   rail side; it is clamped with "See more". */
+.entry-caption {
+  position: relative;
+  display: block;
+  width: fit-content;
+  max-width: 266px;
+  margin-top: 14px;
+  padding: 9px 12px 10px;
+  border: 1px solid #edddc8;
+  background: #fff8ec;
+  box-shadow: 3px 3px 0 #e8dccb;
+  color: #45524a;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 17px;
+  white-space: normal;
+  text-align: start;
+}
+.entry-left .entry-caption {
+  margin-left: auto;
+}
+.entry-caption::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: calc(50% - 16px);
+  width: 32px;
+  height: 8px;
+  background: #c8d9c8bd;
+  transform: rotate(-4deg);
+}
+.entry.type-note .entry-caption::before {
+  display: none;
+}
+.entry-caption-text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--lines, 2);
+  line-clamp: var(--lines, 2);
+  overflow: hidden;
+}
+.entry-caption-text.open {
+  display: block;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+}
+.entry-caption-more {
+  display: inline-block;
+  margin-top: 2px;
+  color: #a86f52;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 700;
+  cursor: pointer;
+}
+.entry-caption-more:hover,
+.entry-caption-more:focus-visible {
+  text-decoration: underline;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Multi-day spans (user decisions). Overlapping spans run side by side as dotted lanes 9px apart
+   (one SVG path each, drawn by LanePath: start curve, straight lane and end curve share a 12px dot
+   spacing), ending at a hollow diamond with an "END" label 10px from it. Later days show a label
+   close under the day banner. Each drawn lane has its own muted colour; spans beyond the 3-lane
+   cap (lane-x) have no line, and their labels and end marker are neutral grey. Hovering, focusing
+   or selecting a span strengthens it and fades the other lanes.
+   --------------------------------------------------------------------------------------------- */
 .lane-0 {
   --lane-dot: #739d7c;
   --lane-strong: #638e70;
@@ -1740,74 +601,6 @@ button:disabled {
   --lane-edge: #c9cec6;
   --lane-text: #858c85;
 }
-.multiday-span {
-  background-image: radial-gradient(circle at 3px 3px, var(--lane-dot) 0 1px, transparent 1.25px);
-}
-.lane-curve {
-  fill: var(--lane-dot);
-}
-.multiday-end {
-  color: var(--lane-text);
-}
-.multiday-end .diamond {
-  border-color: var(--lane-strong);
-}
-.multi-day-chip {
-  border-left-color: var(--lane-edge);
-  color: var(--lane-text);
-}
-/* Later-day labels clear every lane running that day (same 13px gap as with one lane). */
-.multi-day-chip {
-  margin-left: calc(20px + var(--outer, 0) * 9px);
-}
-/* Multi-day focus (hover, keyboard focus or selection): the event's lane, end curve, diamond and
-   labels strengthen; other lanes fade to 35% when more than one lane is drawn. */
-.multiday-span,
-.multiday-end,
-.multi-day-chip {
-  transition:
-    opacity 0.15s ease,
-    background-color 0.15s ease;
-}
-.multiday-span {
-  pointer-events: auto;
-  cursor: pointer;
-}
-/* A 13px-wide invisible hover area around the 2px dot lane. */
-.multiday-span::before {
-  content: '';
-  position: absolute;
-  inset: 0 -3px;
-}
-.is-dim {
-  opacity: 0.35;
-}
-.multiday-end.is-focus .diamond {
-  background: var(--lane-edge);
-}
-.multi-day-chip {
-  font-family: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-.multi-day-chip.is-focus {
-  background: color-mix(in srgb, var(--lane-edge) 40%, #f0f2e8);
-}
-.multi-day-chip:focus-visible {
-  outline: 2px solid var(--lane-strong);
-  outline-offset: 2px;
-}
-/* The end marker's hover area is the diamond and its label only, not the whole row. */
-.multiday-end {
-  width: max-content;
-}
-/* Multi-day lanes are one SVG path each (LanePath in Client.tsx): the start curve, straight lane
-   and end curve share the 12px dot spacing. The start node and end diamond sit above the dots.
-   (Replaces the earlier .multiday-span background lane and per-end .lane-curve.) */
-.multiday-span,
-.lane-curve {
-  display: none;
-}
 .multiday-lane {
   position: absolute;
   z-index: 1;
@@ -1825,13 +618,81 @@ button:disabled {
 .multiday-lane.is-focus circle {
   r: 1.4px;
 }
-.entry.multiday-start .entry-node {
+/* Later-day label: 2px lane-coloured edge, soft offset shadow, 11px bold, clear of every lane
+   running that day. */
+.multi-day-chip {
+  position: relative;
+  display: table;
+  margin: 3px 0 14px calc(20px + var(--outer, 0) * 9px);
+  padding: 5px 10px;
+  border: 0;
+  border-left: 2px solid var(--lane-edge);
+  background: #f0f2e8;
+  box-shadow: 2px 2px 0 #dfe8dc;
+  color: var(--lane-text);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    opacity 0.15s ease,
+    background-color 0.15s ease;
+}
+.entries > .multi-day-chip:first-child {
+  margin-top: -27px;
+}
+.multi-day-chip.is-focus {
+  background: color-mix(in srgb, var(--lane-edge) 40%, #f0f2e8);
+}
+.multi-day-chip:focus-visible {
+  outline: 2px solid var(--lane-strong);
+  outline-offset: 2px;
+}
+/* The end marker's hover area is the diamond and its label only, not the whole row. */
+.multiday-end {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  width: max-content;
+  height: 70px;
+  margin-top: 12px;
+  padding: 0 0 0 calc(16px + var(--lane, 0) * 9px);
+  color: var(--lane-text);
+  font-size: 10px;
+  font-weight: 600;
+  transition:
+    opacity 0.15s ease,
+    background-color 0.15s ease;
+}
+.multiday-end .diamond {
+  position: absolute;
+  top: 2.5px;
+  left: -7.5px;
   z-index: 2;
+  width: 11px;
+  height: 11px;
+  border: 2px solid var(--lane-strong);
+  background: #fffdfa;
+  transform: rotate(45deg);
+}
+.multiday-end.is-focus .diamond {
+  background: var(--lane-edge);
+}
+.multiday-end small {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 16px;
+}
+.is-dim {
+  opacity: 0.35;
 }
 
-/* Stays (user decision, following the locked mock): check-in entry, a compact end-of-day marker
-   for each night, and a check-out entry. The end-of-day marker is one line on the rail: a small
-   copper ring, a quiet "END OF DAY" label and the stay's name, clear of any multi-day lanes. */
+/* ---------------------------------------------------------------------------------------------
+   Stays (user decision, following the locked mock): a check-in entry, a compact end-of-day marker
+   for each night, and a check-out entry. The marker is one line on the rail: a small copper ring,
+   a quiet "END OF DAY" label and the stay's name, clear of any multi-day lanes.
+   --------------------------------------------------------------------------------------------- */
 .stay-night {
   position: relative;
   display: flex;
@@ -1842,14 +703,14 @@ button:disabled {
   padding: 0 0 0 calc(20px + var(--outer, 0) * 9px);
   border: 0;
   background: transparent;
-  font-family: inherit;
   color: #293d30;
-  cursor: pointer;
+  font-family: inherit;
   text-align: left;
+  cursor: pointer;
 }
-/* The rail is each day's .entries left border. A night marker ending the day would push its bottom
-   margin outside that box (margin collapsing) and leave a 22px break in the rail before the next
-   day; the same space is kept as padding inside the box instead. */
+/* A marker ending the day would push its bottom margin outside the day's .entries box (margin
+   collapsing) and leave a 22px break in the rail before the next day; the same space is kept as
+   padding inside the box instead. */
 .stay-night:last-child {
   margin-bottom: 0;
 }
@@ -1858,22 +719,22 @@ button:disabled {
 }
 .stay-night-node {
   position: absolute;
-  left: -6.5px;
   top: 50%;
+  left: -6.5px;
+  z-index: 2;
   width: 9px;
   height: 9px;
   margin-top: -4.5px;
   border: 2px solid #b98468;
   border-radius: 50%;
   background: #fffdfa;
-  z-index: 2;
 }
 .stay-night small {
+  color: #8f978f;
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #8f978f;
 }
 .stay-night strong {
   font-size: 13px;
@@ -1888,410 +749,98 @@ button:disabled {
   outline: 2px solid #ac7658;
   outline-offset: 3px;
 }
-/* House marker for a stay on the map. */
-.map-stay {
-  display: grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  padding: 0;
-  border: 2px solid #b98468;
-  border-radius: 50%;
-  background: #fffdf8;
-  box-shadow: 0 1px 5px #3334;
-  cursor: pointer;
-}
-.map-stay svg {
-  width: 14px;
-  height: 14px;
-  fill: #b98468;
-}
-.map-stay.chosen-pin {
-  background: #c67b55;
-  transform: scale(1.13);
-}
-.map-stay.chosen-pin svg {
-  fill: #fff;
-}
 
-/* Part 3: the transit disc is centred on its title's first line like every other event node (was
-   centred on the title + times + route block); its teal travel segment moves up with it so the disc stays centred on it. */
-.entry.type-transit .entry-node,
-.entry-left.type-transit .entry-node {
-  top: 14.5px;
-}
-.entry.type-transit::before {
-  transform: translateY(-12.5px);
-}
-
-/* Note text on the timeline (Parts 3 and 6): a place's note under its photos and the body of a note
-   entry share one look (user decision): the mock's paper card with tape for notes, and a small paper
-   slip for captions.
-   Alignment rule: the text block is only as wide as its text (up to a limit) and hugs the rail
-   side; inside it every line follows its own reading direction (English left, Hebrew right). */
-.entry-caption {
-  display: block;
-  width: fit-content;
-  max-width: 266px;
-  margin-top: 8px;
-  font-weight: 400;
-  white-space: normal;
-  text-align: start;
-}
-.entry-left .entry-caption {
-  margin-left: auto;
-}
-.entry-caption-text {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: var(--lines, 2);
-  line-clamp: var(--lines, 2);
-  overflow: hidden;
-}
-.entry-caption-text.open {
-  display: block;
-  -webkit-line-clamp: unset;
-  line-clamp: unset;
-}
-.entry-caption-more {
-  display: inline-block;
-  margin-top: 2px;
-  color: #a86f52;
-  font-size: 11px;
-  font-style: normal;
-  font-family: Arial, Helvetica, sans-serif;
-  font-weight: 700;
-  cursor: pointer;
-}
-.entry-caption-more:hover,
-.entry-caption-more:focus-visible {
-  text-decoration: underline;
-}
-
-/* Note entries are anchored in time like every other event: a rail node and arm level with the
-   note's title, then title, "NOTE · time" byline and the note text. */
-.shell .entry.type-note {
-  min-height: 0;
-  padding: 8px 0 22px 66px;
-}
-.shell .entry-left.type-note {
-  padding: 8px 70px 22px 0;
-}
-.shell .entry.type-note .entry-node {
-  display: block;
-  position: absolute;
-  top: var(--note-node, 13px);
-  left: -8.5px;
-  right: auto;
-  width: 13px;
-  height: 13px;
-  box-sizing: border-box;
-  border: 2px solid #b98468;
-  border-radius: 50%;
-  background: #fffdfa;
-  z-index: 2;
-}
-.shell .entry-left.type-note .entry-node {
-  left: auto;
-  right: -4.5px;
-}
-.shell .entry.type-note .entry-node::after {
-  content: '';
-  position: absolute;
-  top: 2.5px;
-  left: 2.5px;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: #b98468;
-}
-.shell .entry.type-note::before {
-  content: '';
-  position: absolute;
-  top: calc(var(--note-node, 13px) + 6px);
-  left: -1.5px;
-  width: var(--note-arm, 61px);
-  border-top: 2px solid #b98468;
-}
-.shell .entry-left.type-note::before {
-  left: auto;
-  right: 1.5px;
-  width: calc(var(--note-arm, 61px) + 3px);
-}
-.shell .entry.type-note .entry-content {
+/* ---------------------------------------------------------------------------------------------
+   Right column: 424px cards, 78px from the top and 13px from the bottom. The map card and the
+   detail card are independent (user decision); the map keeps its size whether it is alone or above
+   the details.
+   --------------------------------------------------------------------------------------------- */
+.right {
+  position: fixed;
+  top: 78px;
+  right: max(40px, calc((100vw - 1370px) / 2 + 7px));
+  bottom: 13px;
+  z-index: 3;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
-  position: relative;
-  width: fit-content;
-  max-width: 300px;
-  padding: 0;
-  border: 0;
-  background: none;
-  box-shadow: none;
-  transform: none;
-  text-align: start;
+  gap: 12px;
+  width: 424px;
+  pointer-events: none;
 }
-.shell .entry-left.type-note .entry-content {
-  margin-left: auto;
+.right > * {
+  pointer-events: auto;
 }
-.shell .entry.type-note .entry-content::before,
-.shell .entry.type-note .entry-content::after {
-  display: none;
-}
-.shell .entry.type-note .entry-content strong {
-  order: 0;
-  text-align: start;
-}
-.shell .entry.type-note .entry-content small {
-  order: 1;
-  margin: 6px 0 0;
-  font-size: 11px;
-  color: #7f8c84;
-  text-align: start;
-}
-.shell .entry.type-note .entry-caption {
-  order: 2;
-  max-width: none;
-  margin-left: 0;
-}
-
-/* Paper card and tape strip (the mock's note), and the same paper as a small slip for captions. */
-.shell .entry.type-note {
-  --note-node: 25px;
-  --note-arm: 58px;
-}
-.shell .entry.type-note .entry-content {
-  display: flex;
-  padding: 14px 16px 15px;
-  background: #fff8ec;
-  border: 1px solid #edddc8;
-  box-shadow: 4px 4px 0 #e5d8c4;
-  transform: rotate(0.4deg);
-}
-.shell .entry.type-note .entry-content::after {
-  display: block;
-  content: '';
-  position: absolute;
-  top: -7px;
-  left: calc(50% - 24px);
-  width: 48px;
-  height: 11px;
-  background: #c8d9c8bd;
-  transform: rotate(-4deg);
-  box-shadow: 0 1px 1px #49644a14;
-}
-.shell .entry.type-note .entry-content strong {
-  font-size: 15px;
-  line-height: 18px;
-  letter-spacing: -0.01em;
-}
-.shell .entry-caption {
-  position: relative;
-  margin-top: 14px;
-  padding: 9px 12px 10px;
-  background: #fff8ec;
-  border: 1px solid #edddc8;
-  box-shadow: 3px 3px 0 #e8dccb;
-  font-size: 12px;
-  line-height: 17px;
-  color: #45524a;
-}
-.shell .entry-caption::before {
-  content: '';
-  position: absolute;
-  top: -5px;
-  left: calc(50% - 16px);
-  width: 32px;
-  height: 8px;
-  background: #c8d9c8bd;
-  transform: rotate(-4deg);
-}
-.shell .entry.type-note .entry-caption {
-  margin-top: 9px;
-  padding: 0;
-  background: none;
-  border: 0;
-  box-shadow: none;
-  font-size: 13px;
-  line-height: 19px;
-}
-.shell .entry.type-note .entry-caption::before {
-  display: none;
-}
-
-/* Part 4: a cluster is a small spread deck of up to three cards, each well visible (user decision);
-   the first photo is on top and the deck hugs the rail side like other entries. */
-.entry.type-cluster .stack {
-  width: calc(108px + (var(--n, 1) - 1) * 62px);
-}
-.entry-left.type-cluster .stack {
-  margin-left: auto;
-}
-.entry.type-cluster .stack img {
-  left: calc(4px + var(--i) * 62px);
-  z-index: calc(3 - var(--i));
-  transform: rotate(-5deg);
-}
-.entry.type-cluster .stack img:nth-child(2) {
-  top: 6px;
-  transform: rotate(3deg);
-}
-.entry.type-cluster .stack img:nth-child(3) {
-  top: 1px;
-  transform: rotate(8deg);
-}
-
-/* A loose photo without a caption has no title (user decision): its time is the first line, and the
-   node and arm are level with it. */
-.entry.no-title .entry-content small {
-  margin-top: 0;
-}
-.entry.no-title:not(.type-note):not(.type-transit) .entry-node {
-  top: 7px;
-}
-.entry.no-title:not(.type-note):not(.type-transit) .entry-content:before {
-  top: 13px;
-}
-
-/* Part 5: transit. The text sits close to the stop: 10px past the disc (rail + 26px), or 10px past
-   the outermost multi-day lane running at that time (lanes are at +9/+18/+27px; `--outer` comes
-   from the data layer). It was 72px, the place-entry column. The disc stays level with the title's first line, and the teal
-   travel segment is a fixed 110px centred on the disc (it was the entry's height, so the disc sat
-   off-centre). Icons are Lucide line icons in one style. */
-.shell .entry.type-transit {
-  padding-left: max(24px, calc((var(--outer, -1) + 1) * 9px + 8px));
-}
-.shell .entry.type-transit::before {
-  top: calc(14.5px + 16px - 55px);
-  bottom: auto;
-  height: 110px;
-  transform: none;
-}
-.shell .entry.type-transit .transit-icon {
-  width: 18px;
-  height: 18px;
-  fill: none;
-  stroke: #3d7a73;
-  stroke-width: 1.75;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-/* Part 8: map attribution as the mock's small white chip, bottom left. */
-.map .maplibregl-control-container .maplibregl-ctrl-bottom-left {
-  display: block;
-}
-.map .maplibregl-ctrl-logo {
-  display: none;
-}
-.map .maplibregl-ctrl-bottom-left .maplibregl-ctrl-attrib {
-  margin: 0 0 8px 8px;
-  padding: 3px 9px;
-  border-radius: 999px;
-  background: #fffffff0;
-  box-shadow: 0 1px 3px #3b403322;
-  font-size: 9px;
-  line-height: 13px;
-  color: #3b4a40;
-}
-.map .maplibregl-ctrl-attrib a {
-  color: inherit;
-}
-
-/* Part 8: map and detail card are independent (user decision). The map keeps its size whether it is
-   alone or above the details; the detail card has its own close button, which clears the selection. */
+.map-card,
 .panel {
-  position: relative;
-}
-.panel-close {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  z-index: 2;
-}
-.panel-body h2 {
-  padding-right: 34px;
-}
-
-/* Part 8: merged pins are a pill with their count ("3 stops"), a different shape from numbered
-   pins, with a second ring as a small stack; transit legs sit on the route as small teal discs with their mode icon (as in the mock). */
-.map-cluster {
-  display: grid;
-  place-items: center;
-  height: 24px;
-  padding: 0 9px;
-  border: 2px solid #c67b55;
-  border-radius: 999px;
-  white-space: nowrap;
-  background: #fbefe6;
-  color: #9e5b3c;
+  overflow: hidden;
+  border: 1px solid #d5e0d3;
+  border-radius: 24px;
+  background: #fffdf8;
   box-shadow:
-    0 0 0 3px #fffdf8,
-    0 0 0 4px #c67b5599,
-    0 2px 6px #3334;
-  font-weight: 700;
-  font-size: 11px;
-  cursor: pointer;
+    0 9px 23px #28382e22,
+    0 2px 6px #28382e12;
 }
-.map-leg {
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  border: 1px solid #a9cfc4;
+.card-head {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  height: 55px;
+  padding: 0 16px 0 18px;
+  border-bottom: 1px solid #e3e8df;
+}
+.card-head small {
+  display: block;
+  color: #8b9a8d;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+}
+.card-head strong {
+  display: block;
+  margin-top: 3px;
+  color: #2a3a30;
+  font-size: 16px;
+  letter-spacing: -0.06em;
+}
+.card-close {
+  width: 29px;
+  height: 29px;
+  border: 1px solid #d5e1d4;
   border-radius: 50%;
-  background: #dcefe8;
-  box-shadow: 0 1px 4px #3333;
-  cursor: pointer;
+  background: #fffdf8;
+  color: #3f5c4b;
+  font-size: 21px;
+  line-height: 16px;
 }
-.map-leg svg {
+.card-close .map-icon {
   width: 14px;
   height: 14px;
-  fill: none;
-  stroke: #3d7a73;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.map-leg.chosen-pin {
-  background: #3d7a73;
-  border-color: #3d7a73;
-}
-.map-leg.chosen-pin svg {
-  stroke: #fff;
-}
-.map-cluster.dim-pin,
-.map-stay.dim-pin,
-.map-leg.dim-pin {
-  opacity: 0.5;
+  vertical-align: middle;
 }
 
-/* Right column transitions (user request). The map card folds into its 55px header strip: its
-   content keeps full size inside, so the map itself never resizes and the detail card moves up or
-   down with the fold. The detail card slides in on open and out on close; with both closed the
-   column fades out and the timeline glides to the centre. */
-/* The map card has three shapes: open, folded to its header strip (details open), and a small "Map"
-   pill in the corner (nothing else open). It keeps its right edge and animates between them; its
-   content keeps full size inside so the map never resizes. */
-:root {
-  /* One motion for the whole right column (user request): the map card, the detail card and the
-     timeline's slide share this duration and curve. */
-  --col-motion: 0.34s cubic-bezier(0.4, 0, 0.2, 1);
-}
+/* The map card has three shapes: open, folded to its 55px header strip (details open), and a small
+   "Map" pill in the corner (nothing else open). It keeps its right edge and animates between them;
+   its content keeps full size inside, so the map never resizes and the detail card moves with it. */
 .map-card {
   position: relative;
+  display: flex;
+  flex: none;
+  flex-direction: column;
   width: 100%;
+  height: max(165px, var(--map-height));
+  min-height: 0;
   margin-left: auto;
   transition:
     height var(--col-motion),
     width var(--col-motion),
     border-radius var(--col-motion);
 }
-.map-card {
-  min-height: 0;
-  height: max(165px, var(--map-height));
+.map-card.is-min {
+  height: 55px;
+}
+.map-card.is-min .card-head {
+  cursor: pointer;
 }
 .map-card.is-min.is-pill {
   width: 92px;
@@ -2299,7 +848,12 @@ button:disabled {
   border-radius: 20px;
 }
 .map-card-inner {
+  display: flex;
+  flex: none;
+  flex-direction: column;
   width: 422px;
+  height: calc(var(--map-height) - 2px);
+  min-height: 163px;
   transition: opacity calc(0.34s / 2) ease;
 }
 .map-card.is-pill .map-card-inner {
@@ -2346,31 +900,320 @@ button:disabled {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.card-close .map-icon {
-  width: 14px;
-  height: 14px;
-  vertical-align: middle;
-}
-.map-card.is-min {
-  height: 55px;
+.map-wrap {
+  position: relative;
+  flex: 1;
   min-height: 0;
 }
-.map-card-inner {
-  flex: none;
-  display: flex;
-  flex-direction: column;
-  height: calc(var(--map-height) - 2px);
-  min-height: 163px;
+.map {
+  width: 100%;
+  height: 100%;
+  background: #d8e8e1;
 }
-.map-card.is-min .card-head {
+.whole-chip {
+  position: absolute;
+  top: 15px;
+  left: 14px;
+  padding: 7px 12px;
+  border: 1px solid #d6e2d7;
+  border-radius: 30px;
+  background: #fffdf8;
+  box-shadow: 0 2px 4px #25352a22;
+  color: #3d4f44;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.01em;
+}
+.map-foot {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  height: 28px;
+  padding: 8px 15px;
+  color: #a1b6a3;
+  font-size: 8px;
+  font-weight: 750;
+  letter-spacing: 0.13em;
+}
+.map-foot span:first-child {
+  color: #7f9c82;
+}
+.map-foot span:first-letter {
+  color: #c78261;
+}
+/* Map controls (maplibre-gl.css loads after this file, hence the .map prefix): zoom buttons bottom
+   right, and the attribution as a small white chip bottom left, without the logo. */
+.maplibregl-ctrl-top-right {
+  top: auto !important;
+  right: 10px !important;
+  bottom: 12px !important;
+}
+.map .maplibregl-ctrl-logo {
+  display: none;
+}
+.map .maplibregl-ctrl-bottom-left .maplibregl-ctrl-attrib {
+  margin: 0 0 8px 8px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #fffffff0;
+  box-shadow: 0 1px 3px #3b403322;
+  color: #3b4a40;
+  font-size: 9px;
+  line-height: 13px;
+}
+.map .maplibregl-ctrl-attrib a {
+  color: inherit;
+}
+
+/* Map markers: numbered pins for places, a house for stays, a "N stops" pill for merged pins (a
+   different shape, with a second ring as a small stack), and small teal discs with the mode icon
+   for transit legs. Markers off the current day are dimmed. */
+.map-pin {
+  width: 27px;
+  height: 27px;
+  padding: 0;
+  border: 2px solid #c67b55;
+  border-radius: 50%;
+  background: #fffdf8;
+  box-shadow: 0 1px 5px #3334;
+  color: #be714d;
+  font-size: 12px;
+  font-weight: 700;
+}
+.map-pin.chosen-pin {
+  background: #c67b55;
+  color: #fff;
+  transform: scale(1.13);
+}
+.photo-pin {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 2px solid white;
+  border-radius: 50%;
+  background: #a0d4c5;
+  color: #426a62;
+}
+.map-stay {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 2px solid #b98468;
+  border-radius: 50%;
+  background: #fffdf8;
+  box-shadow: 0 1px 5px #3334;
   cursor: pointer;
+}
+.map-stay svg {
+  width: 14px;
+  height: 14px;
+  fill: #b98468;
+}
+.map-stay.chosen-pin {
+  background: #c67b55;
+  transform: scale(1.13);
+}
+.map-stay.chosen-pin svg {
+  fill: #fff;
+}
+.map-cluster {
+  display: grid;
+  place-items: center;
+  height: 24px;
+  padding: 0 9px;
+  border: 2px solid #c67b55;
+  border-radius: 999px;
+  background: #fbefe6;
+  box-shadow:
+    0 0 0 3px #fffdf8,
+    0 0 0 4px #c67b5599,
+    0 2px 6px #3334;
+  color: #9e5b3c;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.map-leg {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid #a9cfc4;
+  border-radius: 50%;
+  background: #dcefe8;
+  box-shadow: 0 1px 4px #3333;
+  cursor: pointer;
+}
+.map-leg svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: #3d7a73;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.map-leg.chosen-pin {
+  border-color: #3d7a73;
+  background: #3d7a73;
+}
+.map-leg.chosen-pin svg {
+  stroke: #fff;
+}
+.dim-pin {
+  opacity: 0.5;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Detail card: a label row naming the kind of entry with its date, the title, a metadata line
+   (time and tag; transit adds its mode icon and route), photos with their count and pager, the
+   note, and the Maps link (user decisions). The card fits its content and the column: photos
+   shrink to fit, but not below 150px; an expanded note always shows in full; only if both still
+   don't fit does the card scroll.
+   --------------------------------------------------------------------------------------------- */
+.panel {
+  position: relative;
+  display: flex;
+  flex: 0 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  animation: panel-in var(--col-motion) both;
+}
+.panel-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
 }
 .panel-body-wrap {
   display: contents;
 }
-/* The detail card unfolds top-down from under the map, the same kind of motion as the map's fold
-   (a clip, not a fade), so both read at the same speed. The open clip reaches past the card so its
-   shadow stays visible. */
+.panel-body {
+  display: flex;
+  flex: 0 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  padding: 22px 23px 16px;
+  overflow: hidden auto;
+  scrollbar-width: thin;
+}
+.panel-kicker {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 0 40px 7px 0;
+  color: #8b9a8d;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+.panel-kicker span + span {
+  font-size: 10.5px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.panel-body h2 {
+  flex: none;
+  margin: 0 0 13px;
+  padding-right: 34px;
+  font-size: 26px;
+  line-height: 1.1;
+  letter-spacing: -0.06em;
+}
+.meta {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 9px;
+  margin-bottom: 23px;
+  color: #6e8779;
+  font-size: 11px;
+  font-weight: 700;
+}
+.meta em {
+  padding: 3px 8px;
+  border: 1px solid #d4e2cf;
+  border-radius: 15px;
+  background: #edf4e9;
+  color: #6d866f;
+  font-size: 11px;
+  font-style: normal;
+}
+.meta-mode {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #dcefe8;
+}
+.meta-mode .transit-icon {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: #3d7a73;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.meta-route {
+  color: #3d7a73;
+}
+.meta-route + .meta-time {
+  flex-basis: 100%;
+}
+.stay-info {
+  display: flex;
+  gap: 25px;
+  margin-bottom: 14px;
+  color: #94a696;
+  font-size: 9px;
+}
+.stay-info b {
+  color: #334837;
+  font-size: 11px;
+}
+/* The note is the timeline's paper note without the tape (user decision), clamped with "See more"
+   after four lines. Without photos it follows the metadata line (or the stay's check-in/out) with
+   the same 14px gap a stay leaves before its photos. */
+.detail-note {
+  flex: none;
+  width: auto;
+  max-width: none;
+  margin: 8px 3px 10px 0;
+  padding: 10px 13px 11px;
+  color: #3e4a42;
+  font-size: 13px;
+  line-height: 19px;
+}
+.detail-note::before {
+  display: none;
+}
+.meta:has(+ .detail-note) {
+  margin-bottom: 14px;
+}
+.meta + .detail-note,
+.stay-info + .detail-note {
+  margin-top: 0;
+}
+.maps-link {
+  flex: none;
+  margin-top: 3px;
+  color: #7c9483;
+  font-size: 12px;
+  text-decoration: none;
+}
+
+/* The card unfolds top-down from under the map, the same kind of motion as the map's fold (a clip,
+   not a fade), so both read at the same speed. The open clip reaches past the card so its shadow
+   stays visible. */
 @keyframes panel-in {
   from {
     clip-path: inset(0 0 100% 0 round 24px);
@@ -2387,219 +1230,217 @@ button:disabled {
     clip-path: inset(0 0 100% 0 round 24px);
   }
 }
-/* With the map closed (the bar is, or becomes, the corner pill) the details grow from and shrink into
-   the top-right corner, following the bar. */
-/* Generated from the two curves: the left edge follows the bar's width curve (--col-motion) so the
-   details always match the bar's width; the height follows a quicker ease-out so it comes in early
-   (growing both ways on one curve read as slower than the bar). Linear between the 10% steps. */
-@keyframes panel-in-corner {
-  0% {
-    clip-path: inset(-0px -0px calc(100% + -0px) 332px round 24px);
-  }
-  10% {
-    clip-path: inset(-14.7px -14.7px calc(63.3% + -14.7px) 322.4px round 24px);
-  }
-  20% {
-    clip-path: inset(-24.4px -24.4px calc(39% + -24.4px) 282.2px round 24px);
-  }
-  30% {
-    clip-path: inset(-30.2px -30.2px calc(24.5% + -30.2px) 195.4px round 24px);
-  }
-  40% {
-    clip-path: inset(-33.9px -33.9px calc(15.3% + -33.9px) 103.7px round 24px);
-  }
-  50% {
-    clip-path: inset(-36.3px -36.3px calc(9.3% + -36.3px) 43.5px round 24px);
-  }
-  60% {
-    clip-path: inset(-37.9px -37.9px calc(5.3% + -37.9px) 6.1px round 24px);
-  }
-  70% {
-    clip-path: inset(-38.9px -38.9px calc(2.7% + -38.9px) -17px round 24px);
-  }
-  80% {
-    clip-path: inset(-39.6px -39.6px calc(1.1% + -39.6px) -30.8px round 24px);
-  }
-  90% {
-    clip-path: inset(-39.9px -39.9px calc(0.3% + -39.9px) -37.9px round 24px);
-  }
-  100% {
-    clip-path: inset(-40px -40px calc(0% + -40px) -40px round 24px);
-  }
-}
-@keyframes panel-out-corner {
-  from {
-    clip-path: inset(-40px -40px -40px -40px round 64px);
-  }
-  to {
-    clip-path: inset(0 0 100% 100% round 24px);
-  }
-}
-.panel {
-  animation: panel-in var(--col-motion) both;
-}
 .panel.is-closing {
   animation: panel-out var(--col-motion) forwards;
 }
+/* With the map closed (the bar is, or becomes, the corner pill) the card grows out of and shrinks
+   back into the pill, following the bar. It is the bar's own motion: the card's width transitions
+   from the pill's 92px with the same curve and duration as the bar's, anchored to the right edge,
+   so the two widths match on every frame; its content keeps full width inside. The height is
+   revealed by a clip on a quicker ease-out, so it comes in early (growing both ways on one curve
+   read as slower than the bar). */
 .panel.from-corner {
-  animation-name: panel-in-corner;
-  /* Opening from the pill: the keyframes already carry both curves. */
-  animation-timing-function: linear;
+  width: 100%;
+  margin-left: auto;
+  clip-path: inset(-40px round 64px);
+  animation: none;
+  transition:
+    width var(--col-motion),
+    clip-path 0.34s cubic-bezier(0.25, 1, 0.5, 1);
+}
+@starting-style {
+  .panel.from-corner {
+    width: 92px;
+    clip-path: inset(0 0 100% 0 round 24px);
+  }
 }
 .panel.from-corner.is-closing {
-  animation-name: panel-out-corner;
-  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  width: 92px;
+  animation: none;
+  clip-path: inset(0 0 100% 0 round 24px);
+  transition:
+    width var(--col-motion),
+    clip-path var(--col-motion);
 }
-/* With the right column closed, the timeline's scroll container spans the window and its content
-   takes its full 928px width (the side-by-side width is narrower on smaller windows, which cut
-   content off), sliding to the centre with a transform so the timeline isn't re-laid out on every
-   frame. On reopening, the container narrows only after the content has slid back. */
-.left {
-  transition: width 0s linear 0.34s;
-}
-.left > .intro,
-.left > .rail {
-  width: min(928px, calc(100vw - 512px));
-  transition: transform var(--col-motion);
-}
-.shell.collapsed .left {
-  width: 100vw;
-  margin: 0;
-  transition: width 0s;
-}
-.shell.collapsed .left > .intro,
-.shell.collapsed .left > .rail {
-  width: min(928px, 100vw);
-  margin: 0;
-  transform: translateX(calc((100vw - min(928px, 100vw)) / 2));
-}
-@media (prefers-reduced-motion: reduce) {
-  .map-card,
-  .map-card-inner,
-  .map-pill,
-  .left,
-  .left > .intro,
-  .left > .rail {
-    transition: none;
-  }
-  .panel,
-  .panel.is-closing {
-    animation-duration: 1ms;
-  }
+.panel.from-corner .panel-body {
+  align-self: flex-end;
+  flex-shrink: 0;
+  width: 422px;
 }
 
-/* Part 9: detail card. A label row names the kind of entry and carries the date (user decision);
-   the metadata line holds the time and the place's tag; transit adds its mode icon and route; a
-   Hebrew note has its rule on the side its text starts from. */
-.panel-kicker {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin: 0 40px 7px 0;
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  color: #8b9a8d;
-}
-.panel-kicker span + span {
-  font-size: 10.5px;
-  font-weight: 400;
-  letter-spacing: 0;
-}
-.panel-body .meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px 9px;
-}
-.panel-body .meta-time {
-  font-weight: 700;
-}
-.panel-body .meta-mode {
+/* Gallery: 7px gutters, 6px corners. The layout comes from the whole set's size (up to 12 a page),
+   so every page keeps it (user decision); rows have a natural height (--row) and shrink together
+   when the card would outgrow the column. */
+.photos {
+  --row: 110px;
   display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: #dcefe8;
-}
-.panel-body .meta-mode .transit-icon {
-  width: 14px;
-  height: 14px;
-  fill: none;
-  stroke: #3d7a73;
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.panel-body .meta-route {
-  color: #3d7a73;
-  font-weight: 700;
-}
-.panel-body .meta-route + .meta-time {
-  flex-basis: 100%;
-}
-.note[dir='rtl'] {
-  border-left: 0;
-  border-right: 3px solid #d3ae93;
-  text-align: right;
-}
-.panel-body .meta > span {
-  padding: 0;
-}
-.panel-body .meta em {
-  margin: 0;
-}
-/* Without photos the note follows the metadata line (or the stay's check-in/out) closely, with the
-   same 14px gap a stay leaves before its photos; the stay row no longer needs a rule above it. */
-.panel-body .meta:has(+ .panel-note),
-.panel-body .stay-info:has(+ .panel-note) {
-  margin-bottom: 14px;
-}
-.panel-body .meta + .panel-note,
-.panel-body .stay-info + .panel-note {
-  margin-top: 0;
-}
-.panel-body .stay-info {
-  border-top: 0;
-  padding-top: 0;
-}
-
-/* The detail card's note is the timeline's paper note without the tape (user decision): cream paper,
-   thin warm border, small offset shadow, 13px text, clamped with "See more" after four lines. */
-.panel-body .panel-note {
-  display: block;
-  width: auto;
-  max-width: none;
-  margin: 8px 3px 10px 0;
-  padding: 10px 13px 11px;
-  font-size: 13px;
-  line-height: 19px;
-  color: #3e4a42;
-  flex: none;
-}
-.panel-body .panel-note::before {
-  display: none;
-}
-.panel-body .meta + .panel-note,
-.panel-body .stay-info + .panel-note {
-  margin-top: 0;
-}
-/* The detail card fits the column: photos shrink to fit, but not below 150px; an expanded note
-   always shows in full; only if both still don't fit does the card scroll (a long title, photos and
-   an expanded long note together). */
-.panel-body .panel-note {
-  flex: none;
-}
-.panel-body .photos {
+  flex: 0 1 auto;
+  gap: 7px;
   min-height: 150px;
 }
-.panel-body {
-  overflow-y: auto;
-  scrollbar-width: thin;
+.photo {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 6px;
+  background: #e2e7db;
+}
+.photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.photo span {
+  display: none;
+}
+.photo-active {
+  outline: 3px solid #c7805c;
+  outline-offset: -3px;
+}
+.photos.count-1 {
+  --row: 250px;
+  grid-template-columns: 1fr;
+  grid-template-rows: minmax(0, var(--row));
+}
+.photos.count-2 {
+  --row: 150px;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: minmax(0, var(--row));
+}
+.photos.count-3 {
+  --row: 105px;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, minmax(0, var(--row)));
+}
+.photos.count-3 .photo:first-child {
+  grid-row: span 2;
+}
+.photos.count-4 {
+  --row: 125px;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, minmax(0, var(--row)));
+}
+/* Five: two over three; a photo sequence (cluster) keeps the mock's 2x3 grid. */
+.photos.count-5 {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, var(--row)));
+}
+.photos.count-5 .photo {
+  grid-column: span 2;
+}
+.photos.count-5 .photo:nth-child(-n + 2) {
+  grid-column: span 3;
+}
+.panel-cluster .photos.count-5 {
+  --row: 120px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(3, minmax(0, var(--row)));
+}
+.panel-cluster .photos.count-5 .photo,
+.panel-cluster .photos.count-5 .photo:nth-child(-n + 2) {
+  grid-column: auto;
+}
+.photos.count-6 {
+  --row: 95px;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, minmax(0, var(--row)));
+}
+.photos.count-7,
+.photos.count-8 {
+  --row: 80px;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(2, minmax(0, var(--row)));
+}
+.photos.count-7 .photo:first-child {
+  grid-column: span 2;
+}
+.photos.count-9 {
+  --row: 90px;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, minmax(0, var(--row)));
+}
+.photos.count-10 {
+  --row: 70px;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(2, minmax(0, var(--row)));
+}
+.photos.count-11,
+.photos.count-12 {
+  --row: 76px;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(3, minmax(0, var(--row)));
+}
+.photos.count-11 .photo:last-child {
+  grid-column: span 2;
+}
+/* Count and pager: thin mirrored chevrons, no fading when disabled. */
+.pagination {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  height: 30px;
+  margin-top: 4px;
+  color: #9bab9c;
+}
+.pagination small {
+  color: #9aa39b;
+  font-size: 11px;
+}
+.pagination div {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 30px;
+  font-size: 10px;
+}
+.pagination div span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  line-height: 1;
+}
+.pagination button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #648b70;
+  font-size: 0;
+  line-height: 0;
+}
+.pagination button:disabled {
+  opacity: 1;
+}
+.pager-chevron {
+  display: block;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: #648b70;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  translate: 0 -1px;
+}
+.prev-chevron {
+  transform: rotate(180deg);
 }
 
-/* Part 11: full-screen viewer. */
+/* ---------------------------------------------------------------------------------------------
+   Photo viewer: blurred backdrop, framed photo, round chevron arrows, and a bottom bar with the
+   caption, when it was taken and its position in the set.
+   --------------------------------------------------------------------------------------------- */
 @keyframes light-in {
   from {
     opacity: 0;
@@ -2612,13 +1453,19 @@ button:disabled {
   }
 }
 .lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: #0f1712eb;
   backdrop-filter: blur(6px);
   animation: light-in 0.22s ease both;
 }
 .light-figure {
-  margin: 0;
   display: flex;
+  margin: 0;
 }
 .light-figure img {
   display: block;
@@ -2630,7 +1477,7 @@ button:disabled {
   box-shadow: 0 24px 60px #0008;
   animation: light-photo-in 0.22s ease both;
 }
-.lightbox .light-btn {
+.light-btn {
   position: absolute;
   display: grid;
   place-items: center;
@@ -2644,10 +1491,10 @@ button:disabled {
     background 0.15s ease,
     border-color 0.15s ease;
 }
-.lightbox .light-btn:hover,
-.lightbox .light-btn:focus-visible {
-  background: #ffffff2b;
+.light-btn:hover,
+.light-btn:focus-visible {
   border-color: #ffffff59;
+  background: #ffffff2b;
   outline: none;
 }
 .light-btn svg {
@@ -2687,11 +1534,11 @@ button:disabled {
   position: absolute;
   left: 50%;
   bottom: 26px;
-  transform: translateX(-50%);
   display: flex;
   align-items: center;
   gap: 18px;
   max-width: min(82vw, 1200px);
+  transform: translateX(-50%);
   color: #f4f1e8;
 }
 .light-text {
@@ -2707,19 +1554,39 @@ button:disabled {
   letter-spacing: -0.01em;
 }
 .light-text small {
+  color: #f4f1e8a6;
   font-size: 11px;
   letter-spacing: 0.04em;
-  color: #f4f1e8a6;
 }
 .light-count {
   padding: 4px 10px;
   border: 1px solid #ffffff2e;
   border-radius: 999px;
+  color: #f4f1e8cc;
   font-size: 11px;
   font-variant-numeric: tabular-nums;
-  color: #f4f1e8cc;
 }
+
+/* ---------------------------------------------------------------------------------------------
+   Reduced motion
+   --------------------------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
+  .map-card,
+  .map-card-inner,
+  .map-pill,
+  .left,
+  .left > .intro,
+  .left > .rail {
+    transition: none;
+  }
+  .panel,
+  .panel.is-closing {
+    animation-duration: 1ms;
+  }
+  .panel.from-corner,
+  .panel.from-corner.is-closing {
+    transition: none;
+  }
   .lightbox,
   .light-figure img {
     animation: none;

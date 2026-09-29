@@ -103,7 +103,7 @@ export function DetailPanel({
           {photos.length > 0 && (
             <>
               {/* The grid is chosen from the whole set, so every page keeps the same layout. */}
-              <div className={`photos count-${Math.min(photos.length, PER_PAGE)} arrows-a`}>
+              <div className={`photos count-${Math.min(photos.length, PER_PAGE)}`}>
                 {pagePhotos.map((p) => (
                   <button
                     className={`photo ${activePhoto?.id === p.id ? 'photo-active' : ''}`}
@@ -117,7 +117,7 @@ export function DetailPanel({
               </div>
               {/* One photo: no count or arrows; one page: the count only (user decision). */}
               {photos.length > 1 && (
-                <div className="pagination pagination-a">
+                <div className="pagination">
                   <small>
                     {photos.length} {photos.length === 1 ? 'photo' : 'photos'}
                   </small>
@@ -148,7 +148,7 @@ export function DetailPanel({
           )}
           {/* The same paper note as on the timeline, without the tape (user decision). */}
           {!album && selected?.notes && (
-            <EntryCaption className="panel-note" text={selected.notes} lines={4} />
+            <EntryCaption className="detail-note" text={selected.notes} lines={4} />
           )}
           {!album &&
             (selected?.type === 'place' || selected?.type === 'lodging') &&
