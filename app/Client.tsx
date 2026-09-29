@@ -479,10 +479,23 @@ export default function Client({ trip }: { trip: Trip }) {
   const [ratio, setRatio] = useState('large');
   // The map and the detail card open and close independently (user decision). The detail card is
   // shown while something is selected or a day album is open; closing it clears the selection.
-  // With both closed the timeline centres and a round button brings the map back.
+  // A closed map folds into its header strip (so it can always be reopened); with both closed the
+  // column fades out, the timeline centres and a round button brings the map back.
   const [mapOpen, setMapOpen] = useState(true);
   const detailsOpen = !!(selected || album);
   const collapsed = !mapOpen && !detailsOpen;
+  // Closing the detail card plays its exit animation before the selection is cleared.
+  const [panelClosing, setPanelClosing] = useState(false);
+  function closeDetails() {
+    setPanelClosing(true);
+    window.setTimeout(() => {
+      setSelected(null);
+      setAlbum(null);
+      setActivePhoto(null);
+      setFocus(null);
+      setPanelClosing(false);
+    }, 240);
+  }
   const [arrows, setArrows] = useState('a');
   const [focus, setFocus] = useState<Photo | null>(null);
   // Multi-day focus: the hovered span, else the selected one; its lane, labels and end marker
@@ -633,7 +646,9 @@ export default function Client({ trip }: { trip: Trip }) {
       className={`shell ${collapsed ? 'collapsed' : ''}`}
       style={
         {
-          '--map-height': ratio === 'small' ? '20%' : ratio === 'large' ? '40%' : '30%',
+          // An absolute length (a share of the right column, which spans the viewport minus 91px),
+          // so the folding map card can keep its content at full size inside.
+          '--map-height': `calc((100dvh - 91px) * ${ratio === 'small' ? 0.2 : ratio === 'large' ? 0.4 : 0.3})`,
         } as React.CSSProperties
       }
     >
@@ -814,63 +829,67 @@ export default function Client({ trip }: { trip: Trip }) {
           ))}
         </section>
       </section>
-      {collapsed ? (
-        <button className="reopen" title="Show map" onClick={() => setMapOpen(true)}>
-          ✳
-        </button>
-      ) : (
-        <aside
-          className={`right ${mapOpen && !detailsOpen ? 'map-only' : ''} ${!mapOpen ? 'details-only' : ''}`}
-        >
-          {mapOpen && (
-            <section className="map-card">
-              <header className="card-head">
-                <div>
-                  <small>THE JOURNEY / MAP</small>
-                  <strong>{trip.destination.name}</strong>
-                </div>
-                <button className="card-close" title="Close map" onClick={() => setMapOpen(false)}>
-                  ×
-                </button>
-              </header>
-              <div className="map-wrap">
-                <MapView
-                  trip={trip}
-                  selected={selected}
-                  focused={focus}
-                  day={day}
-                  onSelect={choose}
-                  ratio={ratio}
-                />
-                <button className="whole-chip" onClick={() => setDay('')}>
-                  Whole trip
-                </button>
-              </div>
-              <footer className="map-foot">
-                <span>
-                  ● {days.length} {days.length === 1 ? 'DAY' : 'DAYS'} · OSM
-                </span>
-                <span>OPENFREEMAP</span>
-              </footer>
-            </section>
-          )}
-          {detailsOpen && (
-            <section
-              className={`panel ${album ? 'panel-album' : `panel-${selected?.type}`}`}
-              key={`${album || selected?.id}-${photoPage}`}
+      <button
+        className={`reopen ${collapsed ? 'is-shown' : ''}`}
+        title="Show map"
+        tabIndex={collapsed ? 0 : -1}
+        onClick={() => setMapOpen(true)}
+      >
+        ✳
+      </button>
+      <aside className={`right ${collapsed ? 'is-hidden' : ''}`}>
+        {/* The map stays mounted (keeping its view); when closed it folds into its header strip. */}
+        <section className={`map-card ${mapOpen ? '' : 'is-min'}`}>
+          <div className="map-card-inner">
+            <header
+              className="card-head"
+              onClick={mapOpen ? undefined : () => setMapOpen(true)}
+              title={mapOpen ? undefined : 'Show map'}
             >
+              <div>
+                <small>THE JOURNEY / MAP</small>
+                <strong>{trip.destination.name}</strong>
+              </div>
               <button
-                className="card-close panel-close"
-                title="Close details"
-                onClick={() => {
-                  setSelected(null);
-                  setAlbum(null);
-                  setActivePhoto(null);
-                  setFocus(null);
+                className="card-close"
+                title={mapOpen ? 'Close map' : 'Show map'}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setMapOpen(!mapOpen);
                 }}
               >
-                ×
+                {mapOpen ? '×' : '+'}
               </button>
+            </header>
+            <div className="map-wrap">
+              <MapView
+                trip={trip}
+                selected={selected}
+                focused={focus}
+                day={day}
+                onSelect={choose}
+                ratio={ratio}
+              />
+              <button className="whole-chip" onClick={() => setDay('')}>
+                Whole trip
+              </button>
+            </div>
+            <footer className="map-foot">
+              <span>
+                ● {days.length} {days.length === 1 ? 'DAY' : 'DAYS'} · OSM
+              </span>
+              <span>OPENFREEMAP</span>
+            </footer>
+          </div>
+        </section>
+        {detailsOpen && (
+          <section
+            className={`panel ${album ? 'panel-album' : `panel-${selected?.type}`} ${panelClosing ? 'is-closing' : ''}`}
+          >
+            <button className="card-close panel-close" title="Close details" onClick={closeDetails}>
+              ×
+            </button>
+            <div className="panel-body-wrap" key={`${album || selected?.id}-${photoPage}`}>
               <div className="panel-body">
                 {(album ? days.find((d) => d.date === album)?.title : selected?.title) && (
                   <h2>{album ? days.find((d) => d.date === album)?.title : selected?.title}</h2>
@@ -986,10 +1005,10 @@ export default function Client({ trip }: { trip: Trip }) {
                   </a>
                 )}
               </div>
-            </section>
-          )}
-        </aside>
-      )}
+            </div>
+          </section>
+        )}
+      </aside>
       {full && (
         <div className="lightbox" onClick={() => setFull(null)}>
           <button className="close" onClick={() => setFull(null)}>
