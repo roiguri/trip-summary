@@ -2552,15 +2552,49 @@ button:disabled {
 }
 /* Without photos the note follows the metadata line (or the stay's check-in/out) closely, with the
    same 14px gap a stay leaves before its photos; the stay row no longer needs a rule above it. */
-.panel-body .meta:has(+ .note),
-.panel-body .stay-info:has(+ .note) {
+.panel-body .meta:has(+ .panel-note),
+.panel-body .stay-info:has(+ .panel-note) {
   margin-bottom: 14px;
 }
-.panel-body .meta + .note,
-.panel-body .stay-info + .note {
+.panel-body .meta + .panel-note,
+.panel-body .stay-info + .panel-note {
   margin-top: 0;
 }
 .panel-body .stay-info {
   border-top: 0;
   padding-top: 0;
+}
+
+/* The detail card's note is the timeline's paper note without the tape (user decision): cream paper,
+   thin warm border, small offset shadow, 13px text, clamped with "See more" after four lines. */
+.panel-body .panel-note {
+  display: block;
+  width: auto;
+  max-width: none;
+  margin: 8px 3px 10px 0;
+  padding: 10px 13px 11px;
+  font-size: 13px;
+  line-height: 19px;
+  color: #3e4a42;
+  flex: none;
+}
+.panel-body .panel-note::before {
+  display: none;
+}
+.panel-body .meta + .panel-note,
+.panel-body .stay-info + .panel-note {
+  margin-top: 0;
+}
+/* The detail card fits the column: photos shrink to fit, but not below 150px; an expanded note
+   always shows in full; only if both still don't fit does the card scroll (a long title, photos and
+   an expanded long note together). */
+.panel-body .panel-note {
+  flex: none;
+}
+.panel-body .photos {
+  min-height: 150px;
+}
+.panel-body {
+  overflow-y: auto;
+  scrollbar-width: thin;
 }

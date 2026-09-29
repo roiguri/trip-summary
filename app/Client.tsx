@@ -24,7 +24,15 @@ function noteDir(s: string): 'ltr' | 'rtl' {
  *  share one look (user decision) and show the full text, clamped to `lines` lines with "See more"
  *  only when it is actually cut off. Lives inside the entry button, so the toggle is a span with
  *  button semantics and doesn't select the entry. */
-function EntryCaption({ text, lines = 2 }: { text: string; lines?: number }) {
+function EntryCaption({
+  text,
+  lines = 2,
+  className = '',
+}: {
+  text: string;
+  lines?: number;
+  className?: string;
+}) {
   const ref = useRef<HTMLSpanElement>(null);
   const [open, setOpen] = useState(false);
   const [clamped, setClamped] = useState(false);
@@ -43,7 +51,7 @@ function EntryCaption({ text, lines = 2 }: { text: string; lines?: number }) {
     setOpen((o) => !o);
   };
   return (
-    <span className="entry-caption" dir={noteDir(text)}>
+    <span className={`entry-caption ${className}`} dir={noteDir(text)}>
       <span
         ref={ref}
         className={`entry-caption-text ${open ? 'open' : ''}`}
@@ -1038,10 +1046,9 @@ export default function Client({ trip }: { trip: Trip }) {
                     </div>
                   </>
                 )}
+                {/* The same paper note as on the timeline, without the tape (user decision). */}
                 {!album && selected?.notes && (
-                  <p className="note" dir={noteDir(selected.notes)}>
-                    {selected.notes}
-                  </p>
+                  <EntryCaption className="panel-note" text={selected.notes} lines={4} />
                 )}
                 {!album &&
                   (selected?.type === 'place' || selected?.type === 'lodging') &&
