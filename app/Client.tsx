@@ -506,7 +506,7 @@ export default function Client({ trip }: { trip: Trip }) {
       setActivePhoto(null);
       setFocus(null);
       setPanelClosing(false);
-    }, 340); // the exit animation (--col-motion, 0.32s) plus a frame
+    }, 360); // the exit animation (--col-motion, 0.34s) plus a frame
   }
   const [arrows, setArrows] = useState('a');
   const [focus, setFocus] = useState<Photo | null>(null);

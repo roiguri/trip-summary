@@ -2278,7 +2278,7 @@ button:disabled {
 :root {
   /* One motion for the whole right column (user request): the map card, the detail card and the
      timeline's slide share this duration and curve. */
-  --col-motion: 0.32s cubic-bezier(0.3, 0.7, 0.2, 1);
+  --col-motion: 0.34s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .map-card {
   position: relative;
@@ -2300,7 +2300,7 @@ button:disabled {
 }
 .map-card-inner {
   width: 422px;
-  transition: opacity 0.18s ease;
+  transition: opacity calc(0.34s / 2) ease;
 }
 .map-card.is-pill .map-card-inner {
   opacity: 0;
@@ -2368,16 +2368,23 @@ button:disabled {
 .panel-body-wrap {
   display: contents;
 }
+/* The detail card unfolds top-down from under the map, the same kind of motion as the map's fold
+   (a clip, not a fade), so both read at the same speed. The open clip reaches past the card so its
+   shadow stays visible. */
 @keyframes panel-in {
   from {
-    opacity: 0;
-    transform: translateY(14px);
+    clip-path: inset(0 0 100% 0 round 24px);
+  }
+  to {
+    clip-path: inset(-40px -40px -40px -40px round 64px);
   }
 }
 @keyframes panel-out {
+  from {
+    clip-path: inset(-40px -40px -40px -40px round 64px);
+  }
   to {
-    opacity: 0;
-    transform: translateY(14px);
+    clip-path: inset(0 0 100% 0 round 24px);
   }
 }
 .panel {
