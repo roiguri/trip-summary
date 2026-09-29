@@ -2389,12 +2389,42 @@ button:disabled {
 }
 /* With the map closed (the bar is, or becomes, the corner pill) the details grow from and shrink into
    the top-right corner, following the bar. */
+/* Generated from the two curves: the left edge follows the bar's width curve (--col-motion) so the
+   details always match the bar's width; the height follows a quicker ease-out so it comes in early
+   (growing both ways on one curve read as slower than the bar). Linear between the 10% steps. */
 @keyframes panel-in-corner {
-  from {
-    clip-path: inset(0 0 100% 100% round 24px);
+  0% {
+    clip-path: inset(-0px -0px calc(100% + -0px) 332px round 24px);
   }
-  to {
-    clip-path: inset(-40px -40px -40px -40px round 64px);
+  10% {
+    clip-path: inset(-14.7px -14.7px calc(63.3% + -14.7px) 322.4px round 24px);
+  }
+  20% {
+    clip-path: inset(-24.4px -24.4px calc(39% + -24.4px) 282.2px round 24px);
+  }
+  30% {
+    clip-path: inset(-30.2px -30.2px calc(24.5% + -30.2px) 195.4px round 24px);
+  }
+  40% {
+    clip-path: inset(-33.9px -33.9px calc(15.3% + -33.9px) 103.7px round 24px);
+  }
+  50% {
+    clip-path: inset(-36.3px -36.3px calc(9.3% + -36.3px) 43.5px round 24px);
+  }
+  60% {
+    clip-path: inset(-37.9px -37.9px calc(5.3% + -37.9px) 6.1px round 24px);
+  }
+  70% {
+    clip-path: inset(-38.9px -38.9px calc(2.7% + -38.9px) -17px round 24px);
+  }
+  80% {
+    clip-path: inset(-39.6px -39.6px calc(1.1% + -39.6px) -30.8px round 24px);
+  }
+  90% {
+    clip-path: inset(-39.9px -39.9px calc(0.3% + -39.9px) -37.9px round 24px);
+  }
+  100% {
+    clip-path: inset(-40px -40px calc(0% + -40px) -40px round 24px);
   }
 }
 @keyframes panel-out-corner {
@@ -2413,9 +2443,12 @@ button:disabled {
 }
 .panel.from-corner {
   animation-name: panel-in-corner;
+  /* Opening from the pill: the keyframes already carry both curves. */
+  animation-timing-function: linear;
 }
 .panel.from-corner.is-closing {
   animation-name: panel-out-corner;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 /* The timeline keeps its width and slides to the centre (a transform, so it animates without
    re-laying out the timeline on every frame). */
