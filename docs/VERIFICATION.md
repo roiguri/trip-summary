@@ -115,6 +115,7 @@ Sampled from `mock/app-locked-geometry-final-full` (positions relative to the ra
 - Stay: check-in and check-out shown once (the check-in used to repeat in the metadata line); no "Stay" tag (the label says it); "View on Google Maps" when the stay has a location.
 - Transit: the card used to show only title and times; it now shows the mode icon, "from → to" and the times with a zone on each end when they differ ("12:30 PT → 15:55 MT").
 - A Hebrew note has its rule on the right, the side its text starts from.
+- Without photos the note follows the metadata line (or a stay's check-in/out) with a 14px gap (was 30px); the stay's check-in/out row has no rule above it any more (user report).
 - Map: a merged pill that would sit under the selected pin moves just above or below it.
 
 ### Part 8: Map card, and the right column (agreed with changes)

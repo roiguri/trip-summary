@@ -2550,3 +2550,17 @@ button:disabled {
 .panel-body .meta em {
   margin: 0;
 }
+/* Without photos the note follows the metadata line (or the stay's check-in/out) closely, with the
+   same 14px gap a stay leaves before its photos; the stay row no longer needs a rule above it. */
+.panel-body .meta:has(+ .note),
+.panel-body .stay-info:has(+ .note) {
+  margin-bottom: 14px;
+}
+.panel-body .meta + .note,
+.panel-body .stay-info + .note {
+  margin-top: 0;
+}
+.panel-body .stay-info {
+  border-top: 0;
+  padding-top: 0;
+}
