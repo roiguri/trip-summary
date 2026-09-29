@@ -1568,6 +1568,207 @@ button:disabled {
 }
 
 /* ---------------------------------------------------------------------------------------------
+   Phone (under 768px; agreed in docs/VERIFICATION.md, "Mobile"). One column: the rail runs down the
+   left edge with every entry on its right; points are plain copper rings with a short connector
+   to the title (user decision). The header keeps the brand and moves the nav into a menu.
+   --------------------------------------------------------------------------------------------- */
+.menu-button {
+  display: none;
+}
+@media (max-width: 767px) {
+  .header {
+    height: 50px;
+    padding: 0 12px 0 18px;
+  }
+  .brand {
+    font-size: 14px;
+  }
+  .nav,
+  .status {
+    display: none;
+  }
+  .menu-button {
+    display: grid;
+    gap: 4px;
+    place-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+  .menu-button span {
+    display: block;
+    width: 18px;
+    height: 2px;
+    background: #3f5c4b;
+  }
+  .phone-menu {
+    position: absolute;
+    top: 100%;
+    right: 8px;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 220px;
+    padding: 16px 18px;
+    border: 1px solid #d5e0d3;
+    border-radius: 16px;
+    background: #fffdf8;
+    box-shadow: 0 9px 23px #28382e22;
+    color: #7f9383;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .phone-menu small {
+    padding-top: 12px;
+    border-top: 1px solid #e3e8df;
+    color: #7d8a80;
+    font-size: 11px;
+    font-weight: 400;
+  }
+
+  /* Timeline column: the whole width. */
+  .left,
+  .shell.collapsed .left {
+    width: 100vw;
+    height: calc(100dvh - 50px);
+  }
+  .left > .intro,
+  .left > .rail,
+  .shell.collapsed .left > .intro,
+  .shell.collapsed .left > .rail {
+    width: 100%;
+    transform: none;
+  }
+  .intro {
+    height: auto;
+    padding: 22px 18px 34px;
+  }
+  .kicker {
+    font-size: 10px;
+  }
+  .intro h1 {
+    font-size: 28px;
+  }
+  .intro p {
+    margin-top: 10px;
+    font-size: 10px;
+  }
+  .day-banner {
+    left: 12px;
+    min-width: 0;
+    padding: 12px 14px 9px;
+    font-size: 19px;
+  }
+  .day-banner small {
+    font-size: 10px;
+  }
+  /* The rail sits 24px from the edge (its centre at 26px). */
+  .entries {
+    min-height: 0;
+    margin-left: 24px;
+    padding-top: 36px;
+  }
+
+  /* Entries: all on the right of the rail. */
+  /* The text starts just past the rail, or past the day's outermost multi-day lane (lanes run at
+     +9/+18/+27px); the connector reaches it. */
+  .entries {
+    --text-x: max(20px, calc(var(--day-lanes, 0) * 9px + 11px));
+  }
+  .entry,
+  .entry-left,
+  .entry-right {
+    left: 0;
+    width: auto;
+    min-height: 0;
+    padding: 6px 16px 26px var(--text-x);
+    text-align: left;
+  }
+  .entry-node,
+  .entry-left .entry-node {
+    top: 9px;
+    left: -8.5px;
+    right: auto;
+  }
+  .entry:not(.type-transit) .entry-node::after {
+    display: none;
+  }
+  .entry-content::before,
+  .entry-left .entry-content::before {
+    top: 14.5px;
+    left: 4.5px;
+    right: auto;
+    width: calc(var(--text-x) - 11px);
+  }
+  .entry-content strong {
+    font-size: 19px;
+  }
+  .entry-content small {
+    margin-top: 6px;
+  }
+  .entry.no-title .entry-node {
+    top: 5px;
+  }
+  .entry.no-title .entry-content::before {
+    top: 10.5px;
+  }
+  .stack {
+    width: 240px;
+    height: 96px;
+  }
+  .entry-left .stack,
+  .entry-left .entry-caption {
+    margin-left: 0;
+  }
+  .stack img {
+    left: calc(var(--i) * 78px);
+    width: 84px;
+    height: 90px;
+  }
+  .entry-caption {
+    max-width: 100%;
+  }
+
+  /* A note: its point and connector level with the title on the card. */
+  .entry.type-note,
+  .entry-left.type-note {
+    padding: 6px 16px 22px var(--text-x);
+  }
+  .entry.type-note .entry-node {
+    top: 23px;
+  }
+  .entry.type-note::before,
+  .entry-left.type-note::before {
+    top: 28.5px;
+    left: 4.5px;
+    right: auto;
+    width: calc(var(--text-x) - 11px);
+  }
+  .entry.type-note .entry-content {
+    max-width: 100%;
+  }
+  .entry-left.type-note .entry-content {
+    margin-left: 0;
+  }
+
+  /* Transit keeps its disc and segment; its text follows the disc or the outermost lane. */
+  .entry.type-transit {
+    padding: 14px 16px 28px max(24px, calc((var(--outer, -1) + 1) * 9px + 8px));
+  }
+  .transit-route {
+    white-space: normal;
+  }
+
+  /* Until the phone map and details land, the right column is hidden on phones. */
+  .right {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------------------------
    Reduced motion
    --------------------------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
