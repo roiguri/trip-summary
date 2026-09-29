@@ -120,6 +120,16 @@ const TRANSIT_ICONS: Record<TransitMode, string[]> = {
     'M12 17.5V14l-3-3 4-3 2 3h2',
   ],
 };
+/** Lucide "map" (ISC licence), for reopening the map. */
+function MapIcon() {
+  return (
+    <svg className="map-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z" />
+      <path d="M15 5.764v15" />
+      <path d="M9 3.236v15" />
+    </svg>
+  );
+}
 function TransitIcon({ mode }: { mode: TransitMode }) {
   return (
     <svg className="transit-icon" viewBox="0 0 24 24" aria-hidden="true">
@@ -479,13 +489,15 @@ export default function Client({ trip }: { trip: Trip }) {
   const [ratio, setRatio] = useState('large');
   // The map and the detail card open and close independently (user decision). The detail card is
   // shown while something is selected or a day album is open; closing it clears the selection.
-  // A closed map folds into its header strip (so it can always be reopened); with both closed the
-  // column fades out, the timeline centres and a round button brings the map back.
+  // A closed map folds into its header strip (so it can always be reopened); with both closed it
+  // narrows into a "Map" pill in the corner and the timeline centres.
   const [mapOpen, setMapOpen] = useState(true);
   const detailsOpen = !!(selected || album);
-  const collapsed = !mapOpen && !detailsOpen;
   // Closing the detail card plays its exit animation before the selection is cleared.
   const [panelClosing, setPanelClosing] = useState(false);
+  // Everything closed (counted from the start of the detail card's exit, so the map narrows into
+  // its pill and the timeline centres while the card leaves, not after).
+  const collapsed = !mapOpen && (!detailsOpen || panelClosing);
   function closeDetails() {
     setPanelClosing(true);
     window.setTimeout(() => {
@@ -829,17 +841,19 @@ export default function Client({ trip }: { trip: Trip }) {
           ))}
         </section>
       </section>
-      <button
-        className={`reopen ${collapsed ? 'is-shown' : ''}`}
-        title="Show map"
-        tabIndex={collapsed ? 0 : -1}
-        onClick={() => setMapOpen(true)}
-      >
-        ✳
-      </button>
-      <aside className={`right ${collapsed ? 'is-hidden' : ''}`}>
-        {/* The map stays mounted (keeping its view); when closed it folds into its header strip. */}
-        <section className={`map-card ${mapOpen ? '' : 'is-min'}`}>
+      <aside className="right">
+        {/* The map stays mounted (keeping its view). Closed, it folds into its header strip while
+            details are open, and narrows into a "Map" pill in the corner when nothing else is. */}
+        <section className={`map-card ${mapOpen ? '' : collapsed ? 'is-min is-pill' : 'is-min'}`}>
+          <button
+            className="map-pill"
+            title="Show map"
+            tabIndex={collapsed ? 0 : -1}
+            aria-hidden={!collapsed}
+            onClick={() => setMapOpen(true)}
+          >
+            <MapIcon /> Map
+          </button>
           <div className="map-card-inner">
             <header
               className="card-head"
@@ -858,7 +872,7 @@ export default function Client({ trip }: { trip: Trip }) {
                   setMapOpen(!mapOpen);
                 }}
               >
-                {mapOpen ? '×' : '+'}
+                {mapOpen ? '×' : <MapIcon />}
               </button>
             </header>
             <div className="map-wrap">

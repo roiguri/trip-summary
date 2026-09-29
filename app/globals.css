@@ -2272,8 +2272,79 @@ button:disabled {
    content keeps full size inside, so the map itself never resizes and the detail card moves up or
    down with the fold. The detail card slides in on open and out on close; with both closed the
    column fades out and the timeline glides to the centre. */
+/* The map card has three shapes: open, folded to its header strip (details open), and a small "Map"
+   pill in the corner (nothing else open). It keeps its right edge and animates between them; its
+   content keeps full size inside so the map never resizes. */
 .map-card {
-  transition: height 0.32s cubic-bezier(0.3, 0.7, 0.2, 1);
+  position: relative;
+  width: 100%;
+  margin-left: auto;
+  transition:
+    height 0.32s cubic-bezier(0.3, 0.7, 0.2, 1),
+    width 0.32s cubic-bezier(0.3, 0.7, 0.2, 1),
+    border-radius 0.32s cubic-bezier(0.3, 0.7, 0.2, 1);
+}
+.map-card {
+  min-height: 0;
+  height: max(165px, var(--map-height));
+}
+.map-card.is-min.is-pill {
+  width: 92px;
+  height: 40px;
+  border-radius: 20px;
+}
+.map-card-inner {
+  width: 422px;
+  transition: opacity 0.18s ease;
+}
+.map-card.is-pill .map-card-inner {
+  opacity: 0;
+  pointer-events: none;
+}
+.map-pill {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #3f5c4b;
+  font:
+    700 12px/1 Arial,
+    Helvetica,
+    sans-serif;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+.map-card.is-pill .map-pill {
+  opacity: 1;
+  pointer-events: auto;
+  transition-delay: 0.14s;
+}
+.map-pill:hover,
+.map-pill:focus-visible {
+  color: #b0734f;
+}
+.map-icon {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.card-close .map-icon {
+  width: 14px;
+  height: 14px;
+  vertical-align: middle;
 }
 .map-card.is-min {
   height: 55px;
@@ -2310,28 +2381,6 @@ button:disabled {
 .panel.is-closing {
   animation: panel-out 0.2s ease forwards;
 }
-.right {
-  transition:
-    opacity 0.28s ease,
-    transform 0.28s ease;
-}
-.right.is-hidden {
-  opacity: 0;
-  transform: translateX(18px);
-}
-.right.is-hidden > * {
-  pointer-events: none;
-}
-.reopen {
-  transition:
-    opacity 0.25s ease,
-    transform 0.25s ease;
-}
-.reopen:not(.is-shown) {
-  opacity: 0;
-  transform: scale(0.85);
-  pointer-events: none;
-}
 /* The timeline keeps its width and slides to the centre (a transform, so it animates without
    re-laying out the timeline on every frame). */
 .left {
@@ -2348,8 +2397,8 @@ button:disabled {
 }
 @media (prefers-reduced-motion: reduce) {
   .map-card,
-  .right,
-  .reopen,
+  .map-card-inner,
+  .map-pill,
   .left {
     transition: none;
   }

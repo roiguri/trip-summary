@@ -23,7 +23,7 @@ This document records the agreed visual direction for the local trip-summary pro
 
 ## Right column and map (user decisions)
 
-- The map card and the detail card open and close independently. Nothing is selected at first; the map keeps its size alone or above the details. The detail card appears under the map when an entry is selected and has its own close button. A closed map folds into its header strip while details are open (click to reopen); with both closed the timeline centres and a round button reopens the map. Changes animate: the map folds, the detail card slides in and out, the timeline glides to the centre.
+- The map card and the detail card open and close independently. Nothing is selected at first; the map keeps its size alone or above the details. The detail card appears under the map when an entry is selected and has its own close button. A closed map folds into its header strip while details are open, and into a small "Map" pill (map icon) in the same corner when nothing else is open; the timeline then centres. Changes animate as one motion: the map card morphs between open, strip and pill, the detail card slides in and out, the timeline glides.
 - Map: close pins merge into a "N stops" pill that zooms in on click; the route is a round-dot line per day (current day strong, others faint); transit legs show their mode icon between their neighbouring stops; OpenStreetMap attribution is always visible.
 
 ## Data and publication boundary
