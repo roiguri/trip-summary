@@ -12,8 +12,8 @@ import { STATES } from './states.mjs';
 
 const A = process.env.BASE_A || 'http://localhost:3101';
 const B = process.env.BASE_B || 'http://localhost:3100';
-const MAX_REPORT = 60;
-const PARALLEL = 4;
+const MAX_REPORT = Number(process.env.MAX_REPORT || 60);
+const PARALLEL = 3;
 
 /** Elements to hover and to focus with the keyboard, each in a state where it is on screen. */
 const POINTER = {
@@ -44,16 +44,18 @@ function snapshot() {
   const walk = (el, path) => {
     if (el.classList.contains('maplibregl-canvas-container')) return;
     const inMap = !!el.closest('.map');
-    const cls = el.classList.length ? '.' + [...el.classList].join('.') : '';
-    const key = `${path} ${el.tagName.toLowerCase()}${cls}`;
+    // Keyed by position, so an element whose classes change is still compared (classes are a field).
+    const key = `${path} ${el.tagName.toLowerCase()}`;
+    const cls = [...el.classList].join('.');
     const r = el.getBoundingClientRect();
     const box = inMap
       ? ''
       : [r.x, r.y, r.width, r.height].map((v) => Math.round(v * 10) / 10).join();
-    els[key] = [box, values(getComputedStyle(el), inMap)];
+    els[key] = [box, values(getComputedStyle(el), inMap), cls];
     for (const pe of ['::before', '::after']) {
       const cs = getComputedStyle(el, pe);
-      if (cs.content !== 'none' && cs.content !== 'normal') els[key + pe] = ['', values(cs, inMap)];
+      if (cs.content !== 'none' && cs.content !== 'normal')
+        els[key + pe] = ['', values(cs, inMap), cls];
     }
     [...el.children].forEach((c, i) => walk(c, `${path}/${i}`));
   };
@@ -61,21 +63,70 @@ function snapshot() {
   return { props, els };
 }
 
-async function capture(page, base, state, action) {
-  await page.goto(base, { waitUntil: 'networkidle' });
-  await page.waitForTimeout(1200);
+// The map's tiles and style load from the internet and render in software WebGL here, which made
+// every load slow and variable; the map gets a blank style instead (markers are still compared).
+const BLANK_STYLE = JSON.stringify({
+  version: 8,
+  sources: {},
+  layers: [{ id: 'background', type: 'background', paint: { 'background-color': '#d8e8e1' } }],
+});
+
+/** Waits until no animation or transition is running, scrolling has stopped and images have loaded. */
+async function settle(page) {
+  await page.waitForFunction(
+    () => {
+      const at = [
+        window.scrollY,
+        ...[...document.querySelectorAll('.left, .panel-body')].map((e) => e.scrollTop),
+      ].join();
+      const still = at === window.__settleAt;
+      window.__settleAt = at;
+      return (
+        still &&
+        document.getAnimations().every((a) => a.playState !== 'running') &&
+        [...document.images].every((i) => i.complete)
+      );
+    },
+    null,
+    { polling: 100, timeout: 5000 },
+  );
+}
+
+/**
+ * Loads one state in one build and snapshots it, then each hover and keyboard-focus variant of it
+ * on the same page. Returns the snapshots in order.
+ */
+async function captureState(context, base, state, actions) {
+  const page = await context.newPage();
+  await page.route(/openfreemap\.org/, (route) =>
+    /\/styles\//.test(route.request().url())
+      ? route.fulfill({ contentType: 'application/json', body: BLANK_STYLE })
+      : route.abort(),
+  );
+  await page.goto(base, { waitUntil: 'load' });
+  await settle(page);
   await STATES[state](page);
-  await page.waitForTimeout(1000);
-  if (action) {
+  // The state's last click can leave the pointer over something that moves under it; hover is
+  // checked explicitly below, so the plain snapshot is taken with the pointer out of the way.
+  await page.mouse.move(1, 899);
+  await settle(page);
+  const shots = [await page.evaluate(snapshot)];
+  for (const action of actions) {
     const el = page.locator(action.selector).first();
     if (action.kind === 'hover') await el.hover({ force: true });
     else {
       await page.keyboard.press('Shift');
       await el.focus();
     }
-    await page.waitForTimeout(700);
+    await settle(page);
+    shots.push(await page.evaluate(snapshot));
+    // Back to the plain state: pointer to an inert spot, focus released.
+    await page.mouse.move(1, 899);
+    await page.evaluate(() => document.activeElement?.blur());
+    await settle(page);
   }
-  return page.evaluate(snapshot);
+  await page.close();
+  return shots;
 }
 
 function compare(a, b) {
@@ -87,12 +138,13 @@ function compare(a, b) {
       diffs.push(`${key}: only in ${x ? 'A' : 'B'}`);
       continue;
     }
+    if (x[2] !== y[2]) diffs.push(`${key}: class ${x[2]} -> ${y[2]}`);
     if (x[0] !== y[0]) diffs.push(`${key}: box ${x[0]} -> ${y[0]}`);
     if (x[1] === y[1]) continue;
     const xv = x[1].split('\u0001'),
       yv = y[1].split('\u0001');
     a.props.forEach((p, i) => {
-      if (xv[i] !== yv[i]) diffs.push(`${key}: ${p}: ${xv[i]} -> ${yv[i]}`);
+      if (xv[i] !== yv[i]) diffs.push(`${key}.${x[2]}: ${p}: ${xv[i]} -> ${yv[i]}`);
     });
   }
   return diffs;
@@ -100,47 +152,54 @@ function compare(a, b) {
 
 (async () => {
   const browser = await chromium.launch();
-  const runs = [];
-  for (const state of Object.keys(STATES)) {
-    runs.push({ state });
-    for (const selector of POINTER[state] || [])
-      for (const kind of ['hover', 'focus']) runs.push({ state, action: { kind, selector } });
-  }
-  runs.push({ state: 'place', motion: 'reduce' }, { state: 'all-closed', motion: 'reduce' });
-  const label = (run) =>
-    `${run.state}${run.action ? ` ${run.action.kind} ${run.action.selector}` : ''}${run.motion ? ' (reduced motion)' : ''}`;
-  async function shoot(base, run) {
-    const context = await browser.newContext({
+  // One job per state (and motion setting); its hover/focus variants run on the same page.
+  const jobs = Object.keys(STATES).map((state) => ({
+    state,
+    actions: (POINTER[state] || []).flatMap((selector) =>
+      ['hover', 'focus'].map((kind) => ({ kind, selector })),
+    ),
+  }));
+  jobs.push({ state: 'place', actions: [], motion: 'reduce' });
+  jobs.push({ state: 'all-closed', actions: [], motion: 'reduce' });
+  const label = (job, action) =>
+    `${job.state}${action ? ` ${action.kind} ${action.selector}` : ''}${job.motion ? ' (reduced motion)' : ''}`;
+  const contexts = {};
+  for (const motion of ['no-preference', 'reduce'])
+    contexts[motion] = await browser.newContext({
       viewport: { width: 1440, height: 900 },
-      reducedMotion: run.motion || 'no-preference',
+      reducedMotion: motion,
     });
-    try {
-      return await capture(await context.newPage(), base, run.state, run.action);
-    } finally {
-      await context.close();
-    }
-  }
-  const results = new Array(runs.length);
+  const runs = [];
   let next = 0;
   async function worker() {
-    while (next < runs.length) {
-      const i = next++;
-      results[i] = compare(await shoot(A, runs[i]), await shoot(B, runs[i]));
+    while (next < jobs.length) {
+      const job = jobs[next++];
+      const context = contexts[job.motion || 'no-preference'];
+      const [a, b] = await Promise.all(
+        [A, B].map((base) => captureState(context, base, job.state, job.actions)),
+      );
+      [null, ...job.actions].forEach((action, i) =>
+        runs.push({ label: label(job, action), diffs: compare(a[i], b[i]) }),
+      );
     }
   }
+  const started = Date.now();
   await Promise.all(Array.from({ length: PARALLEL }, worker));
   await browser.close();
   let failed = 0;
-  runs.forEach((run, i) => {
-    const diffs = results[i];
+  runs.sort((x, y) => x.label.localeCompare(y.label));
+  for (const { label, diffs } of runs) {
     if (diffs.length) {
       failed++;
-      console.log(`DIFF  ${label(run)}  (${diffs.length})`);
+      console.log(`DIFF  ${label}  (${diffs.length})`);
       for (const d of diffs.slice(0, MAX_REPORT)) console.log(`      ${d}`);
-    } else console.log(`same  ${label(run)}`);
-  });
+    } else console.log(`same  ${label}`);
+  }
+  const took = `${Math.round((Date.now() - started) / 1000)}s`;
   console.log(
-    failed ? `\n${failed} of ${runs.length} states differ` : `\nall ${runs.length} states match`,
+    failed
+      ? `\n${failed} of ${runs.length} states differ (${took})`
+      : `\nall ${runs.length} states match (${took})`,
   );
-  process.exit(failed ? 1 : 0);
+  process.exitCode = failed ? 1 : 0;
 })();

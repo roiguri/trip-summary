@@ -464,7 +464,6 @@ button:disabled {
   background: #fff8ec;
   box-shadow: 4px 4px 0 #e5d8c4;
   transform: rotate(0.4deg);
-  direction: inherit;
   text-align: start;
 }
 .entry-left.type-note .entry-content {
