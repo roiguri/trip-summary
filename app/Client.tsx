@@ -495,10 +495,18 @@ export default function Client({ trip }: { trip: Trip }) {
   const detailsOpen = !!(selected || album);
   // Closing the detail card plays its exit animation before the selection is cleared.
   const [panelClosing, setPanelClosing] = useState(false);
+  // Which way the detail card enters and leaves: from/into the corner pill when the map is closed,
+  // else folding under the map. Fixed when the card opens and when it closes, so folding or opening
+  // the map in between doesn't restart the card's animation.
+  const panelCorner = useRef(false);
+  const panelWasOpen = useRef(false);
+  if (detailsOpen && !panelWasOpen.current) panelCorner.current = !mapOpen;
+  panelWasOpen.current = detailsOpen;
   // Everything closed (counted from the start of the detail card's exit, so the map narrows into
   // its pill and the timeline centres while the card leaves, not after).
   const collapsed = !mapOpen && (!detailsOpen || panelClosing);
   function closeDetails() {
+    panelCorner.current = !mapOpen;
     setPanelClosing(true);
     window.setTimeout(() => {
       setSelected(null);
@@ -898,7 +906,7 @@ export default function Client({ trip }: { trip: Trip }) {
         </section>
         {detailsOpen && (
           <section
-            className={`panel ${album ? 'panel-album' : `panel-${selected?.type}`} ${panelClosing ? 'is-closing' : ''}`}
+            className={`panel ${album ? 'panel-album' : `panel-${selected?.type}`} ${panelClosing ? 'is-closing' : ''} ${panelCorner.current ? 'from-corner' : ''}`}
           >
             <button className="card-close panel-close" title="Close details" onClick={closeDetails}>
               ×

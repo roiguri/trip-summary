@@ -2387,11 +2387,35 @@ button:disabled {
     clip-path: inset(0 0 100% 0 round 24px);
   }
 }
+/* With the map closed (the bar is, or becomes, the corner pill) the details grow from and shrink into
+   the top-right corner, following the bar. */
+@keyframes panel-in-corner {
+  from {
+    clip-path: inset(0 0 100% 100% round 24px);
+  }
+  to {
+    clip-path: inset(-40px -40px -40px -40px round 64px);
+  }
+}
+@keyframes panel-out-corner {
+  from {
+    clip-path: inset(-40px -40px -40px -40px round 64px);
+  }
+  to {
+    clip-path: inset(0 0 100% 100% round 24px);
+  }
+}
 .panel {
   animation: panel-in var(--col-motion) both;
 }
 .panel.is-closing {
   animation: panel-out var(--col-motion) forwards;
+}
+.panel.from-corner {
+  animation-name: panel-in-corner;
+}
+.panel.from-corner.is-closing {
+  animation-name: panel-out-corner;
 }
 /* The timeline keeps its width and slides to the centre (a transform, so it animates without
    re-laying out the timeline on every frame). */
