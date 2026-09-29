@@ -2450,25 +2450,36 @@ button:disabled {
   animation-name: panel-out-corner;
   animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
-/* The timeline keeps its width and slides to the centre (a transform, so it animates without
-   re-laying out the timeline on every frame). */
+/* With the right column closed, the timeline's scroll container spans the window and its content
+   takes its full 928px width (the side-by-side width is narrower on smaller windows, which cut
+   content off), sliding to the centre with a transform so the timeline isn't re-laid out on every
+   frame. On reopening, the container narrows only after the content has slid back. */
 .left {
+  transition: width 0s linear 0.34s;
+}
+.left > .intro,
+.left > .rail {
+  width: min(928px, calc(100vw - 512px));
   transition: transform var(--col-motion);
 }
 .shell.collapsed .left {
-  width: min(928px, calc(100vw - 512px));
+  width: 100vw;
   margin: 0;
-  transform: translateX(calc((100vw - min(928px, calc(100vw - 512px))) / 2));
+  transition: width 0s;
 }
-.shell.collapsed .rail {
-  width: auto;
+.shell.collapsed .left > .intro,
+.shell.collapsed .left > .rail {
+  width: min(928px, 100vw);
   margin: 0;
+  transform: translateX(calc((100vw - min(928px, 100vw)) / 2));
 }
 @media (prefers-reduced-motion: reduce) {
   .map-card,
   .map-card-inner,
   .map-pill,
-  .left {
+  .left,
+  .left > .intro,
+  .left > .rail {
     transition: none;
   }
   .panel,
