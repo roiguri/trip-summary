@@ -3,6 +3,15 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import maplibregl, { Map as MapType, Marker } from 'maplibre-gl';
 import type { Day, Entry, Photo, TransitMode, Trip } from '../lib/data';
 const allPhotos = (days: Day[]) => days.flatMap((d) => d.entries.flatMap((e) => e.photos));
+/** The detail card's label for each kind of entry. */
+const KICKERS: Record<Entry['type'], string> = {
+  place: 'THE PLACE',
+  lodging: 'THE STAY',
+  transit: 'THE ROUTE',
+  note: 'THE NOTE',
+  photo: 'A MOMENT',
+  cluster: 'PHOTOS',
+};
 function noteDir(s: string): 'ltr' | 'rtl' {
   for (const ch of s) {
     if (/[֐-ࣿ]/.test(ch)) return 'rtl';
@@ -397,8 +406,14 @@ function MapView({
             }
           }
       }
+      // A pill that would sit under the selected pin moves just above or below it.
+      const chosen = groups.find(solo);
+      for (const g of groups)
+        if (chosen && g !== chosen && g.members.length > 1)
+          if (Math.abs(g.x - chosen.x) < 44 && Math.abs(g.y - chosen.y) < 26)
+            g.y = chosen.y + (g.y <= chosen.y ? -28 : 28);
       const out: Marker[] = [];
-      groups.forEach(({ members: group }) => {
+      groups.forEach(({ members: group, x, y }) => {
         const a = { it: group[0] };
         let div: HTMLElement;
         let at: [number, number];
@@ -413,10 +428,8 @@ function MapView({
           div.title = members.map((e) => e.title).join(' · ');
           const bounds = boundsOf(members)!;
           div.onclick = () => m.fitBounds(bounds, { padding: 70, maxZoom: 15, duration: 650 });
-          at = [
-            members.reduce((sum, e) => sum + e.lng!, 0) / members.length,
-            members.reduce((sum, e) => sum + e.lat!, 0) / members.length,
-          ];
+          const ll = m.unproject([x, y]);
+          at = [ll.lng, ll.lat];
         }
         out.push(new maplibregl.Marker({ element: div, anchor: 'center' }).setLngLat(at).addTo(m));
       });
@@ -913,23 +926,36 @@ export default function Client({ trip }: { trip: Trip }) {
             </button>
             <div className="panel-body-wrap" key={`${album || selected?.id}-${photoPage}`}>
               <div className="panel-body">
+                {/* What the entry is, and its date (user decision: one label row above the title). */}
+                <div className="panel-kicker">
+                  <span>{album ? 'THE DAY' : selected ? KICKERS[selected.type] : ''}</span>
+                  <span>{album || selected?.day}</span>
+                </div>
                 {(album ? days.find((d) => d.date === album)?.title : selected?.title) && (
                   <h2>{album ? days.find((d) => d.date === album)?.title : selected?.title}</h2>
                 )}
-                {!album && selected && (
+                {!album && selected && selected.type !== 'lodging' && (
                   <div className="meta">
-                    {selected.type === 'cluster' ? (
-                      ''
-                    ) : (
+                    {selected.type === 'transit' ? (
                       <>
-                        {selected.day} <span>·</span>{' '}
+                        {selected.mode && (
+                          <span className="meta-mode">
+                            <TransitIcon mode={selected.mode} />
+                          </span>
+                        )}
+                        <span className="meta-route">
+                          {selected.from_location || 'Origin'} →{' '}
+                          {selected.to_location || 'Destination'}
+                        </span>
+                        <span className="meta-time">{transitTimes(selected)}</span>
                       </>
+                    ) : (
+                      <span className="meta-time">
+                        {selected.time}
+                        {selected.end_time ? ` – ${selected.end_time}` : ''}
+                      </span>
                     )}
-                    {selected.time}
-                    {selected.end_time ? ` – ${selected.end_time}` : ''}{' '}
-                    {selected.tags.map((t) => (
-                      <em key={t}>{t}</em>
-                    ))}
+                    {selected.type === 'place' && selected.tags.map((t) => <em key={t}>{t}</em>)}
                   </div>
                 )}
                 {selected?.type === 'lodging' && !album && (
@@ -1012,20 +1038,26 @@ export default function Client({ trip }: { trip: Trip }) {
                     </div>
                   </>
                 )}
-                {!album && selected?.notes && <p className="note">{selected.notes}</p>}
-                {!album && selected?.type === 'place' && selected.lat != null && (
-                  <a
-                    className="maps-link"
-                    target="_blank"
-                    rel="noreferrer"
-                    href={
-                      selected.maps_url ||
-                      `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${selected.lat},${selected.lng}`)}`
-                    }
-                  >
-                    View on Google Maps ↗
-                  </a>
+                {!album && selected?.notes && (
+                  <p className="note" dir={noteDir(selected.notes)}>
+                    {selected.notes}
+                  </p>
                 )}
+                {!album &&
+                  (selected?.type === 'place' || selected?.type === 'lodging') &&
+                  selected.lat != null && (
+                    <a
+                      className="maps-link"
+                      target="_blank"
+                      rel="noreferrer"
+                      href={
+                        selected.maps_url ||
+                        `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${selected.lat},${selected.lng}`)}`
+                      }
+                    >
+                      View on Google Maps ↗
+                    </a>
+                  )}
               </div>
             </div>
           </section>

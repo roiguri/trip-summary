@@ -2487,3 +2487,66 @@ button:disabled {
     animation-duration: 1ms;
   }
 }
+
+/* Part 9: detail card. A label row names the kind of entry and carries the date (user decision);
+   the metadata line holds the time and the place's tag; transit adds its mode icon and route; a
+   Hebrew note has its rule on the side its text starts from. */
+.panel-kicker {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0 40px 7px 0;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: #8b9a8d;
+}
+.panel-kicker span + span {
+  font-size: 10.5px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.panel-body .meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 9px;
+}
+.panel-body .meta-time {
+  font-weight: 700;
+}
+.panel-body .meta-mode {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #dcefe8;
+}
+.panel-body .meta-mode .transit-icon {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: #3d7a73;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.panel-body .meta-route {
+  color: #3d7a73;
+  font-weight: 700;
+}
+.panel-body .meta-route + .meta-time {
+  flex-basis: 100%;
+}
+.note[dir='rtl'] {
+  border-left: 0;
+  border-right: 3px solid #d3ae93;
+  text-align: right;
+}
+.panel-body .meta > span {
+  padding: 0;
+}
+.panel-body .meta em {
+  margin: 0;
+}
