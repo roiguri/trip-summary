@@ -19,12 +19,12 @@ Phase 0 goal: confirm that the prototype is implemented correctly against the re
 | #   | Part                                                                                   | References                                                                                       | Status              |
 | --- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------- |
 | 1   | Page shell: header, intro, scroll model, backgrounds                                   | `mock/app-locked-geometry-final-full`, `mock/image-e55ca7ac`, `captures/wayfarer-locked-opening` | agreed with changes |
-| 2   | Rail and day banners (rail, multi-day lane, day tag)                                   | geometry mock, `captures/wayfarer-locked-rail-*`                                                 | pending             |
+| 2   | Rail and day banners (rail, multi-day lane, day tag)                                   | geometry mock, `captures/wayfarer-locked-rail-*`                                                 | agreed with changes |
 | 3   | Place / lodging entries (connector, title, byline, photo fan)                          | geometry mock, `mock/roi-shot-cards`                                                             | agreed with changes |
 | 4   | Loose photo and cluster entries                                                        | `mock/roi-shot-cards`, `captures/wayfarer-photo-cards-compare-*`                                 | agreed with changes |
 | 5   | Transit stop                                                                           | `mock/transit-locked-zoom`, `captures/wayfarer-transit-rail-compare-*`                           | agreed with changes |
 | 6   | Notes (tape, LTR/RTL)                                                                  | geometry mock, `captures/wayfarer-locked-notes`                                                  | agreed with changes |
-| 7   | Multi-day span (start block, day chips, dot lane, end diamond)                         | geometry mock, `captures/wayfarer-locked-multiday-end`                                           | pending             |
+| 7   | Multi-day span (start block, day chips, dot lane, end diamond)                         | geometry mock, `captures/wayfarer-locked-multiday-end`                                           | agreed with changes |
 | 8   | Map card (layout, ratios, markers, route, Whole trip, day emphasis)                    | `mock/trip-real-map-whole-final`, `mock/trip-real-map-day-final`, `mock/panel-ratio-large`       | agreed with changes |
 | 9   | Detail panel: place and lodging                                                        | `mock/panel-final-place`, `captures/wayfarer-locked-place`                                       | agreed with changes |
 | 10  | Detail panel: photo, cluster, day album, gallery and pager                             | `mock/image-e55ca7ac`, `captures/wayfarer-locked-single`, `-cluster`, `-pager`                   | agreed with changes |
@@ -76,7 +76,7 @@ Sampled pixel colours and positions from `mock/app-locked-geometry-final-full` (
 - Seen in the mocks but belongs to Part 3: places show their note as a short caption under the photo fan ("Start early, no shade after ten."); the build doesn't.
 - Removed per-day minimum heights (600/540/470px for days 1/2/3), which were tuned to the sample and had no effect (every day's content is taller).
 
-### Part 7: Multi-day span (in review)
+### Part 7: Multi-day span (agreed with changes)
 
 Sampled from `mock/app-locked-geometry-final-full` (positions relative to the rail centre and the end diamond's centre):
 
