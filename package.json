@@ -12,7 +12,9 @@
     "seed": "node scripts/seed.ts",
     "snapshot": "bash scripts/snapshot.sh",
     "check:interactions": "node scripts/check-interactions.mjs",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "visual": "node scripts/visual.mjs",
+    "visual:update": "node scripts/visual.mjs --update"
   },
   "dependencies": {
     "maplibre-gl": "^5.7.3",

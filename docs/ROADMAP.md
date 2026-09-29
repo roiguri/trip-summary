@@ -24,7 +24,7 @@ Known issues found while initializing:
 
 1. **Verify the implementation against the mocks, part by part** (`docs/VERIFICATION.md`). Each of the 13 parts is reviewed side by side (mock, handoff capture, current capture) and agreed before moving on. Fixes that come out of a part are small, reviewed changes. Progress: all 13 parts agreed; data separation done; a measured mock style pass (header, timeline, photo cards, right column, content-sized detail card) done; Part 7 (multi-day spans, lanes) done and hotel stays designed and built. Parts 3–6 and 8–13 still need their review.
 2. Tooling: Prettier (done, checked in CI), `npm run typecheck` (done), Node pinned (`engines`, done), a GitHub Actions CI job running format, types, build and the interaction checks on every PR (done). ESLint waits for npm registry access (it needs new packages and a lockfile update).
-3. Screenshot guard: `scripts/capture.mjs` (done) becomes Playwright visual tests with committed baselines, taken once the parts are agreed.
+3. Screenshot guard: `npm run visual` compares 22 agreed states with committed baselines in `tests/visual` and runs in CI (done).
 4. Refactor behind the guard: split `Client.tsx` into components (`Header`, `Timeline` + entry kinds, `MapCard`, `DetailPanel`, `Gallery`, `Lightbox`). Split `lib/data.ts` into schema, seed and typed queries. Remove sample-only hard-coding found during verification. No visual diff.
 
 ## Phase 1 — Real data: discovery and design (its own step, no build yet)
