@@ -10,7 +10,8 @@
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
     "seed": "node scripts/seed.ts",
-    "snapshot": "bash scripts/snapshot.sh"
+    "snapshot": "bash scripts/snapshot.sh",
+    "check:interactions": "node scripts/check-interactions.mjs"
   },
   "dependencies": {
     "maplibre-gl": "^5.7.3",

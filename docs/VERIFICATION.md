@@ -28,9 +28,9 @@ Phase 0 goal: confirm that the prototype is implemented correctly against the re
 | 8   | Map card (layout, ratios, markers, route, Whole trip, day emphasis)                    | `mock/trip-real-map-whole-final`, `mock/trip-real-map-day-final`, `mock/panel-ratio-large`       | agreed with changes |
 | 9   | Detail panel: place and lodging                                                        | `mock/panel-final-place`, `captures/wayfarer-locked-place`                                       | agreed with changes |
 | 10  | Detail panel: photo, cluster, day album, gallery and pager                             | `mock/image-e55ca7ac`, `captures/wayfarer-locked-single`, `-cluster`, `-pager`                   | agreed with changes |
-| 11  | Lightbox                                                                               | `captures/wayfarer-locked-fullscreen`                                                            | in review           |
+| 11  | Lightbox                                                                               | `captures/wayfarer-locked-fullscreen`                                                            | agreed with changes |
 | 12  | Collapsed right column                                                                 | no reference image; written spec in `DESIGN.md` only                                             | agreed with changes |
-| 13  | Interactions: click-to-scroll, day tracking while scrolling, map pin → entry, keyboard | written spec in `DESIGN.md`                                                                      | pending             |
+| 13  | Interactions: click-to-scroll, day tracking while scrolling, map pin → entry, keyboard | written spec in `DESIGN.md`                                                                      | agreed with changes |
 
 ## Part decisions
 
@@ -109,7 +109,15 @@ Sampled from `mock/app-locked-geometry-final-full` (positions relative to the ra
 - Caption under the photos (user decision (a)): places and stay check-ins show their full note under the photo fan (or under the byline when there are no photos), at most as wide as the fan (266px). Styled with notes in Part 6 (paper slip). Notes longer than two lines are clamped with "See more" / "See less"; the toggle doesn't select the entry. The Kansai fixture has a long note to exercise it.
 - The transit disc (Part 5) follows the same rule: it was centred on the title + times + route block and now sits on the title's first line; its teal travel segment moves up 12.5px with it so the disc stays centred on it.
 
-### Part 11: Full-screen viewer (in review)
+### Part 13: Interactions (agreed with changes)
+
+Checked with a scripted walkthrough, now kept as `npm run check:interactions` (sample trip; exits 1 on a failure):
+
+- Clicking an entry selects it, scrolls it into view, shows its day on the map and highlights its pin. A map pin selects its entry and scrolls the timeline to it. Scrolling tracks the current day (fixed in Part 8). A day banner opens the day album; a later-day label selects its multi-day event. Enter on a focused entry selects it, and focused entries show an outline. Tab order follows the timeline.
+- Fixed: Escape now closes the photo viewer first, then the detail card (it only closed the viewer).
+- Fixed: the photo viewer is a dialog that takes focus (the close button); Tab stays inside it; closing returns focus to the photo it was opened from (focus used to stay behind it, on the page).
+
+### Part 11: Full-screen viewer (agreed with changes)
 
 - Redesigned (user report: "looks bad, arrows too basic"): darker blurred backdrop; the photo framed with rounded corners and a shadow; round translucent arrow buttons with the pager's thin chevron (hidden for a single photo); a matching round close button; a bottom bar with the caption, the date and time, and a small "1 / 14" counter. Short fade in, none with reduced motion. Keyboard (←/→/Esc) and click-outside-to-close kept. The photo always leaves at least 28px between itself and each arrow (user report: they touched); measured at 1440, 1280 and 1024px wide.
 - "Evening walk" at the bottom was the photo's own caption; the sample captions no longer carry a " · N" number (it duplicated the counter). A photo without a caption shows only its date and time.
