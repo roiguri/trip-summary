@@ -2275,14 +2275,19 @@ button:disabled {
 /* The map card has three shapes: open, folded to its header strip (details open), and a small "Map"
    pill in the corner (nothing else open). It keeps its right edge and animates between them; its
    content keeps full size inside so the map never resizes. */
+:root {
+  /* One motion for the whole right column (user request): the map card, the detail card and the
+     timeline's slide share this duration and curve. */
+  --col-motion: 0.32s cubic-bezier(0.3, 0.7, 0.2, 1);
+}
 .map-card {
   position: relative;
   width: 100%;
   margin-left: auto;
   transition:
-    height 0.32s cubic-bezier(0.3, 0.7, 0.2, 1),
-    width 0.32s cubic-bezier(0.3, 0.7, 0.2, 1),
-    border-radius 0.32s cubic-bezier(0.3, 0.7, 0.2, 1);
+    height var(--col-motion),
+    width var(--col-motion),
+    border-radius var(--col-motion);
 }
 .map-card {
   min-height: 0;
@@ -2376,15 +2381,15 @@ button:disabled {
   }
 }
 .panel {
-  animation: panel-in 0.26s cubic-bezier(0.3, 0.7, 0.2, 1) both;
+  animation: panel-in var(--col-motion) both;
 }
 .panel.is-closing {
-  animation: panel-out 0.2s ease forwards;
+  animation: panel-out var(--col-motion) forwards;
 }
 /* The timeline keeps its width and slides to the centre (a transform, so it animates without
    re-laying out the timeline on every frame). */
 .left {
-  transition: transform 0.34s cubic-bezier(0.3, 0.7, 0.2, 1);
+  transition: transform var(--col-motion);
 }
 .shell.collapsed .left {
   width: min(928px, calc(100vw - 512px));
