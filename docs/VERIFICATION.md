@@ -111,7 +111,7 @@ Sampled from `mock/app-locked-geometry-final-full` (positions relative to the ra
 
 ### Part 11: Full-screen viewer (in review)
 
-- Redesigned (user report: "looks bad, arrows too basic"): darker blurred backdrop; the photo framed with rounded corners and a shadow; round translucent arrow buttons with the pager's thin chevron (hidden for a single photo); a matching round close button; a bottom bar with the caption, the date and time, and a small "1 / 14" counter. Short fade in, none with reduced motion. Keyboard (←/→/Esc) and click-outside-to-close kept.
+- Redesigned (user report: "looks bad, arrows too basic"): darker blurred backdrop; the photo framed with rounded corners and a shadow; round translucent arrow buttons with the pager's thin chevron (hidden for a single photo); a matching round close button; a bottom bar with the caption, the date and time, and a small "1 / 14" counter. Short fade in, none with reduced motion. Keyboard (←/→/Esc) and click-outside-to-close kept. The photo always leaves at least 28px between itself and each arrow (user report: they touched); measured at 1440, 1280 and 1024px wide.
 - "Evening walk" at the bottom was the photo's own caption; the sample captions no longer carry a " · N" number (it duplicated the counter). A photo without a caption shows only its date and time.
 
 ### Part 10: Photo, cluster and day-album cards; gallery and pager (agreed with changes)

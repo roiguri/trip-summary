@@ -2622,7 +2622,8 @@ button:disabled {
 }
 .light-figure img {
   display: block;
-  max-width: min(82vw, 1200px);
+  /* Room for the arrows: each sits 32px from the edge and is 52px wide, plus a 28px gap. */
+  max-width: min(calc(100vw - 2 * (32px + 52px + 28px)), 1200px);
   max-height: calc(100vh - 190px);
   object-fit: contain;
   border-radius: 8px;
