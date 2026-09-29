@@ -1,7 +1,8 @@
 # Visual regression tests
 
 `npm run visual` screenshots the agreed states of the sample trip (verification Parts 1–13) at
-1440×900, and the phone layout (`phone-` states) at 390×844, and compares them with `baseline/`. It
+1440×900, the phone layout (`phone-` states) at 390×844 and tablets (`tablet-` states) at 1024×768
+and 820×1180, and compares them with `baseline/`. It
 runs in CI on every pull request.
 
 - **A test fails:** CI uploads `visual-differences` (per state: `*.actual.png` and `*.diff.png` showing

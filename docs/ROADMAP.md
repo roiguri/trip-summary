@@ -51,7 +51,7 @@ Build what Phase 1 agreed: the importers (porting `legacy-vite/src/lib/importers
 
 ## Phase 4 — Mobile
 
-Designed with mock options and agreed (`docs/VERIFICATION.md`, "Mobile"): a one-column timeline, a full-screen map with every day in one row, and a details sheet. Phone layout built (under 768px). Next: tablet (768–1199px) and the swipeable photo viewer.
+Designed with mock options and agreed (`docs/VERIFICATION.md`, "Mobile"): a one-column timeline, a full-screen map with every day in one row, and a details sheet. Built: the phone layout (under 900px), the one-column timeline with a narrower right column from 900 to 1199px, and a swipeable photo viewer.
 
 ## Phase 5 — Remaining screens
 
@@ -66,4 +66,4 @@ Designed with mock options and agreed (`docs/VERIFICATION.md`, "Mobile"): a one-
 
 ## Immediate next step
 
-Mobile: tablet (768–1199px) and the swipeable photo viewer. Then Phase 1 (real data design).
+Top bar and a day scroller (options being drawn), then Phase 1 (real data design).

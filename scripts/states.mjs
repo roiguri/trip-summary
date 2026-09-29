@@ -1,12 +1,15 @@
 // The agreed states of the sample trip, as steps that reach each one from a fresh page load.
 // Shared by the visual tests (scripts/visual.mjs) and the style comparison (scripts/style-diff.mjs).
-// Desktop states run at 1440x900; `phone-` states at 390x844 with touch.
+// Desktop states run at 1440x900; `phone-` states at 390x844 with touch; `tablet-` states at
+// 1024x768 (one-column timeline beside the right column), `tablet-portrait` at 820x1180 (phone layout).
 
 /** Browser context options for a state. */
-export const viewportOf = (name) =>
-  name.startsWith('phone-')
-    ? { viewport: { width: 390, height: 844 }, hasTouch: true }
-    : { viewport: { width: 1440, height: 900 } };
+export const viewportOf = (name) => {
+  if (name === 'tablet-portrait') return { viewport: { width: 820, height: 1180 }, hasTouch: true };
+  if (name.startsWith('tablet-')) return { viewport: { width: 1024, height: 768 } };
+  if (name.startsWith('phone-')) return { viewport: { width: 390, height: 844 }, hasTouch: true };
+  return { viewport: { width: 1440, height: 900 } };
+};
 
 /** Entry id for a timeline title (ids are generated, titles come from the sample data). */
 const entry = (p, title) =>
@@ -98,4 +101,14 @@ export const STATES = {
     if (at) await p.mouse.click(at.x, at.y);
   },
   'phone-menu': (p) => p.click('.menu-button'),
+  'phone-viewer': async (p) => {
+    await select(p, '14 photos');
+    await p.waitForTimeout(600);
+    await p.click('.phone-sheet .photo');
+  },
+
+  // Tablet.
+  'tablet-opening': async () => {},
+  'tablet-place': (p) => select(p, 'Point Lobos State Natural Reserve'),
+  'tablet-portrait': async () => {},
 };

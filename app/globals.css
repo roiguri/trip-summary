@@ -756,6 +756,7 @@ button:disabled {
    the details.
    --------------------------------------------------------------------------------------------- */
 .right {
+  --col-w: 424px;
   position: fixed;
   top: 78px;
   right: max(40px, calc((100vw - 1370px) / 2 + 7px));
@@ -764,7 +765,7 @@ button:disabled {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  width: 424px;
+  width: var(--col-w);
   pointer-events: none;
 }
 .right > * {
@@ -851,7 +852,7 @@ button:disabled {
   display: flex;
   flex: none;
   flex-direction: column;
-  width: 422px;
+  width: calc(var(--col-w) - 2px);
   height: calc(var(--map-height) - 2px);
   min-height: 163px;
   transition: opacity calc(0.34s / 2) ease;
@@ -1265,7 +1266,7 @@ button:disabled {
 .panel.from-corner .panel-body {
   align-self: flex-end;
   flex-shrink: 0;
-  width: 422px;
+  width: calc(var(--col-w) - 2px);
 }
 
 /* Gallery: 7px gutters, 6px corners. The layout comes from the whole set's size (up to 12 a page),
@@ -1568,14 +1569,139 @@ button:disabled {
 }
 
 /* ---------------------------------------------------------------------------------------------
-   Phone (under 768px; agreed in docs/VERIFICATION.md, "Mobile"). One column: the rail runs down the
-   left edge with every entry on its right; points are plain copper rings with a short connector
-   to the title (user decision). The header keeps the brand and moves the nav into a menu.
+   Narrower screens (agreed in docs/VERIFICATION.md, "Mobile").
+   Under 1200px the two-sided timeline no longer fits beside the right column, so it becomes one
+   column: the rail runs down the left with every entry on its right; points are plain copper rings
+   with a short connector to the title (user decision). 900-1199px keeps the right column, narrower.
+   Under 900px is the phone layout: the header moves the nav into a menu, and the map and details
+   become a full-screen map and a bottom sheet (PhoneMap, PhoneSheet).
    --------------------------------------------------------------------------------------------- */
 .menu-button {
   display: none;
 }
-@media (max-width: 767px) {
+@media (max-width: 1199px) {
+  .left > .intro,
+  .left > .rail,
+  .shell.collapsed .left > .intro,
+  .shell.collapsed .left > .rail {
+    width: auto;
+    max-width: 680px;
+    margin: 0 auto;
+    transform: none;
+    transition: none;
+  }
+  .intro {
+    height: auto;
+    padding: 40px 24px 40px;
+  }
+  .day-banner {
+    left: 12px;
+    min-width: 0;
+  }
+  /* The rail sits 24px from the column's edge (its centre at 26px). */
+  .entries {
+    --title: 22px;
+    /* The text starts just past the rail, or past the day's outermost multi-day lane (lanes run
+       at +9/+18/+27px); the connector reaches it. */
+    --text-x: max(20px, calc(var(--day-lanes, 0) * 9px + 11px));
+    min-height: 0;
+    margin-left: 24px;
+    padding-top: 36px;
+  }
+  /* The day's tag hangs over the rail here, so a later-day label starts just below it. */
+  .entries > .multi-day-chip:first-child {
+    margin-top: -4px;
+  }
+  .entry,
+  .entry-left,
+  .entry-right {
+    left: 0;
+    width: auto;
+    min-height: 0;
+    padding: 6px 16px 26px var(--text-x);
+    text-align: left;
+  }
+  /* Point and connector level with the title's first line (measured). */
+  .entry-node,
+  .entry-left .entry-node {
+    top: calc(var(--title) * 0.54 - 1.26px);
+    left: -8.5px;
+    right: auto;
+  }
+  .entry:not(.type-transit) .entry-node::after {
+    display: none;
+  }
+  .entry-content::before,
+  .entry-left .entry-content::before {
+    top: calc(var(--title) * 0.54 + 4.24px);
+    left: 4.5px;
+    right: auto;
+    width: calc(var(--text-x) - 11px);
+  }
+  .entry-content strong {
+    font-size: var(--title);
+  }
+  .entry-content small {
+    margin-top: 6px;
+  }
+  .entry.no-title .entry-node {
+    top: 5px;
+  }
+  .entry.no-title .entry-content::before {
+    top: 10.5px;
+  }
+  .entry-left .stack,
+  .entry-left .entry-caption {
+    margin-left: 0;
+  }
+  .entry-caption {
+    max-width: min(420px, 100%);
+  }
+
+  /* A note: its point and connector level with the title on the card. */
+  .entry.type-note,
+  .entry-left.type-note {
+    padding: 6px 16px 22px var(--text-x);
+  }
+  .entry.type-note .entry-node {
+    top: 23px;
+  }
+  .entry.type-note::before,
+  .entry-left.type-note::before {
+    top: 28.5px;
+    left: 4.5px;
+    right: auto;
+    width: calc(var(--text-x) - 11px);
+  }
+  .entry.type-note .entry-content {
+    max-width: min(420px, 100%);
+  }
+  .entry-left.type-note .entry-content {
+    margin-left: 0;
+  }
+
+  /* Transit keeps its disc and segment; its text follows the disc or the outermost lane. */
+  .entry.type-transit {
+    padding: 14px 16px 28px max(24px, calc((var(--outer, -1) + 1) * 9px + 8px));
+  }
+  .transit-route {
+    white-space: normal;
+  }
+}
+
+/* 900-1199px: the right column stays, 380px wide, 20px from the edge. */
+@media (min-width: 900px) and (max-width: 1199px) {
+  .right {
+    --col-w: 380px;
+    right: 20px;
+  }
+  .left {
+    width: calc(100vw - 420px);
+  }
+}
+
+/* Phone. */
+@media (max-width: 899px) {
   .header {
     height: 50px;
     padding: 0 12px 0 18px;
@@ -1628,22 +1754,13 @@ button:disabled {
     font-size: 11px;
     font-weight: 400;
   }
-
-  /* Timeline column: the whole width. */
+  /* Timeline column: the whole width (centred at up to 680px on larger phones). */
   .left,
   .shell.collapsed .left {
     width: 100vw;
     height: calc(100dvh - 50px);
   }
-  .left > .intro,
-  .left > .rail,
-  .shell.collapsed .left > .intro,
-  .shell.collapsed .left > .rail {
-    width: 100%;
-    transform: none;
-  }
   .intro {
-    height: auto;
     padding: 22px 18px 34px;
   }
   .kicker {
@@ -1657,113 +1774,23 @@ button:disabled {
     font-size: 10px;
   }
   .day-banner {
-    left: 12px;
-    min-width: 0;
     padding: 12px 14px 9px;
     font-size: 19px;
   }
   .day-banner small {
     font-size: 10px;
   }
-  /* The rail sits 24px from the edge (its centre at 26px). */
   .entries {
-    min-height: 0;
-    margin-left: 24px;
-    padding-top: 36px;
-  }
-  /* The day's tag hangs over the rail here, so a later-day label starts just below it. */
-  .entries > .multi-day-chip:first-child {
-    margin-top: -4px;
-  }
-
-  /* Entries: all on the right of the rail. */
-  /* The text starts just past the rail, or past the day's outermost multi-day lane (lanes run at
-     +9/+18/+27px); the connector reaches it. */
-  .entries {
-    --text-x: max(20px, calc(var(--day-lanes, 0) * 9px + 11px));
-  }
-  .entry,
-  .entry-left,
-  .entry-right {
-    left: 0;
-    width: auto;
-    min-height: 0;
-    padding: 6px 16px 26px var(--text-x);
-    text-align: left;
-  }
-  .entry-node,
-  .entry-left .entry-node {
-    top: 9px;
-    left: -8.5px;
-    right: auto;
-  }
-  .entry:not(.type-transit) .entry-node::after {
-    display: none;
-  }
-  .entry-content::before,
-  .entry-left .entry-content::before {
-    top: 14.5px;
-    left: 4.5px;
-    right: auto;
-    width: calc(var(--text-x) - 11px);
-  }
-  .entry-content strong {
-    font-size: 19px;
-  }
-  .entry-content small {
-    margin-top: 6px;
-  }
-  .entry.no-title .entry-node {
-    top: 5px;
-  }
-  .entry.no-title .entry-content::before {
-    top: 10.5px;
+    --title: 19px;
   }
   .stack {
     width: 240px;
     height: 96px;
   }
-  .entry-left .stack,
-  .entry-left .entry-caption {
-    margin-left: 0;
-  }
   .stack img {
     left: calc(var(--i) * 78px);
     width: 84px;
     height: 90px;
-  }
-  .entry-caption {
-    max-width: 100%;
-  }
-
-  /* A note: its point and connector level with the title on the card. */
-  .entry.type-note,
-  .entry-left.type-note {
-    padding: 6px 16px 22px var(--text-x);
-  }
-  .entry.type-note .entry-node {
-    top: 23px;
-  }
-  .entry.type-note::before,
-  .entry-left.type-note::before {
-    top: 28.5px;
-    left: 4.5px;
-    right: auto;
-    width: calc(var(--text-x) - 11px);
-  }
-  .entry.type-note .entry-content {
-    max-width: 100%;
-  }
-  .entry-left.type-note .entry-content {
-    margin-left: 0;
-  }
-
-  /* Transit keeps its disc and segment; its text follows the disc or the outermost lane. */
-  .entry.type-transit {
-    padding: 14px 16px 28px max(24px, calc((var(--outer, -1) + 1) * 9px + 8px));
-  }
-  .transit-route {
-    white-space: normal;
   }
 }
 
@@ -2039,6 +2066,31 @@ button:disabled {
 }
 .phone-sheet .photos {
   min-height: 0;
+}
+
+/* The viewer on touch screens and phones: swipe instead of arrows, the photo at full width, and
+   the close button and caption bar clear of the notch and the home indicator. */
+.lightbox {
+  touch-action: none;
+}
+@media (hover: none) {
+  .light-nav {
+    display: none;
+  }
+}
+@media (hover: none), (max-width: 599px) {
+  .light-figure img {
+    max-width: calc(100vw - 24px);
+    max-height: calc(100dvh - 210px);
+  }
+  .light-close {
+    top: calc(12px + env(safe-area-inset-top, 0px));
+    right: 12px;
+  }
+  .light-bar {
+    bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+    max-width: calc(100vw - 32px);
+  }
 }
 
 /* ---------------------------------------------------------------------------------------------

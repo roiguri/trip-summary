@@ -28,7 +28,8 @@ This document records the agreed visual direction for the local trip-summary pro
 
 ## Phone layout (user decisions)
 
-- Under 768px the page is one column. The rail runs down the left edge with every entry on its right; points are plain copper rings with a short connector to the title, clearing any multi-day lanes. The header keeps the brand and a menu.
+- Under 1200px the timeline is one column (the right column stays, narrower, from 900px); under 900px the page is the phone layout.
+- On a phone the page is one column. The rail runs down the left edge with every entry on its right; points are plain copper rings with a short connector to the title, clearing any multi-day lanes. The header keeps the brand and a menu.
 - The map is a full-screen view opened from a floating "Map" button, with every day as a pill in one sideways-scrolling row and a card for the tapped pin. Details open in a bottom sheet at two thirds of the screen (or less for short entries) that pulls up to full height.
 
 ## Data and publication boundary

@@ -235,6 +235,34 @@ const BASE = process.env.BASE_URL || 'http://localhost:3000';
   await ph.keyboard.press('Escape');
   await ph.waitForTimeout(400);
   ok('phone: second Escape closes the map', !(await ph.$('.phone-map')));
+  const cluster = await ph.evaluate(
+    () =>
+      [...document.querySelectorAll('.entry')].find(
+        (e) => e.querySelector('strong')?.textContent === '14 photos',
+      ).dataset.entryId,
+  );
+  await ph.click(`[data-entry-id="${cluster}"] strong`);
+  await ph.waitForTimeout(900);
+  await ph.click('.phone-sheet .photo');
+  await ph.waitForTimeout(500);
+  const count = () => ph.textContent('.light-count');
+  const before = await count();
+  await ph.mouse.move(300, 400);
+  await ph.mouse.down();
+  await ph.mouse.move(200, 405, { steps: 5 });
+  await ph.mouse.move(80, 410, { steps: 5 });
+  await ph.mouse.up();
+  await ph.waitForTimeout(400);
+  ok(
+    'phone: swiping the viewer shows the next photo',
+    (await count()) !== before && !!(await ph.$('.lightbox')),
+    `${before} -> ${await count()}`,
+  );
+  ok('phone: no arrows on touch', !(await ph.isVisible('.light-nav.next')));
+  await ph.keyboard.press('Escape');
+  await ph.waitForTimeout(400);
+  await ph.keyboard.press('Escape');
+  await ph.waitForTimeout(600);
   await ph.click('.menu-button');
   ok(
     'phone: the menu holds the nav',
