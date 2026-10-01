@@ -49,15 +49,9 @@ Build what Phase 1 agreed: the importers (porting `legacy-vite/src/lib/importers
 - Trip picker (the schema already supports multiple trips with one `is_current`).
 - Export/backup.
 
-## Phase 4 — Mobile: design (its own step)
+## Phase 4 — Mobile
 
-Nothing has been discussed or designed for mobile yet; the locked design is desktop (1440×900) only. First decide together:
-
-- Which uses matter on a phone (browsing a finished trip, logging during the trip, sharing).
-- How the rail + map + detail layout translates (e.g. map as sheet/toggle, detail as full-screen sheet, rail single-sided).
-- Mocks for the key screens, agreed the same part-by-part way as Phase 0.
-
-Then implementation as its own step.
+Designed with mock options and agreed (`docs/VERIFICATION.md`, "Mobile"): a one-column timeline, a full-screen map with every day in one row, and a details sheet. Built: the phone layout (under 900px), the one-column timeline with a narrower right column from 900 to 1199px, and a swipeable photo viewer.
 
 ## Phase 5 — Remaining screens
 
@@ -72,4 +66,6 @@ Then implementation as its own step.
 
 ## Immediate next step
 
-Phase 0, item 1: walk through verification part 1 (page shell and scroll model) and agree on it.
+Phase 1 (real data design).
+
+Postponed (user decision, to return to later): the top bar (style, mark, name) and a ChatGPT-style day scroller. Live options for both, with recommendations, are on the options page: https://claude.ai/artifact/V9Fa92HhY897rcKrsadNrw

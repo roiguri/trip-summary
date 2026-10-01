@@ -21,6 +21,16 @@ function timelineItems(d: Day): TimelineItem[] {
   return items;
 }
 
+/** Multi-day lanes drawn beside the rail on this day (on phones the text column clears them). */
+function dayLanes(d: Day) {
+  const lanes = [
+    ...d.continuing.map((s) => s.lane),
+    ...d.spanEnds.map((s) => s.lane),
+    ...d.entries.map((e) => e.span_end?.lane ?? -1),
+  ];
+  return Math.max(-1, ...lanes) + 1;
+}
+
 /** One entry's byline under its title. */
 function byline(e: Entry) {
   if (e.type === 'cluster' || e.type === 'photo')
@@ -128,7 +138,7 @@ export function Timeline({
             </span>
             {d.tags.length > 0 && <small>{d.tags.join(' · ')}</small>}
           </button>
-          <div className="entries">
+          <div className="entries" style={{ '--day-lanes': dayLanes(d) } as React.CSSProperties}>
             {d.continuing.map((s) => (
               <button
                 className={`multi-day-chip ${laneClass(s.lane)} ${spanFocus(s.id)}`}

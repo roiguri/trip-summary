@@ -1,7 +1,9 @@
 # Visual regression tests
 
 `npm run visual` screenshots the agreed states of the sample trip (verification Parts 1–13) at
-1440×900 and compares them with `baseline/`. It runs in CI on every pull request.
+1440×900, the phone layout (`phone-` states) at 390×844 and tablets (`tablet-` states) at 1024×768
+and 820×1180, and compares them with `baseline/`. It
+runs in CI on every pull request.
 
 - **A test fails:** CI uploads `visual-differences` (per state: `*.actual.png` and `*.diff.png` showing
   baseline | now | diff in red). Locally the same files land in `output/` (git-ignored).
@@ -29,5 +31,6 @@ animations, cursors, hover and focus styles. The states are shared with the scre
 BASE_A=http://localhost:3101 BASE_B=http://localhost:3100 npm run check:styles
 ```
 
-A difference is not always a regression (a rule that had no visible effect may be removed); each one
+A state that one build can't reach (a phone state against a build without the phone layout) is
+reported as skipped. A difference is not always a regression (a rule that had no visible effect may be removed); each one
 listed should be understood.

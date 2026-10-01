@@ -1,5 +1,15 @@
 // The agreed states of the sample trip, as steps that reach each one from a fresh page load.
 // Shared by the visual tests (scripts/visual.mjs) and the style comparison (scripts/style-diff.mjs).
+// Desktop states run at 1440x900; `phone-` states at 390x844 with touch; `tablet-` states at
+// 1024x768 (one-column timeline beside the right column), `tablet-portrait` at 820x1180 (phone layout).
+
+/** Browser context options for a state. */
+export const viewportOf = (name) => {
+  if (name === 'tablet-portrait') return { viewport: { width: 820, height: 1180 }, hasTouch: true };
+  if (name.startsWith('tablet-')) return { viewport: { width: 1024, height: 768 } };
+  if (name.startsWith('phone-')) return { viewport: { width: 390, height: 844 }, hasTouch: true };
+  return { viewport: { width: 1440, height: 900 } };
+};
 
 /** Entry id for a timeline title (ids are generated, titles come from the sample data). */
 const entry = (p, title) =>
@@ -62,4 +72,43 @@ export const STATES = {
     await p.waitForTimeout(400);
     await p.click('.panel .photo');
   },
+
+  // Phone (agreed options 1A, 2A, 3A).
+  'phone-opening': async () => {},
+  'phone-day2': (p) => scrollToDay(p, '2026-05-16', 0),
+  'phone-lanes': (p) => scrollToDay(p, '2026-05-18', 0),
+  'phone-changeover': (p) => scrollToDay(p, '2026-05-19', 0),
+  'phone-sheet': (p) =>
+    select(p, 'Julia Pfeiffer Burns State Park and the McWay Falls Overlook Trail'),
+  'phone-sheet-note': async (p) => {
+    await select(p, 'Julia Pfeiffer Burns State Park and the McWay Falls Overlook Trail');
+    await p.waitForTimeout(500);
+    await p.click('.phone-sheet .entry-caption-more');
+  },
+  'phone-album': (p) => p.click('.day-section[data-day="2026-05-15"] .day-banner'),
+  'phone-map': (p) => p.click('.map-fab'),
+  'phone-map-card': async (p) => {
+    await p.click('.map-fab');
+    await p.waitForTimeout(1500);
+    await p.click('.day-pills button:nth-child(4)');
+    await p.waitForTimeout(1500);
+    const at = await p.evaluate(() => {
+      const r = [...document.querySelectorAll('.map-pin.day-pin')]
+        .map((e) => e.getBoundingClientRect())
+        .find((r) => r.top > 80 && r.bottom < 600 && r.left > 0 && r.right < 390);
+      return r && { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+    });
+    if (at) await p.mouse.click(at.x, at.y);
+  },
+  'phone-menu': (p) => p.click('.menu-button'),
+  'phone-viewer': async (p) => {
+    await select(p, '14 photos');
+    await p.waitForTimeout(600);
+    await p.click('.phone-sheet .photo');
+  },
+
+  // Tablet.
+  'tablet-opening': async () => {},
+  'tablet-place': (p) => select(p, 'Point Lobos State Natural Reserve'),
+  'tablet-portrait': async () => {},
 };

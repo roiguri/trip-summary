@@ -26,6 +26,12 @@ This document records the agreed visual direction for the local trip-summary pro
 - The map card and the detail card open and close independently. Nothing is selected at first; the map keeps its size alone or above the details. The detail card appears under the map when an entry is selected and has its own close button. A closed map folds into its header strip while details are open, and into a small "Map" pill (map icon) in the same corner when nothing else is open; the timeline then centres. Changes animate as one motion: the map card morphs between open, strip and pill, the detail card slides in and out, the timeline glides.
 - Map: close pins merge into a "N stops" pill that zooms in on click; the route is a round-dot line per day (current day strong, others faint); transit legs show their mode icon between their neighbouring stops; OpenStreetMap attribution is always visible.
 
+## Phone layout (user decisions)
+
+- Under 1200px the timeline is one column (the right column stays, narrower, from 900px); under 900px the page is the phone layout.
+- On a phone the page is one column. The rail runs down the left edge with every entry on its right; points are plain copper rings with a short connector to the title, clearing any multi-day lanes. The header keeps the brand and a menu.
+- The map is a full-screen view opened from a floating "Map" button, with every day as a pill in one sideways-scrolling row and a card for the tapped pin. Details open in a bottom sheet at two thirds of the screen (or less for short entries) that pulls up to full height.
+
 ## Data and publication boundary
 
 - Seed only fictional Carmel/Monterey trip data, with `America/Los_Angeles` from the destination. The supplied core SQLite schema includes a unique current-trip index; the sample's extra photos table is prototype-only. No real trip data belongs in the repo.

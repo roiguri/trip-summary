@@ -6,8 +6,8 @@ import { formatDay, noteDir } from '../lib/format';
 /**
  * Full-screen photo viewer (Part 11): blurred backdrop, framed photo, round chevron arrows, and a
  * bottom bar with the caption, when it was taken and its position in the set. It is a dialog: it
- * takes focus, keeps Tab inside, and returns focus to where it was on closing. ←/→ move through the
- * set and Escape closes it.
+ * takes focus, keeps Tab inside, and returns focus to where it was on closing. ←/→ or a sideways
+ * swipe move through the set and Escape closes it. On touch screens the arrows are hidden.
  */
 export function Lightbox({
   photo,
@@ -27,6 +27,32 @@ export function Lightbox({
   const close = () => {
     onClose();
     returnFocus.current?.focus();
+  };
+  // Swiping sideways moves through the set (touch, or a mouse drag); a swipe isn't a tap, so it
+  // doesn't close the viewer.
+  const swipe = useRef<{ x: number; y: number } | null>(null);
+  const swiped = useRef(false);
+  const pointer = {
+    onPointerDown: (e: React.PointerEvent) => {
+      swipe.current = { x: e.clientX, y: e.clientY };
+      swiped.current = false;
+    },
+    onPointerUp: (e: React.PointerEvent) => {
+      const s = swipe.current;
+      swipe.current = null;
+      if (!s || set.length < 2) return;
+      const dx = e.clientX - s.x,
+        dy = e.clientY - s.y;
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+        swiped.current = true;
+        step(dx < 0 ? 1 : -1);
+      }
+    },
+  };
+  const tap = (e: React.MouseEvent, action: () => void) => {
+    e.stopPropagation();
+    if (swiped.current) swiped.current = false;
+    else action();
   };
 
   useEffect(() => {
@@ -56,7 +82,8 @@ export function Lightbox({
       role="dialog"
       aria-modal="true"
       aria-label={photo.caption || 'Photo'}
-      onClick={close}
+      onClick={(e) => tap(e, close)}
+      {...pointer}
     >
       <button
         className="light-btn light-close"
@@ -84,8 +111,8 @@ export function Lightbox({
           </svg>
         </button>
       )}
-      <figure className="light-figure" onClick={(e) => e.stopPropagation()}>
-        <img key={photo.id} src={photo.url} alt={photo.caption} />
+      <figure className="light-figure" onClick={(e) => tap(e, () => {})}>
+        <img key={photo.id} src={photo.url} alt={photo.caption} draggable={false} />
       </figure>
       {set.length > 1 && (
         <button

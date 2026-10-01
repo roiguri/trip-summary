@@ -1,5 +1,5 @@
-// Visual regression tests: screenshots of the agreed states of the sample trip, compared with the
-// committed baselines in tests/visual/baseline.
+// Visual regression tests: screenshots of the agreed states of the sample trip (desktop at 1440x900,
+// phone at 390x844), compared with the committed baselines in tests/visual/baseline.
 //
 //   npm run visual           compare; on a difference, writes baseline | now | diff images to
 //                            tests/visual/output and exits 1
@@ -10,7 +10,7 @@
 // Linux) from tests/visual/fonts, hide the map's tile canvas (the tiles load from the internet and
 // draw differently per machine; pins and markers stay), and turn off animations.
 import { chromium } from 'playwright';
-import { STATES } from './states.mjs';
+import { STATES, viewportOf } from './states.mjs';
 import { mkdirSync, readFileSync, writeFileSync, existsSync, readdirSync, rmSync } from 'node:fs';
 
 const BASE = process.env.BASE_URL || 'http://localhost:3100';
@@ -91,17 +91,24 @@ async function compare(page, a, b) {
   rmSync(`${DIR}/output`, { recursive: true, force: true });
   mkdirSync(`${DIR}/output`, { recursive: true });
   const browser = await chromium.launch();
-  const context = await browser.newContext({
-    viewport: { width: 1440, height: 900 },
-    reducedMotion: 'reduce',
-  });
-  const page = await context.newPage();
   const errors = [];
-  page.on('pageerror', (e) => errors.push(String(e)));
-  const tool = await context.newPage();
+  // One page per viewport (desktop, phone), reused across its states.
+  const pages = {};
+  async function pageFor(name) {
+    const options = viewportOf(name);
+    const key = JSON.stringify(options);
+    if (!pages[key]) {
+      const context = await browser.newContext({ ...options, reducedMotion: 'reduce' });
+      pages[key] = await context.newPage();
+      pages[key].on('pageerror', (e) => errors.push(String(e)));
+    }
+    return pages[key];
+  }
+  const tool = await (await browser.newContext()).newPage();
   const failed = [];
   const names = Object.keys(STATES).filter((n) => !ONLY || n === ONLY);
   for (const name of names) {
+    const page = await pageFor(name);
     await page.goto(BASE, { waitUntil: 'networkidle' });
     await page.addStyleTag({ content: STABLE_CSS });
     await page.evaluate(() => document.fonts.ready);

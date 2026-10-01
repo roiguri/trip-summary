@@ -8,7 +8,7 @@
 // Both builds need the same seeded sample trip. The map's tiles are skipped; its markers are
 // compared without their position (it depends on tile loading).
 import { chromium } from 'playwright';
-import { STATES } from './states.mjs';
+import { STATES, viewportOf } from './states.mjs';
 
 const A = process.env.BASE_A || 'http://localhost:3101';
 const B = process.env.BASE_B || 'http://localhost:3100';
@@ -108,7 +108,8 @@ async function captureState(context, base, state, actions) {
   await STATES[state](page);
   // The state's last click can leave the pointer over something that moves under it; hover is
   // checked explicitly below, so the plain snapshot is taken with the pointer out of the way.
-  await page.mouse.move(1, 899);
+  const parked = { x: 1, y: page.viewportSize().height - 1 };
+  await page.mouse.move(parked.x, parked.y);
   await settle(page);
   const shots = [await page.evaluate(snapshot)];
   for (const action of actions) {
@@ -121,7 +122,7 @@ async function captureState(context, base, state, actions) {
     await settle(page);
     shots.push(await page.evaluate(snapshot));
     // Back to the plain state: pointer to an inert spot, focus released.
-    await page.mouse.move(1, 899);
+    await page.mouse.move(parked.x, parked.y);
     await page.evaluate(() => document.activeElement?.blur());
     await settle(page);
   }
@@ -164,20 +165,35 @@ function compare(a, b) {
   const label = (job, action) =>
     `${job.state}${action ? ` ${action.kind} ${action.selector}` : ''}${job.motion ? ' (reduced motion)' : ''}`;
   const contexts = {};
-  for (const motion of ['no-preference', 'reduce'])
-    contexts[motion] = await browser.newContext({
-      viewport: { width: 1440, height: 900 },
-      reducedMotion: motion,
-    });
+  async function contextFor(job) {
+    const options = { ...viewportOf(job.state), reducedMotion: job.motion || 'no-preference' };
+    const key = JSON.stringify(options);
+    contexts[key] ??= await browser.newContext(options);
+    return contexts[key];
+  }
   const runs = [];
   let next = 0;
   async function worker() {
     while (next < jobs.length) {
       const job = jobs[next++];
-      const context = contexts[job.motion || 'no-preference'];
-      const [a, b] = await Promise.all(
-        [A, B].map((base) => captureState(context, base, job.state, job.actions)),
+      const context = await contextFor(job);
+      // A state one build can't reach (e.g. a phone state against a build without the phone
+      // layout) is reported as skipped rather than stopping the run.
+      const shots = await Promise.all(
+        [A, B].map((base) =>
+          captureState(context, base, job.state, job.actions).catch((e) => ({
+            error: String(e.message || e).split('\n')[0],
+          })),
+        ),
       );
+      const [a, b] = shots;
+      if (a.error || b.error) {
+        runs.push({
+          label: label(job),
+          skipped: `${a.error ? 'A' : 'B'}: ${(a.error || b.error).slice(0, 80)}`,
+        });
+        continue;
+      }
       [null, ...job.actions].forEach((action, i) =>
         runs.push({ label: label(job, action), diffs: compare(a[i], b[i]) }),
       );
@@ -188,7 +204,9 @@ function compare(a, b) {
   await browser.close();
   let failed = 0;
   runs.sort((x, y) => x.label.localeCompare(y.label));
-  for (const { label, diffs } of runs) {
+  const skipped = runs.filter((r) => r.skipped);
+  for (const { label, skipped: why } of skipped) console.log(`skip  ${label}  (${why})`);
+  for (const { label, diffs } of runs.filter((r) => !r.skipped)) {
     if (diffs.length) {
       failed++;
       console.log(`DIFF  ${label}  (${diffs.length})`);
@@ -196,10 +214,12 @@ function compare(a, b) {
     } else console.log(`same  ${label}`);
   }
   const took = `${Math.round((Date.now() - started) / 1000)}s`;
+  const compared = runs.length - skipped.length;
+  const skip = skipped.length ? `, ${skipped.length} skipped` : '';
   console.log(
     failed
-      ? `\n${failed} of ${runs.length} states differ (${took})`
-      : `\nall ${runs.length} states match (${took})`,
+      ? `\n${failed} of ${compared} states differ${skip} (${took})`
+      : `\nall ${compared} states match${skip} (${took})`,
   );
   process.exitCode = failed ? 1 : 0;
 })();

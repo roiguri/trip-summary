@@ -1,5 +1,6 @@
 // Interaction checks (verification Part 13) against the sample trip: selecting entries, map pins,
-// day tracking, day albums, multi-day labels and the keyboard. Usage: start the app, then
+// day tracking, day albums, multi-day labels and the keyboard; on a phone, the timeline layout, the
+// details sheet, the full-screen map and the menu. Usage: start the app, then
 // `npm run check:interactions` (BASE_URL defaults to http://localhost:3000). Exits 1 on a failure.
 import { chromium } from 'playwright';
 const BASE = process.env.BASE_URL || 'http://localhost:3000';
@@ -142,6 +143,132 @@ const BASE = process.env.BASE_URL || 'http://localhost:3000';
     ok('second Escape closes details', !(await state()).title);
   }
   // 9. See more doesn't select
+
+  // Phone (390x844, touch): one-column timeline, the details sheet, the full-screen map, the menu.
+  const ph = await b.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true });
+  ph.on('pageerror', (e) => errs.push(String(e)));
+  await ph.goto(BASE, { waitUntil: 'networkidle' });
+  await ph.waitForTimeout(1500);
+  const layout = await ph.evaluate(() => {
+    const rail = document.querySelector('.entries').getBoundingClientRect().left + 2;
+    const points = [...document.querySelectorAll('.entry')].map((e) => {
+      const n = e.querySelector('.entry-node').getBoundingClientRect();
+      const t = e.querySelector('strong') || e.querySelector('small');
+      const r = document.createRange();
+      r.selectNodeContents(t);
+      const line = r.getClientRects()[0];
+      return {
+        dx: Math.abs(n.left + n.width / 2 - rail),
+        dy: Math.abs(n.top + n.height / 2 - (line.top + line.height / 2)),
+      };
+    });
+    const left = document.querySelector('.left');
+    return {
+      offRail: points.filter((q) => q.dx > 1).length,
+      offTitle: points.filter((q) => q.dy > 1.5).length,
+      overflow: left.scrollWidth - left.clientWidth,
+    };
+  });
+  ok('phone: every point on the rail', layout.offRail === 0, layout.offRail);
+  ok('phone: every point level with its title', layout.offTitle === 0, layout.offTitle);
+  ok('phone: no sideways scroll', layout.overflow <= 0, layout.overflow);
+  const sheet = () =>
+    ph.evaluate(() => {
+      const s = document.querySelector('.phone-sheet');
+      return s ? Math.round(s.getBoundingClientRect().height) : 0;
+    });
+  const dragGrab = async (toY) => {
+    const g = await ph.locator('.sheet-grab').boundingBox();
+    await ph.mouse.move(g.x + 60, g.y + 20);
+    await ph.mouse.down();
+    const step = toY > g.y ? 40 : -40;
+    for (let y = g.y + 20; step > 0 ? y < toY : y > toY; y += step)
+      await ph.mouse.move(g.x + 60, y);
+    await ph.mouse.up();
+    await ph.waitForTimeout(700);
+  };
+  const mcway = await ph.evaluate(
+    () =>
+      [...document.querySelectorAll('.entry')].find((e) =>
+        e.querySelector('strong')?.textContent.startsWith('Julia Pfeiffer'),
+      ).dataset.entryId,
+  );
+  await ph.click(`[data-entry-id="${mcway}"] strong`);
+  await ph.waitForTimeout(900);
+  const opened = await sheet();
+  ok('phone: tapping an entry opens the sheet at two thirds', Math.abs(opened - 563) <= 1, opened);
+  await dragGrab(100);
+  const pulled = await sheet();
+  ok('phone: dragging the handle up expands it', pulled > opened + 20, `${opened} -> ${pulled}`);
+  await dragGrab(830);
+  ok('phone: dragging it down closes it', (await sheet()) === 0);
+  await ph.click('.map-fab');
+  await ph.waitForTimeout(2500);
+  ok('phone: Map opens the full-screen map', !!(await ph.$('.phone-map')));
+  await ph.click('.day-pills button:nth-child(4)');
+  await ph.waitForTimeout(1500);
+  ok(
+    'phone: a day pill switches the day',
+    (await ph.textContent('.phone-map-title')) === 'Day 4 · Mon, May 18',
+  );
+  const pinAt = await ph.evaluate(() => {
+    const r = [...document.querySelectorAll('.map-pin.day-pin')]
+      .map((e) => e.getBoundingClientRect())
+      .find((r) => r.top > 80 && r.bottom < 600 && r.left > 0 && r.right < 390);
+    return r && { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+  });
+  if (pinAt) await ph.mouse.click(pinAt.x, pinAt.y);
+  await ph.waitForTimeout(800);
+  ok('phone: tapping a pin shows its card', !!(await ph.$('.pin-card')));
+  await ph.click('.pin-card');
+  await ph.waitForTimeout(900);
+  ok(
+    'phone: Details opens the sheet over the map',
+    (await sheet()) > 0 && !!(await ph.$('.phone-map')),
+  );
+  await ph.keyboard.press('Escape');
+  await ph.waitForTimeout(600);
+  ok(
+    'phone: Escape closes the sheet, keeps the map',
+    (await sheet()) === 0 && !!(await ph.$('.phone-map')),
+  );
+  await ph.keyboard.press('Escape');
+  await ph.waitForTimeout(400);
+  ok('phone: second Escape closes the map', !(await ph.$('.phone-map')));
+  const cluster = await ph.evaluate(
+    () =>
+      [...document.querySelectorAll('.entry')].find(
+        (e) => e.querySelector('strong')?.textContent === '14 photos',
+      ).dataset.entryId,
+  );
+  await ph.click(`[data-entry-id="${cluster}"] strong`);
+  await ph.waitForTimeout(900);
+  await ph.click('.phone-sheet .photo');
+  await ph.waitForTimeout(500);
+  const count = () => ph.textContent('.light-count');
+  const before = await count();
+  await ph.mouse.move(300, 400);
+  await ph.mouse.down();
+  await ph.mouse.move(200, 405, { steps: 5 });
+  await ph.mouse.move(80, 410, { steps: 5 });
+  await ph.mouse.up();
+  await ph.waitForTimeout(400);
+  ok(
+    'phone: swiping the viewer shows the next photo',
+    (await count()) !== before && !!(await ph.$('.lightbox')),
+    `${before} -> ${await count()}`,
+  );
+  ok('phone: no arrows on touch', !(await ph.isVisible('.light-nav.next')));
+  await ph.keyboard.press('Escape');
+  await ph.waitForTimeout(400);
+  await ph.keyboard.press('Escape');
+  await ph.waitForTimeout(600);
+  await ph.click('.menu-button');
+  ok(
+    'phone: the menu holds the nav',
+    ((await ph.textContent('.phone-menu')) || '').includes('WISHLIST'),
+  );
+
   for (const e of errs) R.push('FAIL  console error: ' + e);
   console.log(R.join('\n'));
   await b.close();
