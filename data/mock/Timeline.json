@@ -126,7 +126,7 @@
     },
     {
       "startTime": "2026-05-15T15:20:00.000-07:00",
-      "endTime": "2026-05-16T08:30:00.000-07:00",
+      "endTime": "2026-05-15T16:20:00.000-07:00",
       "startTimeTimezoneUtcOffsetMinutes": -420,
       "endTimeTimezoneUtcOffsetMinutes": -420,
       "visit": {
@@ -156,6 +156,24 @@
           "probability": 0.71,
           "placeLocation": {
             "latLng": "36.5320000°, -121.9310000°"
+          }
+        }
+      }
+    },
+    {
+      "startTime": "2026-05-15T17:40:00.000-07:00",
+      "endTime": "2026-05-16T08:30:00.000-07:00",
+      "startTimeTimezoneUtcOffsetMinutes": -420,
+      "endTimeTimezoneUtcOffsetMinutes": -420,
+      "visit": {
+        "hierarchyLevel": 0,
+        "probability": 0.83,
+        "topCandidate": {
+          "placeId": "ChIJmockgardeninnxxxxxxxxxx",
+          "semanticType": "UNKNOWN",
+          "probability": 0.71,
+          "placeLocation": {
+            "latLng": "36.5580000°, -121.9180000°"
           }
         }
       }
@@ -288,7 +306,7 @@
     },
     {
       "startTime": "2026-05-16T19:00:00.000-07:00",
-      "endTime": "2026-05-17T10:40:00.000-07:00",
+      "endTime": "2026-05-17T09:40:00.000-07:00",
       "startTimeTimezoneUtcOffsetMinutes": -420,
       "endTimeTimezoneUtcOffsetMinutes": -420,
       "visit": {
@@ -436,7 +454,7 @@
     },
     {
       "startTime": "2026-05-18T16:10:00.000-07:00",
-      "endTime": "2026-05-19T09:50:00.000-07:00",
+      "endTime": "2026-05-18T18:50:00.000-07:00",
       "startTimeTimezoneUtcOffsetMinutes": -420,
       "endTimeTimezoneUtcOffsetMinutes": -420,
       "visit": {
@@ -462,6 +480,24 @@
         "probability": 0.83,
         "topCandidate": {
           "placeId": "ChIJmockstop202605181900xxx",
+          "semanticType": "UNKNOWN",
+          "probability": 0.71,
+          "placeLocation": {
+            "latLng": "36.2475000°, -121.7812000°"
+          }
+        }
+      }
+    },
+    {
+      "startTime": "2026-05-18T20:45:00.000-07:00",
+      "endTime": "2026-05-19T07:40:00.000-07:00",
+      "startTimeTimezoneUtcOffsetMinutes": -420,
+      "endTimeTimezoneUtcOffsetMinutes": -420,
+      "visit": {
+        "hierarchyLevel": 0,
+        "probability": 0.83,
+        "topCandidate": {
+          "placeId": "ChIJmockriverlodgexxxxxxxxx",
           "semanticType": "UNKNOWN",
           "probability": 0.71,
           "placeLocation": {
