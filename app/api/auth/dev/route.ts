@@ -17,6 +17,7 @@ import {
 // It exists only on the emulators with the demo project, so it can never sign anyone into a real one.
 //   /api/auth/dev?as=editor&next=/trips/sample-coast
 //   /api/auth/dev?as=viewer&trip=sample-coast
+//   /api/auth/dev?as=guest   (a Google account that is on no trip)
 export async function GET(req: Request) {
   if (!emulated()) return new Response('Not found', { status: 404 });
   const url = new URL(req.url);
@@ -26,11 +27,13 @@ export async function GET(req: Request) {
     const { secret } = await createInvite(getStore(), trip, 'Mock viewer', 'dev');
     return NextResponse.redirect(new URL(`/invite/${secret}`, req.url));
   }
-  const uid = 'dev-editor';
-  const email = ownerEmail()!;
+  const guest = url.searchParams.get('as') === 'guest';
+  const uid = guest ? 'dev-guest' : 'dev-editor';
+  const email = guest ? 'guest@example.com' : ownerEmail()!;
+  const displayName = guest ? 'Mock guest' : 'Mock editor';
   await auth()
-    .updateUser(uid, { email, displayName: 'Mock editor' })
-    .catch(() => auth().createUser({ uid, email, displayName: 'Mock editor' }));
+    .updateUser(uid, { email, displayName })
+    .catch(() => auth().createUser({ uid, email, displayName }));
   const session = await sessionCookieFor(await idTokenFor(await auth().createCustomToken(uid)));
   const res = NextResponse.redirect(new URL(safeNext(url.searchParams.get('next')), req.url));
   res.cookies.set(SESSION_COOKIE, session, cookieOptions(SESSION_DAYS * 86_400));

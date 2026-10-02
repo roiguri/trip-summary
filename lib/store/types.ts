@@ -15,6 +15,20 @@ export type Trip = {
   status: TripStatus;
   createdAt: string;
   updatedAt: string;
+  /** What the home page shows on the trip's card, worked out with each journal rebuild. */
+  summary?: TripSummary;
+};
+
+/** A trip's card on the home page (DESIGN.md, "Home, adding a trip and imports"). */
+export type TripSummary = {
+  /** The cover's image: the owner's pick, else the first photo of the most photographed stop; null
+   *  for a paper cover. */
+  cover: string | null;
+  coverFrom: 'pick' | 'stop' | null;
+  photos: number;
+  stops: number;
+  hasTimeline: boolean;
+  hasPhotos: boolean;
 };
 
 /** Jarvis rows as imported, column names kept (lib/schema.ts CORE_SCHEMA). */

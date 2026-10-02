@@ -51,6 +51,12 @@ ok(
   'the owner opens the sample',
   ep.url().endsWith(SAMPLE) && (await ep.locator('.day-section').count()) > 0,
 );
+await ep.goto(BASE + '/');
+ok(
+  'the owner’s home lists every trip and offers a new one',
+  (await ep.locator('.trip-card').count()) === 2 &&
+    (await ep.locator('text=+ New trip').count()) === 1,
+);
 const res = await ep.goto(BASE + '/trips/no-such-trip');
 ok('a trip that does not exist is not found', res?.status() === 404, res?.status());
 const [sess] = (await editor.cookies()).filter((c) => c.name === '__session');
@@ -76,7 +82,12 @@ ok(
 const other = await vp.goto(BASE + OTHER);
 ok("a viewer cannot open a trip they weren't invited to", other?.status() === 404, other?.status());
 await vp.goto(BASE + '/');
-ok('home takes a viewer to their trip', vp.url().endsWith(SAMPLE));
+ok(
+  'a viewer’s home lists only their trip, without editors’ details',
+  (await vp.locator('.trip-card').count()) === 1 &&
+    (await vp.locator('.trip-status').count()) === 0 &&
+    (await vp.locator('text=+ New trip').count()) === 0,
+);
 
 // The same link in another browser.
 const second = await ctx();
