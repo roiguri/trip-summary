@@ -7,3 +7,6 @@ node_modules/
 captures/
 preview/
 tests/visual/output/
+
+# Copied from node_modules before dev and build (scripts/copy-maplibre-worker.mjs)
+/public/maplibre/
