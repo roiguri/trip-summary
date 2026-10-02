@@ -4,4 +4,3 @@ legacy-vite
 public
 docs/reference
 package-lock.json
-next-env.d.ts
