@@ -37,7 +37,7 @@ Real data integration is complex enough to be designed and agreed on before any 
 - **Storage and privacy:** where the DB and photo files live, what's git-ignored, thumbnails.
 - **UX:** import flow (CLI first vs. in-app), and how review/editing corrections feed back.
 
-Output: a written data design, agreed before Phase 2.
+Output: a written data design, agreed before Phase 2: `docs/DATA-DESIGN.md` (agreed). Next: verify it against the real sources on the owner's computer (`docs/HANDOFF.md`).
 
 ## Phase 2 — Real data: implementation
 
@@ -66,6 +66,6 @@ Designed with mock options and agreed (`docs/VERIFICATION.md`, "Mobile"): a one-
 
 ## Immediate next step
 
-Phase 1 (real data design).
+Verify the data design against the real sources and set up access to them, on the owner's computer: `docs/HANDOFF.md`. Then Phase 2.
 
 Postponed (user decision, to return to later): the top bar (style, mark, name) and a ChatGPT-style day scroller. Live options for both, with recommendations, are on the options page: https://claude.ai/artifact/V9Fa92HhY897rcKrsadNrw
