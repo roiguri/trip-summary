@@ -113,12 +113,12 @@ and listed in edit mode as "refers to something no longer in the plan", never si
 5. After publishing, edits go live immediately. A re-import stays a pending review and changes the
    published trip only when applied.
 
-## Access (proposed)
+## Access (agreed)
 
 - **Editors**: an allowlist of Google accounts per trip, signing in with Google (which the photo
   import needs anyway).
-- **Viewers**: an allowlist of email addresses per trip. A viewer signs in with Google or with a
-  one-time sign-in link emailed to them, so no Google account is needed. Adding a viewer sends them
+- **Viewers**: an allowlist of email addresses per trip. A viewer signs in with a one-time sign-in
+  link emailed to them (or with Google), so no Google account is needed. Adding a viewer sends them
   an invite; a forwarded invite gives nothing to anyone not on the list. Removing a viewer revokes
   only their access.
 - Nothing is public. Photos are served only to signed-in users with access, through short-lived URLs.
@@ -132,9 +132,31 @@ and listed in edit mode as "refers to something no longer in the plan", never si
 - The importers and the merge are tested against these, including re-imports that keep edits.
 - Sign-in has a development mode with mock users (an editor and a viewer).
 
-## Open points
+## Verifying the real sources before agreeing
 
-- Access model above (proposed).
-- What "highlight" looks like on an entry.
-- Hosting and photo storage (Phase 6): where the database and the copied photos live.
-- Videos: skipped at first, or shown as a still?
+Two sources are checked against the real data before this design is agreed, without sharing the data:
+`node scripts/probe-sources.mjs --jarvis <jarvis.db> --timeline <Timeline.json>` prints only their
+shape (tables and columns compared with the app's schema, counts, how much is filled in, Timeline
+field names, segment kinds and modes, months covered); no names, notes, coordinates or place IDs.
+It checks in particular:
+
+- that Jarvis's tables and columns match the app's core schema;
+- how many places have a Google place ID (visit matching relies on it; without it, matching falls
+  back to distance and time);
+- the Android `Timeline.json` structure and field names the importer will read.
+
+The Photos Picker (whether it gives a photo's location and time zone) is checked at the start of
+Phase 2, as it needs a Google Cloud project and OAuth setup; the design works either way.
+
+## Videos (proposed)
+
+Videos picked with the photos are recorded and shown as a still frame at first; playing them comes
+later.
+
+## Order of the remaining design work
+
+The open design questions don't change the data layer (it only stores, for example, that something is
+highlighted), so they come after the importers and the merge are built against mock data, and
+before the edit-mode screens: what a highlight looks like, the edit mode itself (suggestions, the
+import review, moving photos), and then the top bar and day scroller (postponed, see the roadmap).
+Hosting and photo storage (Phase 6) must be decided before anything real goes online.
