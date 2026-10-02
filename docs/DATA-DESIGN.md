@@ -53,7 +53,9 @@ with `geoData`). It is not built; it is the fallback if Timeline placement prove
 
 ## Three layers
 
-The page is always computed from three layers; only the third is ever edited.
+The page is always computed from three layers; only the third is ever edited. They are described
+below as tables; they are stored as Firestore documents (`docs/ARCHITECTURE.md`), with the same
+fields and keys.
 
 1. **Sources**: what each import brought, stored as-is per trip, replaced on re-import.
 2. **Merge**: computed from the sources by fixed rules; never edited, rebuilt on each import.
@@ -140,12 +142,13 @@ and listed in edit mode as "refers to something no longer in the plan", never si
 
 - **Editors**: an allowlist of Google accounts per trip, signing in with Google (which the photo
   import needs anyway).
-- **Viewers**: an allowlist of email addresses per trip. A viewer signs in with a one-time sign-in
-  link emailed to them (or with Google), so no Google account is needed. Adding a viewer sends them
-  an invite; a forwarded invite gives nothing to anyone not on the list. Removing a viewer revokes
-  only their access.
+- **Viewers**: each viewer gets a **personal invite link**, created in the app and sent by the owner
+  however they like; there is no email service **(agreed)**. Opening it signs that browser in as
+  that viewer, so no Google account is needed (a viewer may also sign in with Google). A link works
+  for one browser, so a forwarded link gives nothing. Removing a viewer revokes only their access.
 - Nothing is public. Photos are served only to signed-in users with access, through short-lived URLs.
-- Tables: `users` (email, name, sign-in method), `trip_access` (trip, email, role, added when, by whom).
+- Stored: users (name, sign-in method), trip access (trip, user, role, added when, by whom), and
+  invites (link, trip, viewer, created, used by which browser, revoked).
 
 ## Building with mock data (agreed)
 
@@ -154,6 +157,7 @@ and listed in edit mode as "refers to something no longer in the plan", never si
   filters), and mock Picker results with sample images.
 - The importers and the merge are tested against these, including re-imports that keep edits.
 - Sign-in has a development mode with mock users (an editor and a viewer).
+- Development and tests run on the Firebase Emulator Suite, never the real project.
 
 ## Findings from the real sources
 
@@ -193,4 +197,4 @@ The open design questions don't change the data layer (it only stores, for examp
 highlighted), so they come after the importers and the merge are built against mock data, and
 before the edit-mode screens: what a highlight looks like, the edit mode itself (suggestions, the
 import review, moving photos), and then the top bar and day scroller (postponed, see the roadmap).
-Hosting and photo storage (Phase 6) must be decided before anything real goes online.
+Hosting and storage are decided: `docs/ARCHITECTURE.md` (Netlify + Firebase).

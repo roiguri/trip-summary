@@ -41,7 +41,19 @@ Output: a written data design, agreed before Phase 2: `docs/DATA-DESIGN.md` (agr
 
 ## Phase 2 — Real data: implementation
 
-Build what Phase 1 agreed: the importers (porting `legacy-vite/src/lib/importers/*` where it still fits), the timeline builder, the import flow, and a page that reads the DB per request. Fixture-based tests. Hard rule: no real trip data or photos in the repo.
+Build what Phase 1 agreed, on the store `docs/ARCHITECTURE.md` decided (Netlify + Firebase). Hard rule: no real trip data or photos in the repo. One pull request per step:
+
+0. Architecture decision (`docs/ARCHITECTURE.md`): done.
+1. Mock sources shaped like the real ones (Jarvis database, `Timeline.json`, Picker results), and the Node `engines` fix.
+2. Data model on Firestore behind `lib/store/`, with the emulator for development and tests.
+3. Plan importer (Jarvis SQLite file).
+4. Timeline importer (slice, parse, store).
+5. The merge, with a test per rule; the sample trip, imported and merged, must look identical (the visual tests pass unchanged).
+6. Design round, with preview pages: the home page (trips list), adding a new trip, the import flow and its review, drafts and publishing.
+7. Build those screens, including the photo import (Picker, Cloud Function copy, resizing).
+8. Import the owner's real trip into a private draft and tune the matching, reviewed together.
+
+Then the edit-mode design round.
 
 ## Phase 3 — Review and editing
 
@@ -59,13 +71,13 @@ Designed with mock options and agreed (`docs/VERIFICATION.md`, "Mobile"): a one-
 - **Wishlist:** backed by the existing `wishlist` table, with done/priority.
 - Each needs its own design pass. There are no mocks for either today.
 
-## Phase 6 — Sharing and deployment (needs a separate decision)
+## Phase 6 — Sharing and deployment
 
-- Hosting choice (SQLite on a single node vs. hosted DB), auth, and read-only share links.
-- Photo storage strategy (local files vs. object storage), and media licensing review.
+- Hosting, storage and sign-in are decided (`docs/ARCHITECTURE.md`): Netlify + Firebase, editors with Google, viewers with personal invite links.
+- Left for this phase: the production Firebase project and Netlify site, the budget alert, and a media licensing review of the sample photos.
 
 ## Immediate next step
 
-Phase 2: the real sources are verified and access to them is set up (`docs/HANDOFF.md`, `docs/DATA-DESIGN.md`).
+Phase 2, step 1 (mock sources). The real sources are verified (`docs/DATA-DESIGN.md`) and the architecture is decided (`docs/ARCHITECTURE.md`).
 
 Postponed (user decision, to return to later): the top bar (style, mark, name) and a ChatGPT-style day scroller. Live options for both, with recommendations, are on the options page: https://claude.ai/artifact/V9Fa92HhY897rcKrsadNrw
