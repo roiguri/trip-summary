@@ -3,6 +3,7 @@
 // the owner's Jarvis data.
 import { DatabaseSync } from 'node:sqlite';
 import type { JarvisRow, PlanSource, Store } from '../store/index.ts';
+import { rebuildJournal } from '../journal.ts';
 
 /** The tables and columns the importer reads; anything else in the file is ignored. */
 const REQUIRED: Record<string, string[]> = {
@@ -155,5 +156,6 @@ export async function importPlan(store: Store, file: string, tripId: string, by:
     summary,
     state: 'applied',
   });
+  await rebuildJournal(store, tripId);
   return { trip, summary, record };
 }

@@ -1,13 +1,17 @@
-import { getDb } from './db.ts';
+import { readFileSync } from 'node:fs';
+import { loadTrip, openDb, type TripFile } from './db.ts';
 import { buildTrip, type ModelItem, type ModelPhoto } from './model.ts';
 
 export type * from './model.ts';
 
-// The sample fixture: reads the trip seeded from data/sample-trip.json (lib/db.ts) and draws it as the
-// prototype did, loose photos grouped by clock hour. Real trips come from the merge (lib/merge/).
+// The sample fixture: a trip file (data/sample-trip.json, data/README.md) loaded into an in-memory
+// database and drawn as the prototype did, loose photos grouped by clock hour. It is what the visual
+// tests lock. Real trips come from the merge (lib/merge/).
 
-export function getTrip() {
-  const db = getDb();
+export function fixtureTrip(file: string) {
+  const data = JSON.parse(readFileSync(file, 'utf8')) as TripFile;
+  const db = openDb();
+  loadTrip(db, data);
   const trip = db
     .prepare(
       `SELECT t.trip_id, t.title, t.notes AS subtitle, t.start_date, t.end_date,
@@ -27,7 +31,7 @@ export function getTrip() {
         lng: number | null;
       }
     | undefined;
-  if (!trip) throw new Error('No current trip in the database. Run `npm run seed`.');
+  if (!trip) throw new Error(`No trip in ${file}`);
 
   const items = db
     .prepare(

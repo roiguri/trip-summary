@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "predev": "node scripts/copy-maplibre-worker.mjs",
-    "dev": "next dev -p 3100",
+    "dev": "FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 next dev -p 3100",
     "prebuild": "node scripts/copy-maplibre-worker.mjs",
     "build": "next build",
     "start": "next start -p 3100",

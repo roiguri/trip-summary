@@ -1,14 +1,14 @@
 # Trip data files
 
-The app renders whatever trip is current in the local SQLite database. The code holds no trip-specific values. A trip is described by one JSON file and loaded with:
+The app renders a trip's journal from the store. The code holds no trip-specific values. A trip file describes a trip in one JSON file, for the sample and tests, and is loaded with:
 
 ```sh
-npm run seed                                 # data/sample-trip.json -> trip-sample.db
-npm run seed -- data/fixtures/test-trip.json # any other trip file
-TRIP_DB=/tmp/other.db npm run seed -- file.json   # into a different database
+npm run seed                                 # data/sample-trip.json, as the trip "sample-coast"
+npm run seed -- data/fixtures/test-trip.json # any other trip file, under its own trip ID
+npm run seed -- --mocks                      # the mock sources (below) imported and merged
 ```
 
-Seeding replaces the database. The page reads the database on every request, so reload after seeding and don't rebuild. `npm run dev` seeds the sample automatically if no database exists.
+Seeding needs the emulators running (`npm run emulators`, then `FIRESTORE_EMULATOR_HOST=127.0.0.1:8080`) and refuses to run against a real project. A trip file is stored as a ready-made journal, drawn as the prototype did (loose photos grouped by clock hour): it is the fixture the visual tests lock. The page reads the store on every request, so reload after seeding; `TRIP_ID` picks which trip it shows.
 
 - `sample-trip.json`: the fictional sample and the one preview. Days 1–3 are the clean Carmel/Monterey trip the design was locked against. Days 4–6 (Big Sur, day tag "Edge cases") hold the stress cases in one place: four overlapping multi-day events (one beyond the 3-lane cap), a hotel changeover, a stay that checks out after the trip ends, lodging with photos, long English and Hebrew notes and captions, a long title, places without photos or coordinates, a large photo cluster, and train and flight legs across time zones.
 - `fixtures/test-trip.json`: a small, deliberately different trip (other dates, timezone, day count). It only checks that the UI has no sample-specific code; edge cases live in the sample.

@@ -1,16 +1,19 @@
 # WAYFARER trip journal
 
 A trip journal: a timeline of each day (places, stays, transit, notes, photos) beside a map and a
-detail card, with a phone layout. Next.js 15 (app router), React 19, MapLibre (OpenFreeMap tiles),
-SQLite through `node:sqlite`. The page reads the current trip from the database on every request.
+detail card, with a phone layout. Next.js 16 (app router), React 19, MapLibre (OpenFreeMap tiles),
+Firebase (`docs/ARCHITECTURE.md`). The page reads the trip's journal (the merged trip, rebuilt after
+every import and edit) from the store on every request; locally and in CI that is the emulators.
 
 **Where things stand and what's next: read `docs/HANDOFF.md` first.**
 
 ## Commands
 
 ```sh
-npm run seed                 # load data/sample-trip.json into trip-sample.db ($TRIP_DB selects another file)
-npm run dev                  # dev server on 3100
+npm run emulators            # first, in its own terminal: the local Firebase the app and tests use
+FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 npm run seed            # the sample trip into the emulators
+FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 npm run seed -- --mocks # the mocks through the importers and merge
+npm run dev                  # dev server on 3100 (against the emulators; TRIP_ID picks the trip)
 npm run build && npm run start
 npm run format:check && npm run typecheck
 BASE_URL=http://localhost:3100 npm run check:interactions   # 34 interaction checks (desktop + phone)

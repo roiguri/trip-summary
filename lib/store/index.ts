@@ -6,6 +6,7 @@ import type {
   Edit,
   EditTarget,
   ImportRecord,
+  Journal,
   PlanSource,
   Trip,
   TripPhoto,
@@ -129,6 +130,43 @@ export function createStore(db: Firestore) {
     },
     async listEdits(tripId: string): Promise<Edit[]> {
       return list<Edit>(tripId, 'edits');
+    },
+
+    /** Replaces the trip's journal; days no longer in it are removed. */
+    async putJournal(tripId: string, j: Journal) {
+      const col = sub(tripId, 'journal');
+      const { days, ...meta } = j.trip;
+      const dayIds = new Set(days.map((d) => `day-${d.date}`));
+      const old = await col.select().get();
+      await writeAll([
+        ...old.docs
+          .filter((d) => d.id.startsWith('day-') && !dayIds.has(d.id))
+          .map((d) => [d.ref, null] as [DocumentReference, null]),
+        ...days.map((d) => [col.doc(docId(`day-${d.date}`)), d] as [DocumentReference, object]),
+        [col.doc('review'), { suggestions: j.suggestions, orphanEdits: j.orphanEdits }],
+        // Written last: a reader that finds the meta finds every day it lists.
+        [col.doc('meta'), { ...meta, dates: days.map((d) => d.date), builtAt: j.builtAt }],
+      ]);
+    },
+    async getJournal(tripId: string): Promise<Journal | null> {
+      const snap = await sub(tripId, 'journal').get();
+      const docs = new Map(snap.docs.map((d) => [d.id, d.data()]));
+      const meta = docs.get('meta');
+      if (!meta) return null;
+      const { dates, builtAt, ...trip } = meta as Journal['trip'] & {
+        dates: string[];
+        builtAt: string;
+      };
+      const review = (docs.get('review') ?? {}) as Partial<Journal>;
+      return {
+        trip: {
+          ...trip,
+          days: dates.map((d) => docs.get(`day-${d}`) as Journal['trip']['days'][number]),
+        },
+        suggestions: review.suggestions ?? [],
+        orphanEdits: review.orphanEdits ?? [],
+        builtAt,
+      };
     },
 
     async recordImport(

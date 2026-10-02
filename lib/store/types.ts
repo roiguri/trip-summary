@@ -98,3 +98,15 @@ export type ImportRecord = {
   summary: Record<string, number>;
   state: 'pending' | 'applied' | 'discarded';
 };
+
+/**
+ * The merged trip as the page draws it, rebuilt after every import and edit so a page view only
+ * reads. Stored as `journal/meta`, one `journal/day-{date}` per day (a document holds at most 1 MiB)
+ * and `journal/review` (what edit mode needs: suggestions and orphaned edits).
+ */
+export type Journal = {
+  trip: import('../model.ts').Trip;
+  suggestions: import('../merge/index.ts').Suggestion[];
+  orphanEdits: Edit[];
+  builtAt: string;
+};
