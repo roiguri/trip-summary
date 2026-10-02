@@ -11,3 +11,6 @@ tests/visual/output/
 # Copied from node_modules before dev and build (scripts/copy-maplibre-worker.mjs)
 /public/maplibre/
 /next-env.d.ts
+
+# Firebase emulator logs
+*-debug.log

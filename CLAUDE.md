@@ -19,6 +19,10 @@ npm run visual:update        # only for an intended visual change; it also rewri
                              # with anti-aliasing noise, so commit only the states that changed
 npm run check:styles         # computed-style diff between two builds (BASE_A, BASE_B), for refactors
 node scripts/probe-sources.mjs --jarvis <db> --timeline <Timeline.json>   # shape of real sources only
+npm run mocks                # regenerate data/mock/ from the sample (CI checks it is up to date)
+npm test                     # unit tests (tests/unit)
+npm run test:store           # store tests against the Firebase emulators (needs Java 21+)
+npm run emulators            # Firebase emulators for development (Firestore, Storage, Auth)
 ```
 
 CI (`.github/workflows/ci.yml`) runs format, types, build, interaction checks and visual tests.
@@ -28,7 +32,8 @@ CI (`.github/workflows/ci.yml`) runs format, types, build, interaction checks an
 - `app/Client.tsx` holds shared state; parts live in `app/components/` (Timeline, MapCard, MapView,
   DetailPanel, Lightbox, PhoneMap, PhoneSheet, Header). `app/globals.css` is written by component,
   each style once; narrow layouts are at the end (one column under 1200px, phone under 900px).
-- `lib/data.ts` builds the trip model from the database; `lib/schema.ts` is the schema (core tables
+- `lib/store/` is the only code that talks to Firebase (`docs/ARCHITECTURE.md`); `scripts/firebase.mjs`
+  runs the pinned Firebase CLI. `lib/data.ts` builds the trip model from the database; `lib/schema.ts` is the schema (core tables
   are the user's real schema; `days` and `photos` are prototype tables to be replaced, see
   `docs/DATA-DESIGN.md`).
 - `docs/ROADMAP.md` (phases), `docs/ARCHITECTURE.md` (hosting, store, sign-in), `docs/DATA-DESIGN.md` (agreed data design), `docs/VERIFICATION.md`

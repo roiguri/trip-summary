@@ -1,0 +1,10 @@
+rules_version = '2';
+// Clients never read or write Firestore directly: every access goes through the app's server, which
+// checks the viewer's access first (docs/ARCHITECTURE.md). The Admin SDK bypasses these rules.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

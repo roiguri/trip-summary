@@ -77,6 +77,9 @@ Firebase is a proprietary stack, so moving away is real work. These rules keep i
 
 - **Local development and tests** run against the **Firebase Emulator Suite** (Firestore, Storage,
   Auth, Functions on the developer's machine), so no cloud project is touched and CI needs no keys.
+  They use the emulator-only project `demo-trip-summary` and need Java 21+. The Firebase CLI runs at
+  a pinned version through `scripts/firebase.mjs` rather than from `package.json`, so its large
+  dependency tree stays out of the app's lockfile and audit.
 - **Secrets** (the Admin SDK service account, OAuth client secret, invite signing key) live in
   `.env.local` locally and in Netlify's environment settings, never in git.
 - **Blaze** needs a card, but usage stays inside the free allowance at this scale (Cloud Storage
