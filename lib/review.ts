@@ -11,7 +11,8 @@ export type ReviewItem =
   | { kind: 'removed'; id: string; title: string; time: string }
   | { kind: 'retitled'; id: string; from: string; to: string }
   | { kind: 'notes'; id: string; title: string }
-  | { kind: 'suggestion'; suggestion: Suggestion; photos: Photo[] };
+  | { kind: 'suggestion'; suggestion: Suggestion; photos: Photo[] }
+  | { kind: 'photos'; where: string | null; count: number; thumbs: Photo[] };
 
 export type ReviewDay = { date: string; items: ReviewItem[] };
 export type Review = { days: ReviewDay[]; counts: Record<ReviewItem['kind'], number> };
@@ -72,6 +73,37 @@ export function review(before: MergeResult, after: MergeResult): Review {
       photos: loose.filter((p) => p.date === s.date && p.time >= s.time && p.time <= s.endTime),
     });
 
+  // New photos, by where they landed: an entry, or loose moments of that day.
+  const had = new Set(
+    before.trip.days.flatMap((d) => d.entries.flatMap((e) => e.photos.map((p) => p.id))),
+  );
+  const landed = new Map<
+    string,
+    { date: string; time: string; where: string | null; photos: Photo[] }
+  >();
+  for (const d of after.trip.days)
+    for (const e of d.entries) {
+      const fresh = e.photos.filter((p) => !had.has(p.id));
+      if (!fresh.length) continue;
+      const loose = e.type === 'photo' || e.type === 'cluster';
+      const k = loose ? `${d.date} loose` : e.id;
+      const g = landed.get(k) ?? {
+        date: d.date,
+        time: loose ? '99:99' : e.time,
+        where: loose ? null : e.title,
+        photos: [],
+      };
+      g.photos.push(...fresh);
+      landed.set(k, g);
+    }
+  for (const g of landed.values())
+    push(g.date, g.time, {
+      kind: 'photos',
+      where: g.where,
+      count: g.photos.length,
+      thumbs: g.photos.slice(0, 4),
+    });
+
   items.sort((x, y) => x.date.localeCompare(y.date) || x.time.localeCompare(y.time));
   const days: ReviewDay[] = [];
   for (const { date, item } of items) {
@@ -87,7 +119,8 @@ export function review(before: MergeResult, after: MergeResult): Review {
     retitled: 0,
     notes: 0,
     suggestion: 0,
+    photos: 0,
   };
-  for (const { item } of items) counts[item.kind]++;
+  for (const { item } of items) counts[item.kind] += item.kind === 'photos' ? item.count : 1;
   return { days, counts };
 }

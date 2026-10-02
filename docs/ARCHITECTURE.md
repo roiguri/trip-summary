@@ -12,7 +12,8 @@ in git-ignored env files.
   - **Firestore** holds the trips, the imported sources, the edits and the merged journal.
   - **Cloud Storage** holds photos, videos and their resized copies.
   - **Firebase Auth** signs editors and viewers in.
-  - **Cloud Functions** run the long jobs: copying picked media from Google Photos and resizing it.
+  - **Cloud Functions**, only if hosting shows they're needed: copying long videos from Google
+    Photos (see Imports).
 - The Google Cloud project created for the Photos Picker becomes the Firebase project, so the
   Picker's OAuth setup carries over.
 
@@ -33,8 +34,10 @@ Two services in total, both already used in the owner's other apps, at no cost a
 
 The merge runs once per import, not per view: its result, the journal, is stored in Firestore one
 document per day. A page view checks the viewer's access and reads that trip's journal documents.
-Photos and videos are served through **signed URLs** that the server issues per view and that expire
-within the hour; Storage itself is closed to direct reads.
+Photos and videos are served through the app's `/media/…` route, which checks the viewer's access to
+that trip on every request and supports range requests (seeking in a video); Storage itself is closed
+to direct reads **(agreed, Oct 2)**. Signed URLs can replace it at hosting if bandwidth through the
+app's functions costs too much.
 
 ### Sign-in and access
 
@@ -51,9 +54,18 @@ within the hour; Storage itself is closed to direct reads.
 - **Plan**: the Jarvis SQLite file is chosen in the browser and uploaded; the server reads the trip
   from it and stores the rows in Firestore.
 - **Timeline**: sliced in the browser to the trip's dates **(agreed)**; only the slice is uploaded.
-- **Photos and videos**: the editor picks them in the Google Photos Picker; a Cloud Function copies
-  each file from Google straight into Storage and writes the 2048px and 400px copies. A video's still
-  frame is taken in the browser at pick time. Uploads never pass through Netlify's short functions.
+- **Photos and videos**: the editor connects Google Photos (a separate, read-only consent for the
+  photos they pick; the access token lives about an hour in an encrypted HTTP-only cookie, and no
+  refresh token is asked for) and picks in the Google Photos Picker. The app copies the picked items
+  in small batches, a few per request so each fits a short function's time limit: originals are
+  downloaded from Google, photos are stored as 2048px and 400px copies (`sharp`, location removed),
+  videos as they are, with Google's own thumbnail as the still frame. The local time comes from the
+  photo's EXIF. Like every import, picked photos wait for review before they're applied **(agreed,
+  Oct 2)**.
+- **Cloud Functions, if needed**: copying lives in one module (`lib/media/`). If long videos turn out
+  to exceed the host's time limit, the same module moves into a Cloud Function driven by a job queue,
+  and how the function gets the Google token is decided then **(agreed, Oct 2: decided at hosting,
+  after measuring)**.
 
 ### Firestore layout (proposed, settled in Phase 2's data-model step)
 

@@ -3,7 +3,8 @@
 // applies or discards it, so a published trip changes only when they say so.
 import { merge, type MergeResult } from '../merge/index.ts';
 import { rebuildJournal } from '../journal.ts';
-import type { Pending, Store, TimelineSegment } from '../store/index.ts';
+import type { Pending, Store, TimelineSegment, TripPhoto } from '../store/index.ts';
+import { deleteFolder } from '../media/storage.ts';
 import { diffItinerary, importPlan, PlanImportError, readJarvisPlan } from './plan.ts';
 import { checkSlice, TimelineImportError } from './timeline-store.ts';
 
@@ -66,6 +67,39 @@ export async function stageTimeline(
   }));
 }
 
+/** Starts a photo import: its photos are added batch by batch as they are copied. */
+export async function beginPhotos(store: Store, tripId: string, sessionId: string, by: string) {
+  if (!(await store.getTrip(tripId))) throw new StageError(`No trip "${tripId}"`);
+  return stage(store, tripId, by, { photos: 0 }, (importId, at) => ({
+    importId,
+    source: 'photos',
+    sessionId,
+    photos: [],
+    at,
+  }));
+}
+
+/** Adds copied photos to the waiting photo import (a re-copied photo replaces itself). */
+export async function addPendingPhotos(store: Store, tripId: string, photos: TripPhoto[]) {
+  const pending = await store.getPending(tripId);
+  if (pending?.source !== 'photos')
+    throw new StageError('The photo import was replaced or discarded');
+  const all = new Map(pending.photos.map((p) => [p.mediaId, p]));
+  for (const p of photos) all.set(p.mediaId, p);
+  await store.putPending(tripId, { ...pending, photos: [...all.values()] });
+}
+
+/** A discarded photo import's copied files go too, except those of photos already in the trip. */
+async function dropFiles(store: Store, tripId: string, pending: Pending) {
+  if (pending.source !== 'photos') return;
+  const kept = new Set((await store.listPhotos(tripId)).map((p) => p.mediaId));
+  await Promise.all(
+    pending.photos
+      .filter((p) => !kept.has(p.mediaId))
+      .map((p) => deleteFolder(`trips/${tripId}/media/${p.mediaId}/`)),
+  );
+}
+
 /** Records the import as pending and stores it, discarding any import still waiting. */
 async function stage(
   store: Store,
@@ -75,7 +109,10 @@ async function stage(
   make: (importId: string, at: string) => Pending,
 ) {
   const waiting = await store.getPending(tripId);
-  if (waiting) await store.setImportState(tripId, waiting.importId, 'discarded');
+  if (waiting) {
+    await store.setImportState(tripId, waiting.importId, 'discarded');
+    await dropFiles(store, tripId, waiting);
+  }
   const source = make('', '').source;
   const record = await store.recordImport(tripId, { source, by, summary, state: 'pending' });
   const pending = make(record.id, record.at);
@@ -110,7 +147,7 @@ export async function previewPending(
   const after = merge({
     plan: pending.source === 'plan' ? pending.plan : plan,
     segments: pending.source === 'timeline' ? pending.segments : segments,
-    photos,
+    photos: pending.source === 'photos' ? withPhotos(photos, pending.photos) : photos,
     edits: others,
   });
   const decisions: Record<string, 'add' | 'dismiss'> = {};
@@ -140,7 +177,8 @@ export async function applyPending(store: Store, tripId: string) {
       endDate: (t.end_date as string | null) ?? null,
     });
     await store.putPlan(tripId, pending.plan);
-  } else await store.replaceTimeline(tripId, pending.segments);
+  } else if (pending.source === 'timeline') await store.replaceTimeline(tripId, pending.segments);
+  else await store.upsertPhotos(tripId, pending.photos);
   await store.deletePending(tripId);
   await store.setImportState(tripId, pending.importId, 'applied');
   await rebuildJournal(store, tripId);
@@ -151,4 +189,11 @@ export async function discardPending(store: Store, tripId: string) {
   if (!pending) return;
   await store.deletePending(tripId);
   await store.setImportState(tripId, pending.importId, 'discarded');
+  await dropFiles(store, tripId, pending);
 }
+
+const withPhotos = (current: TripPhoto[], added: TripPhoto[]) => {
+  const all = new Map(current.map((p) => [p.mediaId, p]));
+  for (const p of added) all.set(p.mediaId, p);
+  return [...all.values()];
+};

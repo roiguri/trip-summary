@@ -32,7 +32,7 @@ export function ReviewPanel({
   published,
 }: {
   tripId: string;
-  source: 'plan' | 'timeline';
+  source: 'plan' | 'timeline' | 'photos';
   review: Review;
   decisions: Record<string, 'add' | 'dismiss'>;
   published: boolean;
