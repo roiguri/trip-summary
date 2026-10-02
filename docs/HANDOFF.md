@@ -16,35 +16,27 @@
   https://claude.ai/artifact/V9Fa92HhY897rcKrsadNrw
 - Hosted preview of the sample trip: https://claude.ai/artifact/SCUXjuqmaHh9TjeaXQ3MJH
 
-## Why this session runs on the owner's computer
+## The real sources are verified
 
-The data design rests on three sources that only exist on the owner's machines and accounts. Before
-Phase 2 builds the importers, each one is checked for real, and the owner is guided through getting
-access. Keep all real data outside the repo (for example in `~/wayfarer-data/`), and never commit it
-or paste it into pull requests; only shapes and findings go into the docs.
+All three were checked on the owner's computer; the findings are in `docs/DATA-DESIGN.md`
+("Findings from the real sources"). Real files stay outside the repo, in a private folder on the
+owner's machine (for example `~/trip-summary-data/`), and are never committed or pasted into pull
+requests.
 
-## Next steps
+- **Jarvis database**: the agent keeps it in its data directory (`jarvis_data/travel/travel.sqlite`
+  on the agent's host). Copy it with a read-only online backup (open with `mode=ro`, SQLite's
+  `backup`, stream it over SSH) so the live file is never written or locked.
+- **Timeline**: exported on the phone (Settings → Location → Location services → Timeline → Export
+  Timeline data) and pulled with `adb pull` over wireless debugging.
+- **Photos Picker**: a Google Cloud project named `trip-summary` (ID in the Cloud console), with
+  only the Photos Picker API enabled, no billing, the consent screen in testing mode with the owner
+  as the only test user, and a web OAuth client whose redirect is
+  `http://localhost:3100/api/auth/callback/google`. Its ID and secret are in `.env.local`
+  (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, git-ignored).
 
-1. **Jarvis database** (SQLite, everything entered by hand). Find the file, then run
-   `node scripts/probe-sources.mjs --jarvis <path>`. Check that the tables and columns match
-   `lib/schema.ts`'s core schema, and how many places have a `google_place_id` (visit matching relies
-   on it; without it, matching falls back to distance and time).
-2. **Timeline** (Android only). Guide the owner through Google Maps → Settings → Location → Timeline →
-   Export, and moving `Timeline.json` to the computer privately. Run
-   `node scripts/probe-sources.mjs --timeline <path>` and check the field names the importer will read:
-   `semanticSegments`, `startTime`/`endTime`, the UTC offsets, `visit.topCandidate.placeId` and
-   `semanticType`, `activity.topCandidate.type`, `distanceMeters`. Note the months covered (it spans
-   years; the importer keeps only the trip's dates).
-3. **Google Photos Picker** (since March 2025 the only way to read the owner's photos). Guide the
-   owner through: a Google Cloud project; enabling the Photos Picker API; an OAuth consent screen in
-   testing mode with their account as a test user; an OAuth client for a local web app; the scope
-   `photospicker.mediaitems.readonly`. Keep the client ID and secret in `.env.local` (git-ignored).
-   Then a small local test: create a picker session, open its `pickerUri`, pick a few photos and a
-   video, poll the session, list the picked items, and download one photo and one video through the
-   base URL. Record: which fields come back (time taken and its time zone? location? size?), how
-   videos appear and download, and how long base URLs last.
-4. **Update `docs/DATA-DESIGN.md`** with the findings (field names, matching fallback, thresholds,
-   anything that changes the plan) and agree the changes with the owner.
-5. **Then Phase 2**, as `docs/DATA-DESIGN.md` describes under "Building with mock data": mock
-   sources shaped like the real ones, the importers, the merge with its tests, then a design round
-   for edit mode before building its screens.
+## Next: Phase 2
+
+As `docs/DATA-DESIGN.md` describes under "Building with mock data": mock sources shaped like the
+real ones (now known), the importers, the merge with its tests, then a design round for edit mode
+before building its screens. Thresholds and the proposed matching rules are tuned against the real
+trip locally, never by committing it.

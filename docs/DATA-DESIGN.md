@@ -17,26 +17,39 @@ how the owner curates it, and who can see it. Agreed decisions are marked **(agr
 
 ## Sources
 
-| Source       | What it gives                                                                                                                                                                        | How it arrives                                                                                                                                                                         |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Plan**     | The trip, its destination, places (with Google place IDs), and itinerary entries: places, lodging, transit, notes, tags. All entered by hand in Jarvis.                              | Jarvis's SQLite database file **(agreed)**. The importer reads one trip's rows by `trip_id`: the trip, its destination, its itinerary and the places they reference.                   |
-| **Timeline** | Visits (Google place ID, semantic type, start/end, location) and activities (mode such as `IN_PASSENGER_VEHICLE`, `WALKING`, `FLYING`; start/end; distance), with local UTC offsets. | The Android Timeline export (Google Maps → Settings → Location → Timeline → Export, `Timeline.json` with `semanticSegments`) **(agreed: Android only)**. Sliced in the browser, below. |
-| **Photos**   | Photos chosen from Google Photos: stable media ID, time taken, size, and the image itself.                                                                                           | The Google Photos Picker API (since March 2025 apps can't read a whole library). Picker links expire after 60 minutes, so the app copies each picked photo into its own storage.       |
+| Source       | What it gives                                                                                                                                                                        | How it arrives                                                                                                                                                                                                   |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Plan**     | The trip, its destination, places (with Google place IDs), and itinerary entries: places, lodging, transit, notes, tags. All entered by hand in Jarvis.                              | Jarvis's SQLite database file **(agreed)**. The importer reads one trip's rows by `trip_id`: the trip, its destination, its itinerary and the places they reference.                                             |
+| **Timeline** | Visits (Google place ID, semantic type, start/end, location) and activities (mode such as `IN_PASSENGER_VEHICLE`, `WALKING`, `FLYING`; start/end; distance), with local UTC offsets. | The Android Timeline export (phone Settings → Location → Location services → Timeline → Export Timeline data, `Timeline.json` with `semanticSegments`) **(agreed: Android only)**. Sliced in the browser, below. |
+| **Photos**   | Photos and videos chosen from Google Photos: stable media ID, time taken (UTC), size, and the file itself. No location (see below).                                                  | The Google Photos Picker API (since March 2025 apps can't read a whole library). Picker links expire after 60 minutes, so the app copies each picked photo into its own storage.                                 |
 
 ### Timeline slicing (agreed)
 
 The export covers years. The import page reads the file in the browser, keeps only segments that
 overlap the trip's dates plus one day on each side (in the trip's local time), and uploads only that
-slice. The rest of the history never leaves the owner's device. `timelinePath`, `rawSignals` and
-`userLocationProfile` are dropped.
+slice. The rest of the history never leaves the owner's device. `timelinePath`, `timelineMemory`,
+`rawSignals` and `userLocationProfile` are dropped.
 
 ### Photos
 
-For each trip the owner picks photos (typically one album) in Google's picker. The importer stores
-each photo's media ID (stable, used to avoid duplicates on re-pick), its time taken, and copies of
-the image at display size (2048px) and thumbnail size (400px). Location data is removed from the
-stored copies. If the Picker turns out to give a photo's location, it is kept in the database only;
-otherwise a photo's place comes from the Timeline at the time it was taken.
+For each trip the owner picks photos (typically one album) in Google's picker **(agreed)**. The
+importer stores each photo's media ID (stable, used to avoid duplicates on re-pick), its time taken,
+and copies of the image at display size (2048px) and thumbnail size (400px).
+
+What the Picker gives, checked on the real API (see "Findings from the real sources"):
+
+- **No location.** The API has no location field, and downloads have GPS stripped from EXIF. A
+  photo's place always comes from the Timeline at the time it was taken (merge rule 6).
+- **Time taken is UTC** (`createTime`). The local offset comes from the downloaded file's EXIF
+  `OffsetTimeOriginal` when present, else from the Timeline at that moment, else the destination's
+  time zone.
+- **Files are reachable only with the owner's token**, through a base URL that Google documents as
+  lasting 60 minutes, so the importer copies everything right after the pick. Photos download with
+  `=d`, videos with `=dv` (a video can be tens of MB).
+
+A Google Takeout export of the trip's album would give locations and captions too (per-file JSON
+with `geoData`). It is not built; it is the fallback if Timeline placement proves too coarse
+**(agreed)**.
 
 ## Three layers
 
@@ -53,9 +66,12 @@ The page is always computed from three layers; only the third is ever edited.
   re-imports. `wishlist` is not part of trip import.
 - **`timeline_segments`**: trip, segment key (kind + start time + place ID or mode), kind (`visit` /
   `activity`), start and end (UTC), start and end UTC offsets, Google place ID, semantic type,
-  probability, location, activity mode, distance.
-- **`trip_photos`**: trip, Google media ID, time taken (UTC), local offset (from the Timeline at that
-  moment, else the destination's time zone), size, MIME type, stored file paths.
+  probability, hierarchy level (a visit nested in a larger one, such as a shop in a mall), location
+  (a visit's place; an activity's start and end), activity mode, distance. Locations arrive as
+  `latLng` strings and are parsed into numbers on import.
+- **`trip_photos`**: trip, Google media ID, kind (photo / video), time taken (UTC), local offset
+  (from EXIF, else the Timeline at that moment, else the destination's time zone), size, MIME type,
+  stored file paths.
 - **`imports`**: one row per import: trip, source, when, by whom, a summary of what changed, and its
   state (`pending`, `applied`, `discarded`).
 
@@ -66,18 +82,25 @@ These replace the prototype `days` and `photos` tables.
 1. **Days**: one per date from the trip's start to end, in local time. On days that cross time
    zones, each item's local time uses its own offset.
 2. **Plan entries are the skeleton.** Every plan entry appears; nothing else appears unless approved.
-3. **Visit → entry**: a Timeline visit matches a plan entry when they share a Google place ID, or
-   failing that when the visit is within 150 m of the entry's place and overlaps its planned day
-   (and time, if planned). A matched entry shows the visit's actual times **(agreed)**; an entry
-   without a match keeps its planned times.
+3. **Visit → entry**: place IDs can be wrong on either side and planned times can be off, so
+   neither decides alone **(agreed)**. A visit is a candidate for an entry on the same local day
+   when it is within 150 m of the entry's place **or** shares its Google place ID. Among candidates,
+   the one closest to the planned time wins, preferring the one that is both near and the same ID;
+   a planned time is a hint, not a window. Each visit matches at most one entry. Nested visits (a
+   shop inside a mall) are matched at any level; a nested visit inside a matched one is not a
+   separate suggestion. A matched entry shows the visit's actual times **(agreed)**; an entry
+   without a match keeps its planned times. The candidate and tie-break rules are **(proposed)**.
 4. **Activity → transit**: an activity matches a transit entry when they overlap in time. It sets
-   the transit mode (replacing today's guess from the title) and the actual times.
+   the transit mode (replacing today's guess from the title), the actual times, and the UTC offsets
+   at both ends, which the plan usually lacks (most transit legs carry no time zones).
 5. **Unmatched visits and activities** become **suggestions**, shown only in edit mode, filtered to
    cut noise: visits of at least 15 minutes that aren't home or work, and activities over 2 km. A
    suggestion becomes an entry only when the owner approves it **(agreed)**.
 6. **Photos**: a photo taken during a matched visit (with 15 minutes either side) attaches to that
    entry; any other photo is a **loose moment**, grouped with nearby photos by time gap (a new group
-   after 45 minutes) **(agreed)**.
+   after 45 minutes) **(agreed)**. A photo's map position is its visit's place; a photo taken during
+   an activity is placed between the activity's start and end in proportion to the time; one with
+   neither has no position and is shown without a pin **(proposed)**.
 7. **Precedence**: edits, then the plan (names, notes, categories), then the Timeline (times, mode),
    then photos (attached to whatever the first three produce).
 
@@ -132,21 +155,30 @@ and listed in edit mode as "refers to something no longer in the plan", never si
 - The importers and the merge are tested against these, including re-imports that keep edits.
 - Sign-in has a development mode with mock users (an editor and a viewer).
 
-## Verifying the real sources before agreeing
+## Findings from the real sources
 
-Two sources are checked against the real data before this design is agreed, without sharing the data:
+All three sources were checked on the owner's computer, without sharing the data:
 `node scripts/probe-sources.mjs --jarvis <jarvis.db> --timeline <Timeline.json>` prints only their
-shape (tables and columns compared with the app's schema, counts, how much is filled in, Timeline
-field names, segment kinds and modes, months covered); no names, notes, coordinates or place IDs.
-It checks in particular:
+shape, and the Picker was tried with a throwaway script. The real files live outside the repo.
 
-- that Jarvis's tables and columns match the app's core schema;
-- how many places have a Google place ID (visit matching relies on it; without it, matching falls
-  back to distance and time);
-- the Android `Timeline.json` structure and field names the importer will read.
+- **Jarvis database**: tables and columns match the app's core schema exactly. About 90% of
+  scheduled places and stays carry a Google place ID and coordinates. Most transit legs have no
+  time zones, few stays have a check-out time, and few entries span more than one day.
+- **Timeline**: every field the importer reads is present (`semanticSegments`, `startTime`/`endTime`,
+  `start/endTimeTimezoneUtcOffsetMinutes`, `visit.topCandidate.placeId`/`semanticType`,
+  `activity.topCandidate.type`, `distanceMeters`). The export spans years, so slicing is essential.
+  Every visit has a place ID, but only about a third of the planned places appear among the trip's
+  visits by ID: the IDs differ between Maps and the plan, which is why matching uses distance too.
+  About a third of segments have no UTC offset. Visits can be nested (`hierarchyLevel`). Locations
+  are `latLng` strings. A `timelineMemory` kind exists and is ignored.
+- **Photos Picker**: works with one read-only scope (`photospicker.mediaitems.readonly`), an OAuth
+  client for a web app, and the consent screen in testing mode. Items carry `id`, `createTime`
+  (UTC), `type` (`PHOTO`/`VIDEO`) and `mediaFile` (`baseUrl`, `mimeType`, `filename`, width,
+  height, camera, photo or video details with `processingStatus`). No location anywhere; EXIF keeps
+  the time and its offset. Base URLs refuse requests without the token.
 
-The Photos Picker (whether it gives a photo's location and time zone) is checked at the start of
-Phase 2, as it needs a Google Cloud project and OAuth setup; the design works either way.
+Thresholds (150 m, 15 minutes, 45 minutes, 2 km) remain starting values, tuned on the real trip in
+Phase 2.
 
 ## Videos (agreed: from the start)
 
