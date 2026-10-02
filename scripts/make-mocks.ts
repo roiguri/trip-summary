@@ -189,23 +189,33 @@ expected.matches['lovers-point-visit'] = null;
   );
 }
 
-// Stays: overnight visits at the lodging.
-for (const [key, nights] of [
+// Stays: visits at the lodging, split around the evening stops where loose photos were taken (a
+// Timeline has one top-level visit at a time). The first visit matches the stay; the later ones are
+// part of it, not suggestions.
+for (const [key, visits] of [
   [
     'inn',
     [
-      ['2026-05-15', '15:20', '2026-05-16', '08:30'],
-      ['2026-05-16', '19:00', '2026-05-17', '10:40'],
+      ['2026-05-15', '15:20', '2026-05-15', '16:20'],
+      ['2026-05-15', '17:40', '2026-05-16', '08:30'],
+      ['2026-05-16', '19:00', '2026-05-17', '09:40'],
     ],
   ],
-  ['river-lodge-stay', [['2026-05-18', '16:10', '2026-05-19', '09:50']]],
+  [
+    'river-lodge-stay',
+    [
+      ['2026-05-18', '16:10', '2026-05-18', '18:50'],
+      ['2026-05-18', '20:45', '2026-05-19', '07:40'],
+    ],
+  ],
   ['ridge-cabin-stay', [['2026-05-19', '17:45', '2026-05-20', '07:20']]],
 ] as const) {
   const [lat, lng] = where(key);
-  const segs = nights.map(([d1, t1, d2, t2]) =>
+  const segs = visits.map(([d1, t1, d2, t2]) =>
     visit({ date: d1, from: t1, endDate: d2, to: t2, lat, lng, id: plannedId(entry(key).place!) }),
   );
   expected.matches[key] = { segment: segs[0], by: 'id+distance' };
+  expected.filteredOut.push(...segs.slice(1));
 }
 
 // Planned transit, each with the mode it should get.
@@ -243,16 +253,26 @@ for (const [date, from, to] of looseStops) {
   const photo = (sample.photos ?? []).find(
     (p) => p.date === date && !p.entry && p.lat && p.time >= from,
   )!;
-  expected.suggestions.push(
-    visit({
-      date,
-      from,
-      to,
-      lat: photo.lat!,
-      lng: photo.lng!,
-      id: placeId(`mockstop${date}${from}`),
-    }),
-  );
+  const key = visit({
+    date,
+    from,
+    to,
+    lat: photo.lat!,
+    lng: photo.lng!,
+    id: placeId(`mockstop${date}${from}`),
+  });
+  // A stop at the lodging on a day of the stay is coming home to it, not a new place.
+  const atLodging = sample.itinerary.some((i) => {
+    if (i.type !== 'lodging' || !i.place) return false;
+    const p = places.get(i.place)!;
+    return (
+      date >= i.start_date &&
+      date <= (i.end_date ?? i.start_date) &&
+      Math.abs(p.lat! - photo.lat!) < 0.001 &&
+      Math.abs(p.lng! - photo.lng!) < 0.001
+    );
+  });
+  (atLodging ? expected.filteredOut : expected.suggestions).push(key);
 }
 // A long unplanned drive, also a suggestion.
 expected.suggestions.push(
@@ -431,7 +451,7 @@ const captions: Record<string, string> = {};
 (sample.photos ?? []).forEach((p, n) => {
   const id = `mock-media-${pad(n + 1, 3)}`;
   // Photos taken in the same minute get distinct seconds, as a camera would give them.
-  const createTime = at(p.date, p.time, n / 60).utc.replace('.000Z', 'Z');
+  const createTime = at(p.date, p.time, (n % 60) / 60).utc.replace('.000Z', 'Z');
   const stamp = createTime.replace(/[-:TZ]/g, '').slice(0, 14);
   media.push({
     id,
