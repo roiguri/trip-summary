@@ -3,6 +3,7 @@
 import { merge } from './merge/index.ts';
 import { fixtureTrip } from './data.ts';
 import type { Store } from './store/index.ts';
+import { summarize } from './summary.ts';
 
 /** Merges the trip's stored sources and edits and stores the result. */
 export async function rebuildJournal(store: Store, tripId: string) {
@@ -20,6 +21,13 @@ export async function rebuildJournal(store: Store, tripId: string) {
     orphanEdits,
     builtAt: new Date().toISOString(),
   });
+  await store.setTripSummary(
+    tripId,
+    summarize(tripId, trip, edits, {
+      hasTimeline: segments.length > 0,
+      hasPhotos: photos.length > 0,
+    }),
+  );
 }
 
 /** Stores a trip file (data/README.md) as a published trip with a ready-made journal: the sample
@@ -40,5 +48,13 @@ export async function storeFixture(store: Store, file: string, tripId: string) {
     orphanEdits: [],
     builtAt: new Date().toISOString(),
   });
+  // A trip file is a whole trip: it stands for all three sources.
+  await store.setTripSummary(
+    tripId,
+    summarize(tripId, trip, [], {
+      hasTimeline: true,
+      hasPhotos: trip.days.some((d) => d.entries.some((e) => e.photos.length)),
+    }),
+  );
   await store.setTripStatus(tripId, 'published');
 }

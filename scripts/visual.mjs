@@ -10,7 +10,7 @@
 // Linux) from tests/visual/fonts, hide the map's tile canvas (the tiles load from the internet and
 // draw differently per machine; pins and markers stay), and turn off animations.
 import { chromium } from 'playwright';
-import { STATES, viewportOf } from './states.mjs';
+import { STATES, viewportOf, pageOf, accountOf } from './states.mjs';
 import { mkdirSync, readFileSync, writeFileSync, existsSync, readdirSync, rmSync } from 'node:fs';
 import { signIn, TRIP } from './signed-in.mjs';
 
@@ -97,10 +97,10 @@ async function compare(page, a, b) {
   const pages = {};
   async function pageFor(name) {
     const options = viewportOf(name);
-    const key = JSON.stringify(options);
+    const key = JSON.stringify([options, accountOf(name)]);
     if (!pages[key]) {
       const context = await browser.newContext({ ...options, reducedMotion: 'reduce' });
-      await signIn(context, BASE);
+      await signIn(context, BASE, accountOf(name));
       pages[key] = await context.newPage();
       pages[key].on('pageerror', (e) => errors.push(String(e)));
     }
@@ -111,7 +111,7 @@ async function compare(page, a, b) {
   const names = Object.keys(STATES).filter((n) => !ONLY || n === ONLY);
   for (const name of names) {
     const page = await pageFor(name);
-    await page.goto(BASE + TRIP, { waitUntil: 'networkidle' });
+    await page.goto(BASE + (pageOf(name) ?? TRIP), { waitUntil: 'networkidle' });
     await page.addStyleTag({ content: STABLE_CSS });
     await page.evaluate(() => document.fonts.ready);
     await page.waitForTimeout(1200);

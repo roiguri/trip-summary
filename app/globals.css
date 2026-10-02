@@ -2197,3 +2197,201 @@ button:disabled {
 .notice-error {
   color: #9a3f2b !important;
 }
+
+/* Home: the shelf of trip cards (DESIGN.md, "Home (H1)"). */
+.home-page {
+  min-height: 100vh;
+  background: #fffdfa;
+}
+.home-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.home-account {
+  font-size: 12px;
+  color: #7d8a80;
+}
+.pill-button {
+  display: inline-flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 16px;
+  border: 1px solid #d5e1d4;
+  border-radius: 17px;
+  background: #fffdf8;
+  font-size: 13px;
+  font-weight: 700;
+  color: #3f5c4b;
+  text-decoration: none;
+}
+.pill-button.primary {
+  border-color: #3f5c4b;
+  background: #3f5c4b;
+  color: #fff;
+}
+.link-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 12px;
+  color: #3f5c4b;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.pill-button:focus-visible,
+.link-button:focus-visible,
+.trip-card:focus-visible {
+  outline: 2px solid #b0734f;
+  outline-offset: 3px;
+}
+a.notice-button {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+.home {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 44px 35px 60px;
+}
+.home-intro small {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: #26382e;
+}
+.home-intro h1 {
+  margin: 8px 0 6px;
+  font-size: 44px;
+  font-weight: 750;
+  line-height: 1.05;
+  letter-spacing: -0.05em;
+  color: #26382e;
+}
+.home-intro p {
+  margin: 0;
+  font-size: 12px;
+  color: #8e968f;
+}
+.shelf {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 26px;
+  margin-top: 28px;
+}
+.trip-card {
+  overflow: hidden;
+  border: 1px solid #e3e8df;
+  border-radius: 16px;
+  background: #fffdf8;
+  box-shadow: 0 6px 16px #28382e14;
+  color: #26382e;
+  text-decoration: none;
+  transition: box-shadow 0.15s ease;
+}
+.trip-card:hover {
+  box-shadow: 0 10px 24px #28382e24;
+}
+.trip-cover {
+  position: relative;
+  height: 180px;
+}
+.trip-cover img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.trip-status {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 3px 9px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.trip-status.draft {
+  background: #f6e3d3;
+  color: #9a5a36;
+}
+.trip-status.published {
+  background: #e3eedf;
+  color: #3f6a4b;
+}
+.paper-cover {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  background: #f4f5ec;
+}
+.paper-cover svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.paper-label {
+  position: absolute;
+  left: 16px;
+  bottom: 14px;
+  font-size: 24px;
+  font-weight: 750;
+  letter-spacing: -0.04em;
+  color: #3b4a40;
+}
+.trip-body {
+  padding: 16px 18px 18px;
+}
+.trip-body strong {
+  display: block;
+  font-size: 20px;
+  font-weight: 750;
+  letter-spacing: -0.03em;
+}
+.trip-body small {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #7f8c84;
+}
+.trip-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  padding-top: 11px;
+  border-top: 1px dashed #e0e6dd;
+  font-size: 12px;
+  color: #8e968f;
+}
+@media (max-width: 599px) {
+  .home {
+    padding: 26px 16px 40px;
+  }
+  .home-intro h1 {
+    font-size: 32px;
+  }
+  .home-header {
+    padding: 0 16px;
+  }
+  .home-account {
+    display: none;
+  }
+  .shelf {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .trip-cover {
+    height: 150px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .trip-card {
+    transition: none;
+  }
+}

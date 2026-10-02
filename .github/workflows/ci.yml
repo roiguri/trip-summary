@@ -81,15 +81,17 @@ jobs:
           FIRESTORE_EMULATOR_HOST: 127.0.0.1:8080
           FIREBASE_AUTH_EMULATOR_HOST: 127.0.0.1:9099
 
-      - name: Sign-in and access checks
-        run: BASE_URL=http://localhost:3100 npm run check:access
-
       - name: Interaction checks
         run: BASE_URL=http://localhost:3100 npm run check:interactions
 
       - name: Visual regression tests
         if: ${{ !inputs.update_baselines }}
         run: BASE_URL=http://localhost:3100 npm run visual
+
+      # Last: it creates invites, which the home page's cards count.
+      - name: Sign-in and access checks
+        if: ${{ !inputs.update_baselines }}
+        run: BASE_URL=http://localhost:3100 npm run check:access
 
       - name: Visual differences (baseline | now | diff)
         if: failure()

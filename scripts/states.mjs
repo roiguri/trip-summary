@@ -11,6 +11,11 @@ export const viewportOf = (name) => {
   return { viewport: { width: 1440, height: 900 } };
 };
 
+/** The page a state starts on: the home page for `home` states, else the sample trip. */
+export const pageOf = (name) => (/(^|-)home/.test(name) ? '/' : null);
+/** Who is signed in: a guest on no trip for the empty home page, else the owner. */
+export const accountOf = (name) => (name.endsWith('home-empty') ? 'guest' : 'editor');
+
 /** Entry id for a timeline title (ids are generated, titles come from the sample data). */
 const entry = (p, title) =>
   p.evaluate(
@@ -111,4 +116,7 @@ export const STATES = {
   'tablet-opening': async () => {},
   'tablet-place': (p) => select(p, 'Point Lobos State Natural Reserve'),
   'tablet-portrait': async () => {},
+  home: async () => {},
+  'home-empty': async () => {},
+  'phone-home': async () => {},
 };

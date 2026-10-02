@@ -8,7 +8,7 @@
 // Both builds need the same seeded sample trip. The map's tiles are skipped; its markers are
 // compared without their position (it depends on tile loading).
 import { chromium } from 'playwright';
-import { STATES, viewportOf } from './states.mjs';
+import { STATES, viewportOf, pageOf, accountOf } from './states.mjs';
 import { signIn, TRIP } from './signed-in.mjs';
 
 const A = process.env.BASE_A || 'http://localhost:3101';
@@ -104,8 +104,8 @@ async function captureState(context, base, state, actions) {
       ? route.fulfill({ contentType: 'application/json', body: BLANK_STYLE })
       : route.abort(),
   );
-  await signIn(context, base);
-  await page.goto(base + TRIP, { waitUntil: 'load' });
+  await signIn(context, base, accountOf(state));
+  await page.goto(base + (pageOf(state) ?? TRIP), { waitUntil: 'load' });
   await settle(page);
   await STATES[state](page);
   // The state's last click can leave the pointer over something that moves under it; hover is
@@ -169,7 +169,7 @@ function compare(a, b) {
   const contexts = {};
   async function contextFor(job) {
     const options = { ...viewportOf(job.state), reducedMotion: job.motion || 'no-preference' };
-    const key = JSON.stringify(options);
+    const key = JSON.stringify([options, accountOf(job.state)]);
     contexts[key] ??= await browser.newContext(options);
     return contexts[key];
   }

@@ -12,6 +12,7 @@ import type {
   Trip,
   TripPhoto,
   TripStatus,
+  TripSummary,
   TimelineSegment,
 } from './types.ts';
 
@@ -57,11 +58,12 @@ export function createStore(db: Firestore) {
       return ((await trip(tripId).get()).data() as Trip | undefined) ?? null;
     },
     /** Creates the trip as a draft, or updates its details and keeps its status. */
-    async putTrip(t: Omit<Trip, 'status' | 'createdAt' | 'updatedAt'>): Promise<Trip> {
+    async putTrip(t: Omit<Trip, 'status' | 'createdAt' | 'updatedAt' | 'summary'>): Promise<Trip> {
       return db.runTransaction(async (tx) => {
         const existing = (await tx.get(trip(t.tripId))).data() as Trip | undefined;
         const next: Trip = {
           ...t,
+          ...(existing?.summary ? { summary: existing.summary } : {}),
           status: existing?.status ?? 'draft',
           createdAt: existing?.createdAt ?? now(),
           updatedAt: now(),
@@ -69,6 +71,9 @@ export function createStore(db: Firestore) {
         tx.set(trip(t.tripId), next);
         return next;
       });
+    },
+    async setTripSummary(tripId: string, summary: TripSummary) {
+      await trip(tripId).update({ summary });
     },
     async setTripStatus(tripId: string, status: TripStatus) {
       await trip(tripId).update({ status, updatedAt: now() });
