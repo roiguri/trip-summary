@@ -23,6 +23,8 @@ npm run mocks                # regenerate data/mock/ from the sample (CI checks 
 npm test                     # unit tests (tests/unit)
 npm run test:store           # store tests against the Firebase emulators (needs Java 21+)
 npm run emulators            # Firebase emulators for development (Firestore, Storage, Auth)
+node scripts/import-plan.ts <jarvis.sqlite> [--trip <id>]   # list or import a Jarvis trip (emulators up,
+                             # FIRESTORE_EMULATOR_HOST=127.0.0.1:8080); the file is opened read-only
 ```
 
 CI (`.github/workflows/ci.yml`) runs format, types, build, interaction checks and visual tests.
