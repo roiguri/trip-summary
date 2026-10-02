@@ -10,7 +10,7 @@
     "start": "next start -p 3100",
     "capture": "node scripts/capture.mjs",
     "format": "prettier --write .",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "seed": "node scripts/seed.ts",
     "snapshot": "bash scripts/snapshot.sh",
     "check:interactions": "node scripts/check-interactions.mjs",
