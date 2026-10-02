@@ -20,6 +20,7 @@ npm run build && npm run start
 npm run format:check && npm run typecheck
 BASE_URL=http://localhost:3100 npm run check:interactions   # 34 interaction checks (desktop + phone)
 BASE_URL=http://localhost:3100 npm run check:access         # sign-in and access, end to end
+BASE_URL=http://localhost:3100 npm run check:import         # new trip, Timeline, review, apply, end to end
 BASE_URL=http://localhost:3100 npm run visual               # 36 screenshot states vs tests/visual/baseline
 npm run visual:update        # only for an intended visual change; it also rewrites unchanged baselines
                              # with anti-aliasing noise, so commit only the states that changed

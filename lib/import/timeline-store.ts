@@ -1,5 +1,5 @@
 // Stores a Timeline slice made by sliceTimeline (lib/import/timeline.ts), usually in the browser.
-import type { Store, TimelineSegment } from '../store/index.ts';
+import type { Store, TimelineSegment, Trip } from '../store/index.ts';
 import { rebuildJournal } from '../journal.ts';
 import { sliceWindow } from './timeline.ts';
 
@@ -17,16 +17,7 @@ export async function importTimeline(
     throw new TimelineImportError(
       `"${tripId}" is published: re-importing it needs the import review`,
     );
-  // The slice is made on the owner's device; check it really is only the trip's dates, so no more of
-  // their location history is ever stored than the design allows.
-  const { from, to } = sliceWindow(trip);
-  const outside = segments.filter(
-    (s) => Date.parse(s.endUtc) < from || Date.parse(s.startUtc) >= to,
-  );
-  if (outside.length)
-    throw new TimelineImportError(
-      `${outside.length} segments fall outside the trip's dates; slice the export first`,
-    );
+  checkSlice(trip, segments);
 
   const before = new Set((await store.listTimeline(tripId)).map((s) => s.key));
   const after = new Set(segments.map((s) => s.key));
@@ -45,4 +36,17 @@ export async function importTimeline(
   });
   await rebuildJournal(store, tripId);
   return { summary, record };
+}
+
+/** The slice is made on the owner's device; check it really is only the trip's days, so no more of
+ *  their location history is ever stored than the design allows. */
+export function checkSlice(trip: Trip, segments: TimelineSegment[]) {
+  const { from, to } = sliceWindow(trip);
+  const outside = segments.filter(
+    (s) => Date.parse(s.endUtc) < from || Date.parse(s.startUtc) >= to,
+  );
+  if (outside.length)
+    throw new TimelineImportError(
+      `${outside.length} segments fall outside the trip's dates; slice the export first`,
+    );
 }

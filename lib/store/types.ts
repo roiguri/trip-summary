@@ -148,3 +148,9 @@ export type Person = {
   lastOpenedAt: string | null;
   revokedAt: string | null;
 };
+
+/** `trips/{tripId}/sources/pending`: an import waiting for its review. One at a time: a newer import
+ *  replaces it. */
+export type Pending =
+  | { importId: string; source: 'plan'; plan: PlanSource; at: string }
+  | { importId: string; source: 'timeline'; segments: TimelineSegment[]; at: string };

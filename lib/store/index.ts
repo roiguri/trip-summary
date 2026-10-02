@@ -7,6 +7,7 @@ import type {
   EditTarget,
   ImportRecord,
   Journal,
+  Pending,
   Person,
   PlanSource,
   Trip,
@@ -95,6 +96,22 @@ export function createStore(db: Firestore) {
       return (
         ((await sub(tripId, 'sources').doc('plan').get()).data() as PlanSource | undefined) ?? null
       );
+    },
+
+    /** Stores an import for review, replacing any import already waiting. */
+    async putPending(tripId: string, p: Pending) {
+      const bytes = Buffer.byteLength(JSON.stringify(p));
+      if (bytes > MAX_DOC_BYTES)
+        throw new Error(`This import is too large to review in one go (${bytes} bytes)`);
+      await sub(tripId, 'sources').doc('pending').set(p);
+    },
+    async getPending(tripId: string): Promise<Pending | null> {
+      return (
+        ((await sub(tripId, 'sources').doc('pending').get()).data() as Pending | undefined) ?? null
+      );
+    },
+    async deletePending(tripId: string) {
+      await sub(tripId, 'sources').doc('pending').delete();
     },
 
     /** Replaces the trip's Timeline slice: segments not in the new slice are removed. */
