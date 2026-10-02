@@ -12,6 +12,10 @@ runs in CI on every pull request.
 - **Baselines differ only by platform:** run the CI workflow by hand with "update baselines" and
   commit the `visual-baselines` artifact.
 
+The journey's states are what a viewer sees (signed in as the sample's mock viewer, so no editors'
+bar); the home page and the editors' bar (`editor-bar`, `share`, `phone-editor-bar`) are the
+owner's, and `home-empty` is a guest's on no trip (`scripts/states.mjs`, `accountOf`).
+
 To be reproducible, the tests render text in Liberation Sans from `fonts/` (SIL Open Font License,
 see `fonts/LICENSE`; it is the page's Arial fallback on Linux), hide the map's tile canvas (tiles load
 from the internet; pins and markers stay), and turn off animations. A state fails when more than

@@ -46,6 +46,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ token: s
   }
   await store.updatePerson(person!.personId, { lastOpenedAt: new Date().toISOString() });
 
+  // The account carries the viewer's name, so the page can greet them by it.
+  await auth()
+    .updateUser(uid, { displayName: person!.name })
+    .catch(() => auth().createUser({ uid, displayName: person!.name }));
   const session = await sessionCookieFor(await idTokenFor(await auth().createCustomToken(uid)));
   const res = NextResponse.redirect(new URL(`/trips/${encodeURIComponent(trip.tripId)}`, req.url));
   res.cookies.set(DEVICE_COOKIE, device, cookieOptions(400 * 86_400));

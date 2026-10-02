@@ -13,8 +13,14 @@ export const viewportOf = (name) => {
 
 /** The page a state starts on: the home page for `home` states, else the sample trip. */
 export const pageOf = (name) => (/(^|-)home/.test(name) ? '/' : null);
-/** Who is signed in: a guest on no trip for the empty home page, else the owner. */
-export const accountOf = (name) => (name.endsWith('home-empty') ? 'guest' : 'editor');
+/** Who is signed in: the locked journey states are what a viewer sees; the home page and the
+ *  editors' bar are the owner's; the empty home page is a guest's on no trip. */
+export const accountOf = (name) =>
+  name.endsWith('home-empty')
+    ? 'guest'
+    : /(^|-)(home|editor-bar|share)/.test(name)
+      ? 'editor'
+      : 'viewer';
 
 /** Entry id for a timeline title (ids are generated, titles come from the sample data). */
 const entry = (p, title) =>
@@ -117,6 +123,9 @@ export const STATES = {
   'tablet-place': (p) => select(p, 'Point Lobos State Natural Reserve'),
   'tablet-portrait': async () => {},
   home: async () => {},
+  'editor-bar': async () => {},
+  share: (p) => p.click('.editor-bar [aria-controls="share"]'),
+  'phone-editor-bar': async () => {},
   'home-empty': async () => {},
   'phone-home': async () => {},
 };

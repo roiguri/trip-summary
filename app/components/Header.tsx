@@ -1,8 +1,9 @@
 'use client';
 import { useState } from 'react';
+import { SignOutButton } from './SignOutButton';
 
-/** Top bar. On phones the nav and the demo notice move into a menu. */
-export function Header() {
+/** Top bar. On phones the nav and the account move into a menu. */
+export function Header({ account }: { account: string }) {
   const [menuOpen, setMenuOpen] = useState(false);
   return (
     <header className="header">
@@ -14,7 +15,9 @@ export function Header() {
         <span>WISHLIST</span>
         <span>PLACES</span>
       </nav>
-      <span className="status">View-only demo · sign-in not configured</span>
+      <span className="status">
+        {account} · <SignOutButton />
+      </span>
       <button
         className="menu-button"
         aria-label="Menu"
@@ -31,7 +34,9 @@ export function Header() {
           <span className="nav-active">THE JOURNEY</span>
           <span>WISHLIST</span>
           <span>PLACES</span>
-          <small>View-only demo · sign-in not configured</small>
+          <small>
+            {account} · <SignOutButton />
+          </small>
         </div>
       )}
     </header>

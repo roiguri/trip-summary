@@ -11,7 +11,7 @@ const BASE = process.env.BASE_URL || 'http://localhost:3000';
   const errs = [];
   p.on('pageerror', (e) => errs.push(String(e)));
   p.on('console', (m) => m.type() === 'error' && errs.push(m.text()));
-  await signIn(p.context(), BASE);
+  await signIn(p.context(), BASE, 'viewer');
   await p.goto(BASE + TRIP, { waitUntil: 'networkidle' });
   await p.waitForTimeout(1500);
   const R = [];
@@ -151,7 +151,7 @@ const BASE = process.env.BASE_URL || 'http://localhost:3000';
     await b.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true })
   ).newPage();
   ph.on('pageerror', (e) => errs.push(String(e)));
-  await signIn(ph.context(), BASE);
+  await signIn(ph.context(), BASE, 'viewer');
   await ph.goto(BASE + TRIP, { waitUntil: 'networkidle' });
   await ph.waitForTimeout(1500);
   const layout = await ph.evaluate(() => {

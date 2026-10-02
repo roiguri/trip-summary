@@ -83,6 +83,12 @@ Options and drawings: https://claude.ai/artifact/4QQeC2zq2rSBUAixmcDmDf (Phase 2
   "+ Add sources" (opens the import page), a waiting review with its count, Edit, "Preview as a
   viewer", and Share. Share lists the people who can see the trip, each with a personal invite link
   to copy or revoke, and creates a new link by name. Viewers never see the bar.
+- As built (step 7e): an invite link is shown once, when created, to copy and send; only its hash is
+  stored, so a link can't be shown again. A person who hasn't opened theirs gets "New link" (the
+  old one stops working). "Preview as a viewer" shows the journey exactly as viewers see it, with
+  an "Exit the viewer's preview" button. On a phone the bar drops the status label (Publish or
+  Unpublish says it) and uses short labels ("+ Sources"). The header's right side names the
+  signed-in account, with "Sign out", replacing the prototype's "View-only demo" note.
 - Empty state (E2): before the first trip, a short "No trips yet" with one "New trip" button,
   under the dashed rail and node drawing (an entry still to come). The import page explains each
   source when you get there. A viewer with nothing shared sees "No trips to show yet" and what to do
