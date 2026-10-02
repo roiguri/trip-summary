@@ -44,11 +44,11 @@ Output: a written data design, agreed before Phase 2: `docs/DATA-DESIGN.md` (agr
 Build what Phase 1 agreed, on the store `docs/ARCHITECTURE.md` decided (Netlify + Firebase). Hard rule: no real trip data or photos in the repo. One pull request per step:
 
 0. Architecture decision (`docs/ARCHITECTURE.md`): done.
-1. Mock sources shaped like the real ones (Jarvis database, `Timeline.json`, Picker results), and the Node `engines` fix.
-2. Data model on Firestore behind `lib/store/`, with the emulator for development and tests.
-3. Plan importer (Jarvis SQLite file).
-4. Timeline importer (slice, parse, store).
-5. The merge, with a test per rule; the sample trip, imported and merged, must look identical (the visual tests pass unchanged).
+1. Done: mock sources shaped like the real ones (Jarvis database, `Timeline.json`, Picker results), and the Node `engines` fix.
+2. Done: data model on Firestore behind `lib/store/`, with the emulator for development and tests.
+3. Done: plan importer (Jarvis SQLite file).
+4. Done: Timeline importer (slice, parse, store).
+5. Done: the merge, with a test per rule, and the page reading the merged journal from the store. The sample is stored as a ready-made journal and the visual tests pass unchanged through the store; a real import changes what is drawn on purpose (actual times, photos grouped by time gaps), so the merge is checked by its tests and, in step 8, on the real trip.
 6. Design round, with preview pages: the home page (trips list), adding a new trip, the import flow and its review, drafts and publishing.
 7. Build those screens, including the photo import (Picker, Cloud Function copy, resizing).
 8. Import the owner's real trip into a private draft and tune the matching, reviewed together.
@@ -78,6 +78,6 @@ Designed with mock options and agreed (`docs/VERIFICATION.md`, "Mobile"): a one-
 
 ## Immediate next step
 
-Phase 2, step 1 (mock sources). The real sources are verified (`docs/DATA-DESIGN.md`) and the architecture is decided (`docs/ARCHITECTURE.md`).
+Phase 2, step 6: the design round for the home page, adding a trip and the import flow (preview pages, agreed with the owner before building). Two merge rules added in step 5 are proposed, not yet agreed: a stay keeps its booked check-in and check-out, and returning to the lodging during the stay is not a suggestion.
 
 Postponed (user decision, to return to later): the top bar (style, mark, name) and a ChatGPT-style day scroller. Live options for both, with recommendations, are on the options page: https://claude.ai/artifact/V9Fa92HhY897rcKrsadNrw
