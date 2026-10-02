@@ -1,19 +1,18 @@
-import { getStore } from '../lib/store';
-import Client from './Client';
+import { redirect } from 'next/navigation';
+import { Notice } from './components/Notice';
+import { currentAccount, visibleTrips } from '../lib/auth/session';
 
-// Read the store on every request, so an import shows up without a rebuild.
-export const dynamic = 'force-dynamic';
-
-export default async function Page() {
-  const store = getStore();
-  // Until the home page lists trips, the page shows TRIP_ID, or else the trip starting latest.
-  const tripId = process.env.TRIP_ID ?? (await store.listTrips())[0]?.tripId;
-  const journal = tripId ? await store.getJournal(tripId) : null;
-  if (!journal)
-    return (
-      <main style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-        No trip yet. With the emulators running, add one with <code>npm run seed</code>.
-      </main>
-    );
-  return <Client trip={journal.trip} />;
+// Until the home page lists trips (Phase 2, step 7b), it opens the newest trip you can see.
+export default async function Home() {
+  if (!(await currentAccount())) redirect('/sign-in');
+  const [newest] = await visibleTrips();
+  if (newest) redirect(`/trips/${encodeURIComponent(newest.trip.tripId)}`);
+  return (
+    <Notice title="No trips to show yet">
+      <p>
+        When someone shares a trip with you, it appears here. If you were sent a link, open it on
+        this device.
+      </p>
+    </Notice>
+  );
 }

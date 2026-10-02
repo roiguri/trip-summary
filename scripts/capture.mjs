@@ -2,14 +2,16 @@
 // Usage: npm run build && npm run start, then: npm run capture [outDir]
 import { chromium } from 'playwright';
 import { mkdirSync } from 'node:fs';
+import { signIn, TRIP } from './signed-in.mjs';
 
 const BASE = process.env.BASE_URL || 'http://localhost:3100';
 (async () => {
   const out = process.argv[2] || 'captures';
   mkdirSync(out, { recursive: true });
   const b = await chromium.launch();
-  const p = await b.newPage({ viewport: { width: 1440, height: 900 } });
-  await p.goto(BASE, { waitUntil: 'load' });
+  const p = await (await b.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
+  await signIn(p.context(), BASE);
+  await p.goto(BASE + TRIP, { waitUntil: 'load' });
   await p.waitForTimeout(1500);
   const shot = async (n) => {
     await p.waitForTimeout(700);
@@ -45,7 +47,7 @@ const BASE = process.env.BASE_URL || 'http://localhost:3100';
   await click('.type-place', 'place');
   await click('.card-close', 'collapsed');
   for (const r of ['small', 'current']) {
-    await p.goto(BASE + '/?map=' + r);
+    await p.goto(BASE + TRIP + '?map=' + r);
     await p.waitForTimeout(1200);
     await shot('map-' + r);
   }

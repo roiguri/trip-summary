@@ -12,6 +12,7 @@
 import { chromium } from 'playwright';
 import { STATES, viewportOf } from './states.mjs';
 import { mkdirSync, readFileSync, writeFileSync, existsSync, readdirSync, rmSync } from 'node:fs';
+import { signIn, TRIP } from './signed-in.mjs';
 
 const BASE = process.env.BASE_URL || 'http://localhost:3100';
 const UPDATE = process.argv.includes('--update');
@@ -99,6 +100,7 @@ async function compare(page, a, b) {
     const key = JSON.stringify(options);
     if (!pages[key]) {
       const context = await browser.newContext({ ...options, reducedMotion: 'reduce' });
+      await signIn(context, BASE);
       pages[key] = await context.newPage();
       pages[key].on('pageerror', (e) => errors.push(String(e)));
     }
@@ -109,7 +111,7 @@ async function compare(page, a, b) {
   const names = Object.keys(STATES).filter((n) => !ONLY || n === ONLY);
   for (const name of names) {
     const page = await pageFor(name);
-    await page.goto(BASE, { waitUntil: 'networkidle' });
+    await page.goto(BASE + TRIP, { waitUntil: 'networkidle' });
     await page.addStyleTag({ content: STABLE_CSS });
     await page.evaluate(() => document.fonts.ready);
     await page.waitForTimeout(1200);

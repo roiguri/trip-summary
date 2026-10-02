@@ -9,6 +9,7 @@
 // compared without their position (it depends on tile loading).
 import { chromium } from 'playwright';
 import { STATES, viewportOf } from './states.mjs';
+import { signIn, TRIP } from './signed-in.mjs';
 
 const A = process.env.BASE_A || 'http://localhost:3101';
 const B = process.env.BASE_B || 'http://localhost:3100';
@@ -103,7 +104,8 @@ async function captureState(context, base, state, actions) {
       ? route.fulfill({ contentType: 'application/json', body: BLANK_STYLE })
       : route.abort(),
   );
-  await page.goto(base, { waitUntil: 'load' });
+  await signIn(context, base);
+  await page.goto(base + TRIP, { waitUntil: 'load' });
   await settle(page);
   await STATES[state](page);
   // The state's last click can leave the pointer over something that moves under it; hover is

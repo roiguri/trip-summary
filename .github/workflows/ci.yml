@@ -55,15 +55,20 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          # Built for the emulators: the sign-in page talks to the Auth emulator.
+          NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST: 127.0.0.1:9099
 
       # The app reads the store: from here on it runs against the emulators, holding the sample trip.
       - name: Start the emulators and seed the sample trip
         run: |
           node scripts/firebase.mjs emulators:start --only firestore,storage,auth > emulators.log 2>&1 &
-          for i in $(seq 1 120); do curl -sf -o /dev/null http://127.0.0.1:8080 && break; sleep 1; done
+          for i in $(seq 1 120); do curl -sf -o /dev/null http://127.0.0.1:8080 && curl -sf -o /dev/null http://127.0.0.1:9099 && break; sleep 1; done
           npm run seed
+          npm run seed -- data/fixtures/test-trip.json
         env:
           FIRESTORE_EMULATOR_HOST: 127.0.0.1:8080
+          FIREBASE_AUTH_EMULATOR_HOST: 127.0.0.1:9099
 
       - name: Browser for the interaction checks
         run: npx playwright install --with-deps chromium
@@ -74,7 +79,10 @@ jobs:
           for i in $(seq 1 60); do curl -sf -o /dev/null http://localhost:3100 && break; sleep 1; done
         env:
           FIRESTORE_EMULATOR_HOST: 127.0.0.1:8080
-          TRIP_ID: sample-coast
+          FIREBASE_AUTH_EMULATOR_HOST: 127.0.0.1:9099
+
+      - name: Sign-in and access checks
+        run: BASE_URL=http://localhost:3100 npm run check:access
 
       - name: Interaction checks
         run: BASE_URL=http://localhost:3100 npm run check:interactions

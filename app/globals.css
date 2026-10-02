@@ -2120,3 +2120,80 @@ button:disabled {
     animation: none;
   }
 }
+
+/* Notice pages: sign-in, invite problems, empty states. One message under the dashed rail drawing
+   (an entry still to come), DESIGN.md "Home, adding a trip and imports". */
+.notice-page {
+  min-height: 100vh;
+  background: #fffdfa;
+}
+.notice {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 90px 20px 40px;
+  text-align: center;
+}
+.notice-rail {
+  position: relative;
+  width: 24px;
+  height: 120px;
+}
+.notice-rail::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 10px;
+  width: 4px;
+  background: repeating-linear-gradient(#c4d3c7 0 10px, transparent 10px 18px);
+}
+.notice-rail i {
+  position: absolute;
+  top: 48px;
+  left: 1px;
+  width: 22px;
+  height: 22px;
+  border: 2px dashed #b98468;
+  border-radius: 50%;
+  background: #fffdfa;
+}
+.notice h1 {
+  margin: 6px 0 0;
+  font-size: 32px;
+  font-weight: 750;
+  letter-spacing: -0.05em;
+  color: #26382e;
+}
+.notice p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #6b766f;
+}
+.notice-button {
+  height: 40px;
+  margin-top: 8px;
+  padding: 0 20px;
+  border: 1px solid #b0734f;
+  border-radius: 20px;
+  background: #b0734f;
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.notice-button:disabled {
+  opacity: 0.7;
+  cursor: progress;
+}
+.notice-button:focus-visible {
+  outline: 2px solid #26382e;
+  outline-offset: 3px;
+}
+.notice-error {
+  color: #9a3f2b !important;
+}

@@ -22,7 +22,8 @@ export async function rebuildJournal(store: Store, tripId: string) {
   });
 }
 
-/** Stores a trip file (data/README.md) as a trip with a ready-made journal: the sample fixture. */
+/** Stores a trip file (data/README.md) as a published trip with a ready-made journal: the sample
+ *  fixture, published so viewers' access can be checked against it. */
 export async function storeFixture(store: Store, file: string, tripId: string) {
   const trip = fixtureTrip(file);
   await store.putTrip({
@@ -39,4 +40,5 @@ export async function storeFixture(store: Store, file: string, tripId: string) {
     orphanEdits: [],
     builtAt: new Date().toISOString(),
   });
+  await store.setTripStatus(tripId, 'published');
 }
