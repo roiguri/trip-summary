@@ -173,8 +173,11 @@ shape, and the Picker was tried with a throwaway script. The real files live out
   `activity.topCandidate.type`, `distanceMeters`). The export spans years, so slicing is essential.
   Every visit has a place ID, but only about a third of the planned places appear among the trip's
   visits by ID: the IDs differ between Maps and the plan, which is why matching uses distance too.
-  About a third of segments have no UTC offset. Visits can be nested (`hierarchyLevel`). Locations
-  are `latLng` strings. A `timelineMemory` kind exists and is ignored.
+  About a third of all segments have no UTC offset, but those are location traces (dropped): every
+  visit and activity in the trip's slice has one. The importer still keeps a missing offset as
+  null rather than guessing. Visits can be nested (`hierarchyLevel`). Locations are `latLng`
+  strings. A `timelineMemory` kind exists and is ignored. Sliced to the trip, the real export
+  shrinks from over 100 MB to under 200 KB.
 - **Photos Picker**: works with one read-only scope (`photospicker.mediaitems.readonly`), an OAuth
   client for a web app, and the consent screen in testing mode. Items carry `id`, `createTime`
   (UTC), `type` (`PHOTO`/`VIDEO`) and `mediaFile` (`baseUrl`, `mimeType`, `filename`, width,

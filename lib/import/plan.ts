@@ -109,13 +109,21 @@ export function readJarvisPlan(file: string, tripId: string): Omit<PlanSource, '
 
 /** What a re-import changes in the itinerary, by Jarvis entry ID. */
 export function diffItinerary(before: JarvisRow[], after: JarvisRow[]) {
-  const old = new Map(before.map((r) => [r.entry_id, JSON.stringify(r)]));
+  // Compared on content: column order doesn't matter, and `created_at` is Jarvis's bookkeeping.
+  const text = (r: JarvisRow) =>
+    JSON.stringify(
+      Object.keys(r)
+        .filter((k) => k !== 'created_at')
+        .sort()
+        .map((k) => [k, r[k]]),
+    );
+  const old = new Map(before.map((r) => [r.entry_id, text(r)]));
   const seen = new Set(after.map((r) => r.entry_id));
   let added = 0;
   let changed = 0;
   for (const r of after) {
     if (!old.has(r.entry_id)) added++;
-    else if (old.get(r.entry_id) !== JSON.stringify(r)) changed++;
+    else if (old.get(r.entry_id) !== text(r)) changed++;
   }
   const removed = before.filter((r) => !seen.has(r.entry_id)).length;
   return { added, changed, removed, unchanged: after.length - added - changed };
