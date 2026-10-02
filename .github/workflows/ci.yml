@@ -53,11 +53,17 @@ jobs:
       - name: Store tests (Firebase emulators)
         run: npm run test:store
 
-      - name: Seed the sample trip
-        run: npm run seed
-
       - name: Build
         run: npm run build
+
+      # The app reads the store: from here on it runs against the emulators, holding the sample trip.
+      - name: Start the emulators and seed the sample trip
+        run: |
+          node scripts/firebase.mjs emulators:start --only firestore,storage,auth > emulators.log 2>&1 &
+          for i in $(seq 1 120); do curl -sf -o /dev/null http://127.0.0.1:8080 && break; sleep 1; done
+          npm run seed
+        env:
+          FIRESTORE_EMULATOR_HOST: 127.0.0.1:8080
 
       - name: Browser for the interaction checks
         run: npx playwright install --with-deps chromium
@@ -66,6 +72,9 @@ jobs:
         run: |
           npm run start > server.log 2>&1 &
           for i in $(seq 1 60); do curl -sf -o /dev/null http://localhost:3100 && break; sleep 1; done
+        env:
+          FIRESTORE_EMULATOR_HOST: 127.0.0.1:8080
+          TRIP_ID: sample-coast
 
       - name: Interaction checks
         run: BASE_URL=http://localhost:3100 npm run check:interactions

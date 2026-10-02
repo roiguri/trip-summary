@@ -1,6 +1,4 @@
 import { DatabaseSync } from 'node:sqlite';
-import { existsSync, readFileSync, rmSync } from 'node:fs';
-import path from 'node:path';
 import { CORE_SCHEMA, PROTOTYPE_SCHEMA } from './schema.ts';
 
 /** Shape of a trip data file (see data/README.md). Keys link rows within the file only. */
@@ -51,10 +49,8 @@ export type TripFile = {
   }[];
 };
 
-export const DB_FILE = path.resolve(process.env.TRIP_DB || 'trip-sample.db');
-export const DEFAULT_DATA_FILE = path.resolve('data/sample-trip.json');
-
-export function openDb(file = DB_FILE) {
+/** A database in the core schema plus the prototype tables, for loading a trip file. */
+export function openDb(file = ':memory:') {
   const db = new DatabaseSync(file);
   db.exec('PRAGMA foreign_keys = ON;');
   db.exec(CORE_SCHEMA);
@@ -156,18 +152,4 @@ export function loadTrip(db: DatabaseSync, data: TripFile) {
     db.exec('ROLLBACK');
     throw err;
   }
-}
-
-/** Replaces the database with a fresh one containing only the given data file. */
-export function seed(dataFile = DEFAULT_DATA_FILE, dbFile = DB_FILE) {
-  for (const f of [dbFile, `${dbFile}-wal`, `${dbFile}-shm`]) rmSync(f, { force: true });
-  const db = openDb(dbFile);
-  loadTrip(db, JSON.parse(readFileSync(dataFile, 'utf8')) as TripFile);
-  return db;
-}
-
-/** Opens the database, seeding the default sample on first run so `npm run dev` works out of the box. */
-export function getDb() {
-  if (!existsSync(DB_FILE)) return seed();
-  return openDb();
 }

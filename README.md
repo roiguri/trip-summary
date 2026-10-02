@@ -1,6 +1,6 @@
 # WAYFARER: trip summary prototype
 
-A local-only Next.js and SQLite prototype for a trip journal, with a fictional three-day Carmel/Monterey itinerary. The original Vite/localStorage proof of concept is archived in `legacy-vite/` for reference. No user's photos, location history, or travel details are stored in this repository.
+A Next.js trip journal on Firebase, with a fictional three-day Carmel/Monterey itinerary. The original Vite/localStorage proof of concept is archived in `legacy-vite/` for reference. No user's photos, location history, or travel details are stored in this repository.
 
 ## Run
 
@@ -8,11 +8,12 @@ Requires Node.js 22.18+ (uses the built-in `node:sqlite` module and runs the Typ
 
 ```sh
 npm install
-npm run dev
-# http://localhost:3100
+npm run emulators                                    # local Firebase (needs Java 21+), own terminal
+FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 npm run seed  # the fictional sample trip
+npm run dev                                          # http://localhost:3100
 ```
 
-`npm run build && npm run start` serves the production build on port 3100. On first execution the app creates `trip-sample.db` from `data/sample-trip.json` (fictional entries and public sample imagery). `npm run seed [file]` reloads it from any trip file; see `data/README.md`. SQLite files are git-ignored. Images are local copies of Wikimedia Commons media; see `public/photos/SOURCES.txt` for source URLs. This is a local prototype: images are for illustrative review, and license terms should be checked before any public deployment.
+The app reads trips from Firebase (`docs/ARCHITECTURE.md`); in development and CI that is the Firebase emulators, never a real project. `npm run seed` stores the fictional sample (`data/sample-trip.json`, public sample imagery); `npm run seed -- --mocks` imports mock sources through the real importers and merge (`data/README.md`). Images are local copies of Wikimedia Commons media; see `public/photos/SOURCES.txt` for source URLs. Images are for illustrative review, and license terms should be checked before any public deployment.
 
 ## Interface
 
@@ -20,7 +21,7 @@ The timeline rail scrolls within a fixed viewport; the right-hand map and detail
 
 ## Data contract
 
-The SQLite core tables `destinations`, `trips`, `places`, `wishlist`, `itinerary` mirror the supplied schema, including the `one_current_trip` index. Prototype-only `days` and `photos` tables hold day titles and photo references with coordinates. The current trip is selected by `is_current=1` and the timezone comes from `destinations.timezone`, not from the browser or a Denver fixture. This is an illustrative viewer, not yet a complete importer or editor. No real trip data should be committed to this repository.
+Trips come from three sources: the plan from the Jarvis travel database (its core tables `destinations`, `trips`, `places`, `itinerary` are mirrored in `lib/schema.ts`), the Android Timeline export, and photos from the Google Photos Picker. They are merged into a journal, with the owner's edits on top (`docs/DATA-DESIGN.md`). Times are read in the destination's time zone, not the browser's. No real trip data should be committed to this repository.
 
 ## Hosted preview
 

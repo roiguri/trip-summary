@@ -1,5 +1,6 @@
 // Stores a Timeline slice made by sliceTimeline (lib/import/timeline.ts), usually in the browser.
 import type { Store, TimelineSegment } from '../store/index.ts';
+import { rebuildJournal } from '../journal.ts';
 import { sliceWindow } from './timeline.ts';
 
 export class TimelineImportError extends Error {}
@@ -42,5 +43,6 @@ export async function importTimeline(
     summary,
     state: 'applied',
   });
+  await rebuildJournal(store, tripId);
   return { summary, record };
 }
