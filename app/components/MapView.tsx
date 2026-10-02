@@ -1,8 +1,12 @@
 'use client';
 import { useEffect, useMemo, useRef } from 'react';
-import maplibregl, { Map as MapType, Marker } from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
+import type { Map as MapType, Marker } from 'maplibre-gl';
 import type { Entry, Photo, Trip } from '../../lib/data';
 import { TRANSIT_ICONS } from './icons';
+
+// Served from public/ (scripts/copy-maplibre-worker.mjs): the bundler can't emit the worker itself.
+maplibregl.setWorkerUrl('/maplibre/maplibre-gl-worker.mjs');
 
 type Bounds = [[number, number], [number, number]];
 function boundsOf(points: { lat: number | null; lng: number | null }[]): Bounds | null {
