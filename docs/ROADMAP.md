@@ -76,8 +76,12 @@ Designed with mock options and agreed (`docs/VERIFICATION.md`, "Mobile"): a one-
 - Hosting, storage and sign-in are decided (`docs/ARCHITECTURE.md`): Netlify + Firebase, editors with Google, viewers with personal invite links.
 - Left for this phase: the production Firebase project and Netlify site, the budget alert, and a media licensing review of the sample photos.
 
+## Enhancements (after the phases above)
+
+- **A map of all trips**: a map view of every trip, as a second way to browse the home page (user decision, Oct 2: nice to have, at the end of the plan).
+
 ## Immediate next step
 
-Phase 2, step 6: the design round for the home page, adding a trip and the import flow. Round 1 options: https://claude.ai/artifact/4QQeC2zq2rSBUAixmcDmDf (home, adding a trip and its sources, the import review, trip controls with invite links); waiting for the owner's picks. Open: whether a stay shows its booked check-in and check-out or the Timeline's times (`docs/DATA-DESIGN.md`, merge rule 8), to discuss with the owner before edit mode.
+Phase 2, step 6: the design round for the home page, adding a trip and the import flow. Options: https://claude.ai/artifact/4QQeC2zq2rSBUAixmcDmDf. Agreed: home H1, one import page A3, review on it R3, editor's bar C1 (`DESIGN.md`). Round 3, open: the empty state and the trip cover. Open: whether a stay shows its booked check-in and check-out or the Timeline's times (`docs/DATA-DESIGN.md`, merge rule 8), to discuss with the owner before edit mode.
 
 Postponed (user decision, to return to later): the top bar (style, mark, name) and a ChatGPT-style day scroller. Live options for both, with recommendations, are on the options page: https://claude.ai/artifact/V9Fa92HhY897rcKrsadNrw
