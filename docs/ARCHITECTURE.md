@@ -80,7 +80,15 @@ Firebase is a proprietary stack, so moving away is real work. These rules keep i
   They use the emulator-only project `demo-trip-summary` and need Java 21+. The Firebase CLI runs at
   a pinned version through `scripts/firebase.mjs` rather than from `package.json`, so its large
   dependency tree stays out of the app's lockfile and audit.
-- **Secrets** (the Admin SDK service account, OAuth client secret, invite signing key) live in
+- **Sign-in in development**: the Auth emulator stands in for Google. `/api/auth/dev` signs a
+  browser in as the mock owner (`owner@example.com` unless `OWNER_EMAIL` is set) or opens a fresh
+  invite as a mock viewer; it exists only when the app runs on the emulators with a `demo-` project.
+  The app reads `FIRESTORE_EMULATOR_HOST` and `FIREBASE_AUTH_EMULATOR_HOST` at run time, and the
+  sign-in page needs `NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST` at build time.
+- **Settings in production**: `OWNER_EMAIL` (the owner, who edits every trip and creates trips),
+  `FIREBASE_PROJECT_ID`, and the web app's `NEXT_PUBLIC_FIREBASE_API_KEY`,
+  `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` and `NEXT_PUBLIC_FIREBASE_PROJECT_ID`.
+- **Secrets** (the Admin SDK service account and the Picker's OAuth client secret) live in
   `.env.local` locally and in Netlify's environment settings, never in git.
 - **Blaze** needs a card, but usage stays inside the free allowance at this scale (Cloud Storage
   includes 5 GB stored and 100 GB downloaded a month, for buckets in the regions that qualify, so

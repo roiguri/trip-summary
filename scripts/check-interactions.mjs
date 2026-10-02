@@ -3,14 +3,16 @@
 // details sheet, the full-screen map and the menu. Usage: start the app, then
 // `npm run check:interactions` (BASE_URL defaults to http://localhost:3000). Exits 1 on a failure.
 import { chromium } from 'playwright';
+import { signIn, TRIP } from './signed-in.mjs';
 const BASE = process.env.BASE_URL || 'http://localhost:3000';
 (async () => {
   const b = await chromium.launch();
-  const p = await b.newPage({ viewport: { width: 1440, height: 900 } });
+  const p = await (await b.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
   const errs = [];
   p.on('pageerror', (e) => errs.push(String(e)));
   p.on('console', (m) => m.type() === 'error' && errs.push(m.text()));
-  await p.goto(BASE, { waitUntil: 'networkidle' });
+  await signIn(p.context(), BASE);
+  await p.goto(BASE + TRIP, { waitUntil: 'networkidle' });
   await p.waitForTimeout(1500);
   const R = [];
   const ok = (name, cond, extra = '') => R.push(`${cond ? 'PASS' : 'FAIL'}  ${name} ${extra}`);
@@ -145,9 +147,12 @@ const BASE = process.env.BASE_URL || 'http://localhost:3000';
   // 9. See more doesn't select
 
   // Phone (390x844, touch): one-column timeline, the details sheet, the full-screen map, the menu.
-  const ph = await b.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true });
+  const ph = await (
+    await b.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true })
+  ).newPage();
   ph.on('pageerror', (e) => errs.push(String(e)));
-  await ph.goto(BASE, { waitUntil: 'networkidle' });
+  await signIn(ph.context(), BASE);
+  await ph.goto(BASE + TRIP, { waitUntil: 'networkidle' });
   await ph.waitForTimeout(1500);
   const layout = await ph.evaluate(() => {
     const rail = document.querySelector('.entries').getBoundingClientRect().left + 2;

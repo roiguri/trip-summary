@@ -1,12 +1,13 @@
 // Every read and write of the app's data goes through here (docs/ARCHITECTURE.md, "Rules that keep it
 // portable"): moving off Firebase means rewriting this module, not the app.
-import { getApps, initializeApp, applicationDefault } from 'firebase-admin/app';
+import { adminApp } from '../firebase-admin.ts';
 import { getFirestore, type Firestore, type DocumentReference } from 'firebase-admin/firestore';
 import type {
   Edit,
   EditTarget,
   ImportRecord,
   Journal,
+  Person,
   PlanSource,
   Trip,
   TripPhoto,
@@ -75,6 +76,8 @@ export function createStore(db: Firestore) {
     /** Deletes the trip and everything under it. */
     async deleteTrip(tripId: string) {
       await db.recursiveDelete(trip(tripId));
+      const people = await db.collection('people').where('tripId', '==', tripId).get();
+      await writeAll(people.docs.map((d) => [d.ref, null] as [DocumentReference, null]));
     },
 
     async putPlan(tripId: string, plan: PlanSource) {
@@ -169,6 +172,50 @@ export function createStore(db: Firestore) {
       };
     },
 
+    async putPerson(p: Person) {
+      await db.collection('people').doc(docId(p.personId)).set(p);
+    },
+    async getPerson(personId: string): Promise<Person | null> {
+      return (
+        ((await db.collection('people').doc(docId(personId)).get()).data() as Person | undefined) ??
+        null
+      );
+    },
+    /** Updates some of a person's fields, but only while they match `expect`: a compare-and-set, so
+     *  two browsers opening one invite at once can't both bind to it. Returns whether it applied. */
+    async updatePerson(personId: string, changes: Partial<Person>, expect: Partial<Person> = {}) {
+      const ref = db.collection('people').doc(docId(personId));
+      return db.runTransaction(async (tx) => {
+        const cur = (await tx.get(ref)).data() as Person | undefined;
+        if (!cur) return false;
+        for (const [k, v] of Object.entries(expect)) if (cur[k as keyof Person] !== v) return false;
+        tx.update(ref, changes);
+        return true;
+      });
+    },
+    async findPersonByInvite(inviteHash: string): Promise<Person | null> {
+      const snap = await db
+        .collection('people')
+        .where('inviteHash', '==', inviteHash)
+        .limit(1)
+        .get();
+      return (snap.docs[0]?.data() as Person | undefined) ?? null;
+    },
+    async listPeople(tripId: string): Promise<Person[]> {
+      const snap = await db.collection('people').where('tripId', '==', tripId).get();
+      return snap.docs.map((d) => d.data() as Person);
+    },
+    /** Everyone-on-a-trip records for a signed-in account, by its UID and by its email. */
+    async peopleFor(uid: string, email: string | null): Promise<Person[]> {
+      const col = db.collection('people');
+      const [byUid, byEmail] = await Promise.all([
+        col.where('uid', '==', uid).get(),
+        email ? col.where('email', '==', email).get() : Promise.resolve(null),
+      ]);
+      const all = [...byUid.docs, ...(byEmail?.docs ?? [])].map((d) => d.data() as Person);
+      return [...new Map(all.map((p) => [p.personId, p])).values()];
+    },
+
     async recordImport(
       tripId: string,
       rec: Omit<ImportRecord, 'id' | 'at'>,
@@ -190,24 +237,14 @@ export function createStore(db: Firestore) {
 
 export type Store = ReturnType<typeof createStore>;
 
-let store: Store | undefined;
-/**
- * The app's store. Against the emulators when FIRESTORE_EMULATOR_HOST is set (development, tests,
- * CI), with the emulator-only demo project; otherwise against the real project, with the
- * credentials the host provides.
- */
+/** The app's store (see lib/firebase-admin.ts for which Firebase it reaches). Cached on the process,
+ *  not the module: Next bundles each route separately, and Firestore's settings may be set once. */
 export function getStore(): Store {
-  if (store) return store;
-  const emulated = Boolean(process.env.FIRESTORE_EMULATOR_HOST);
-  const app =
-    getApps()[0] ??
-    initializeApp(
-      emulated
-        ? { projectId: process.env.FIREBASE_PROJECT_ID ?? 'demo-trip-summary' }
-        : { credential: applicationDefault(), projectId: process.env.FIREBASE_PROJECT_ID },
-    );
-  const db = getFirestore(app);
-  db.settings({ ignoreUndefinedProperties: true });
-  store = createStore(db);
-  return store;
+  const g = globalThis as { __tripSummaryStore?: Store };
+  if (!g.__tripSummaryStore) {
+    const db = getFirestore(adminApp());
+    db.settings({ ignoreUndefinedProperties: true });
+    g.__tripSummaryStore = createStore(db);
+  }
+  return g.__tripSummaryStore;
 }

@@ -13,10 +13,13 @@ every import and edit) from the store on every request; locally and in CI that i
 npm run emulators            # first, in its own terminal: the local Firebase the app and tests use
 FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 npm run seed            # the sample trip into the emulators
 FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 npm run seed -- --mocks # the mocks through the importers and merge
-npm run dev                  # dev server on 3100 (against the emulators; TRIP_ID picks the trip)
+npm run dev                  # dev server on 3100, against the emulators
+# signed in as the mock owner: http://localhost:3100/api/auth/dev?as=editor&next=/trips/sample-coast
+# as a mock viewer (a fresh invite): /api/auth/dev?as=viewer&trip=sample-coast   (emulators only)
 npm run build && npm run start
 npm run format:check && npm run typecheck
 BASE_URL=http://localhost:3100 npm run check:interactions   # 34 interaction checks (desktop + phone)
+BASE_URL=http://localhost:3100 npm run check:access         # sign-in and access, end to end
 BASE_URL=http://localhost:3100 npm run visual               # 36 screenshot states vs tests/visual/baseline
 npm run visual:update        # only for an intended visual change; it also rewrites unchanged baselines
                              # with anti-aliasing noise, so commit only the states that changed

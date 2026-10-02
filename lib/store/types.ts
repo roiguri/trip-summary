@@ -110,3 +110,27 @@ export type Journal = {
   orphanEdits: Edit[];
   builtAt: string;
 };
+
+export type Role = 'editor' | 'viewer';
+
+/**
+ * `people/{personId}`: someone who may see a trip (docs/DATA-DESIGN.md, "Access"). An editor is a
+ * Google account (by email). A viewer has a personal invite link: only its SHA-256 hash is stored,
+ * and the first browser that opens it is bound to it (by the hash of a device cookie).
+ */
+export type Person = {
+  personId: string;
+  tripId: string;
+  name: string;
+  role: Role;
+  /** A Google account's email: editors, and viewers who sign in with Google. */
+  email: string | null;
+  /** The sign-in account once known: a Google user's UID, or `v_{personId}` for an invite link. */
+  uid: string | null;
+  inviteHash: string | null;
+  deviceHash: string | null;
+  createdAt: string;
+  createdBy: string;
+  lastOpenedAt: string | null;
+  revokedAt: string | null;
+};
