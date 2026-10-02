@@ -68,7 +68,7 @@ ok(
 // A viewer with an invite link.
 const viewer = await ctx();
 const vp = await viewer.newPage();
-const landed = await vp.goto(`${BASE}/api/auth/dev?as=viewer&trip=sample-coast`);
+const landed = await vp.goto(`${BASE}/api/auth/dev?as=invite&trip=sample-coast`);
 let hop = landed?.request();
 let invite;
 while (hop) {
@@ -151,6 +151,67 @@ ok(
 );
 const strangerTrip = await tp.goto(BASE + SAMPLE);
 ok('and cannot open one', strangerTrip?.status() === 404, strangerTrip?.status());
+
+// The editors' bar, sharing and publishing.
+const owner = await ctx();
+const op = await owner.newPage();
+await op.goto(`${BASE}/api/auth/dev?as=editor&next=${SAMPLE}`);
+ok('the owner sees the editors’ bar', (await op.locator('.editor-bar').count()) === 1);
+ok(
+  'the header names the account, with sign-out',
+  (await op.locator('.header .status').textContent()).includes('Sign out'),
+);
+await op.goto(`${BASE}${SAMPLE}?view=viewer`);
+ok(
+  'previewing as a viewer hides the bar, with a way back',
+  (await op.locator('.editor-bar').count()) === 0 &&
+    (await op.locator('.preview-exit').count()) === 1,
+);
+const mock = await ctx();
+const mp = await mock.newPage();
+await mp.goto(`${BASE}/api/auth/dev?as=viewer&trip=sample-coast&next=${SAMPLE}`);
+ok(
+  'a viewer sees no editors’ bar',
+  (await mp.locator('.day-section').count()) > 0 && (await mp.locator('.editor-bar').count()) === 0,
+);
+
+await op.goto(BASE + SAMPLE);
+await op.click('.editor-bar [aria-controls="share"]');
+await op.fill('#new-person', 'Grandma');
+await op.getByRole('button', { name: 'Create link' }).click();
+await op.waitForSelector('#fresh-link');
+const link = await op.inputValue('#fresh-link');
+ok('sharing makes a personal link, shown once', /\/invite\/[A-Za-z0-9_-]{43}$/.test(link));
+const grandma = await ctx();
+const gp = await grandma.newPage();
+await gp.goto(link);
+ok('the link opens the trip', gp.url().endsWith(SAMPLE));
+await op.reload();
+await op.click('.editor-bar [aria-controls="share"]');
+ok(
+  'the share list shows them as having opened it',
+  (await op.locator('.person', { hasText: 'Grandma' }).textContent()).includes('Opened'),
+);
+await op.locator('.person', { hasText: 'Grandma' }).getByRole('button', { name: 'Revoke' }).click();
+await op.waitForFunction(
+  () => ![...document.querySelectorAll('.person')].some((e) => e.textContent.includes('Grandma')),
+);
+await new Promise((r) => setTimeout(r, 1100)); // revocation is recorded to the second
+await gp.goto(BASE + SAMPLE);
+ok('revoking ends their session at once', gp.url().includes('/sign-in'));
+
+const kansai = '/trips/test-kansai';
+await op.goto(BASE + kansai);
+await op.getByRole('button', { name: /Make it a draft/ }).click();
+await op.waitForSelector('.editor-bar >> text=Publish');
+const kv = await ctx();
+const kp = await kv.newPage();
+const draftRes = await kp.goto(`${BASE}/api/auth/dev?as=viewer&trip=test-kansai&next=${kansai}`);
+ok('a draft is hidden from its viewers', draftRes?.status() === 404, draftRes?.status());
+await op.getByRole('button', { name: 'Publish' }).click();
+await op.waitForSelector('.editor-bar >> text=Make it a draft', { state: 'attached' });
+await kp.goto(BASE + kansai);
+ok('publishing shows it to them', (await kp.locator('.day-section').count()) > 0);
 
 await browser.close();
 console.log(R.join('\n'));

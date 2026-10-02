@@ -14,6 +14,7 @@ import { sliceTimeline } from '../lib/import/timeline.ts';
 import { importTimeline } from '../lib/import/timeline-store.ts';
 import { rebuildJournal } from '../lib/journal.ts';
 import { jarvisFile, mockEdits, mockPhotos } from '../lib/fixtures.ts';
+import { mockViewer } from '../lib/auth/invites.ts';
 
 if (!process.env.FIRESTORE_EMULATOR_HOST) {
   console.error(
@@ -47,5 +48,6 @@ if (process.argv.includes('--mocks')) {
   const file = path.resolve(process.argv[2] ?? SAMPLE);
   const id = idOf(file);
   await storeFixture(store, file, id);
+  await mockViewer(store, id);
   console.log(`Seeded "${id}" from ${path.relative(process.cwd(), file)}`);
 }

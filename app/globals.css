@@ -31,8 +31,14 @@ button:disabled {
   cursor: default;
 }
 .shell {
+  /* An editor's bar under the header takes this much height (DESIGN.md, "Trip controls (C1)");
+     viewers have none. */
+  --bar: 0px;
   height: 100dvh;
   overflow: hidden;
+}
+.shell.with-bar {
+  --bar: 46px;
 }
 
 /* ---------------------------------------------------------------------------------------------
@@ -89,7 +95,7 @@ button:disabled {
 .left {
   position: relative;
   width: min(928px, calc(100vw - 512px));
-  height: calc(100dvh - 65px);
+  height: calc(100dvh - 65px - var(--bar));
   overflow: auto;
   scrollbar-width: thin;
   scrollbar-color: #d7dcd1 transparent;
@@ -758,7 +764,7 @@ button:disabled {
 .right {
   --col-w: 424px;
   position: fixed;
-  top: 78px;
+  top: calc(78px + var(--bar));
   right: max(40px, calc((100vw - 1370px) / 2 + 7px));
   bottom: 13px;
   z-index: 3;
@@ -1758,7 +1764,7 @@ button:disabled {
   .left,
   .shell.collapsed .left {
     width: 100vw;
-    height: calc(100dvh - 50px);
+    height: calc(100dvh - 50px - var(--bar));
   }
   .intro {
     padding: 22px 18px 34px;
@@ -2746,5 +2752,167 @@ button.pill-button {
   }
   .suggestion .src-actions {
     grid-column: 1 / -1;
+  }
+}
+
+/* The editors' bar on the journey and its share panel (DESIGN.md, "Trip controls (C1)"). */
+.editor-bar {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 46px;
+  padding: 0 35px;
+  border-bottom: 1px solid #e0e6dd;
+  background: #f3f6ef;
+  font-size: 12px;
+}
+.bar-space {
+  flex: 1;
+}
+.editor-bar .short {
+  display: none;
+}
+.bar-link {
+  font-weight: 700;
+  color: #3f5c4b;
+  text-decoration: none;
+}
+.badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  margin-left: 6px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: #b0734f;
+  font-size: 10px;
+  color: #fff;
+}
+.share {
+  position: absolute;
+  top: 42px;
+  right: 35px;
+  z-index: 10;
+  width: 400px;
+  padding: 18px;
+  border: 1px solid #d5e0d3;
+  border-radius: 18px;
+  background: #fffdf8;
+  box-shadow: 0 16px 40px #28382e33;
+  color: #26382e;
+}
+.share h2 {
+  margin: 0 0 4px;
+  font-size: 16px;
+  letter-spacing: -0.03em;
+}
+.share > p {
+  margin: 0 0 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #7f8c84;
+}
+.person {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-top: 1px solid #eef1ea;
+  font-size: 13px;
+}
+.avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #e7efe3;
+  font-size: 11px;
+  font-weight: 800;
+  color: #3f6a4b;
+}
+.person-name {
+  flex: 1;
+  min-width: 0;
+}
+.person-name small {
+  display: block;
+  font-size: 11px;
+  color: #8e968f;
+}
+.link-button.danger {
+  color: #9a3f2b;
+}
+.fresh-link,
+.add-person {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+.fresh-link {
+  padding: 10px;
+  border-radius: 12px;
+  background: #eef4ea;
+}
+.fresh-link small {
+  flex-basis: 100%;
+  font-size: 11px;
+  color: #3f5c4b;
+}
+.fresh-link input,
+.add-person input {
+  flex: 1;
+  min-width: 0;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid #d5e1d4;
+  border-radius: 10px;
+  background: #fffdfa;
+  font: inherit;
+  font-size: 12px;
+}
+.preview-exit {
+  position: fixed;
+  left: 20px;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  z-index: 20;
+  box-shadow: 0 8px 20px #28382e33;
+}
+@media (max-width: 899px) {
+  .shell.with-bar {
+    --bar: 44px;
+  }
+  .editor-bar {
+    height: 44px;
+    gap: 8px;
+    padding: 0 12px;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  /* The status shows in Publish or Unpublish; shorter labels keep the bar on one screen width. */
+  .editor-bar .bar-space,
+  .editor-bar a[href='?view=viewer'],
+  .editor-bar > .trip-status,
+  .editor-bar .long {
+    display: none;
+  }
+  .editor-bar .short {
+    display: inline;
+  }
+  .share {
+    position: fixed;
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: auto;
+    border-radius: 22px 22px 0 0;
+    padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px));
   }
 }

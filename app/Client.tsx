@@ -16,7 +16,15 @@ import { useIsPhone } from './lib/useIsPhone';
  * The journey page: the timeline on the left, the map card and detail card on the right, and the
  * photo viewer. This component holds the state they share; each part lives in `components/`.
  */
-export default function Client({ trip }: { trip: Trip }) {
+export default function Client({
+  trip,
+  account,
+  bar,
+}: {
+  trip: Trip;
+  account: string;
+  bar?: React.ReactNode;
+}) {
   // Nothing is selected at first: the map fills the right column until an entry is chosen (user decision).
   const [selected, setSelected] = useState<Entry | null>(null);
   const [day, setDay] = useState(trip.days[0]?.date ?? '');
@@ -153,16 +161,17 @@ export default function Client({ trip }: { trip: Trip }) {
 
   return (
     <main
-      className={`shell ${collapsed ? 'collapsed' : ''}`}
+      className={`shell ${collapsed ? 'collapsed' : ''} ${bar ? 'with-bar' : ''}`}
       style={
         {
-          // An absolute length (a share of the right column, which spans the viewport minus 91px),
-          // so the folding map card can keep its content at full size inside.
-          '--map-height': 'calc((100dvh - 91px) * 0.4)',
+          // An absolute length (a share of the right column, which spans the viewport minus 91px and
+          // an editor's bar), so the folding map card can keep its content at full size inside.
+          '--map-height': 'calc((100dvh - 91px - var(--bar)) * 0.4)',
         } as React.CSSProperties
       }
     >
-      <Header />
+      <Header account={account} />
+      {bar}
       <section className="left" ref={scroller}>
         <div className="intro">
           <div className="kicker">03 / THE JOURNEY</div>

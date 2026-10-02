@@ -10,7 +10,7 @@ const BASE = process.env.BASE_URL || 'http://localhost:3100';
   mkdirSync(out, { recursive: true });
   const b = await chromium.launch();
   const p = await (await b.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
-  await signIn(p.context(), BASE);
+  await signIn(p.context(), BASE, 'viewer');
   await p.goto(BASE + TRIP, { waitUntil: 'load' });
   await p.waitForTimeout(1500);
   const shot = async (n) => {
