@@ -78,6 +78,6 @@ Designed with mock options and agreed (`docs/VERIFICATION.md`, "Mobile"): a one-
 
 ## Immediate next step
 
-Phase 2, step 6: the design round for the home page, adding a trip and the import flow (preview pages, agreed with the owner before building). Two merge rules added in step 5 are proposed, not yet agreed: a stay keeps its booked check-in and check-out, and returning to the lodging during the stay is not a suggestion.
+Phase 2, step 6: the design round for the home page, adding a trip and the import flow. Round 1 options: https://claude.ai/artifact/4QQeC2zq2rSBUAixmcDmDf (home, adding a trip and its sources, the import review, trip controls with invite links); waiting for the owner's picks. Open: whether a stay shows its booked check-in and check-out or the Timeline's times (`docs/DATA-DESIGN.md`, merge rule 8), to discuss with the owner before edit mode.
 
 Postponed (user decision, to return to later): the top bar (style, mark, name) and a ChatGPT-style day scroller. Live options for both, with recommendations, are on the options page: https://claude.ai/artifact/V9Fa92HhY897rcKrsadNrw
