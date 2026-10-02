@@ -31,7 +31,7 @@ CI (`.github/workflows/ci.yml`) runs format, types, build, interaction checks an
 - `lib/data.ts` builds the trip model from the database; `lib/schema.ts` is the schema (core tables
   are the user's real schema; `days` and `photos` are prototype tables to be replaced, see
   `docs/DATA-DESIGN.md`).
-- `docs/ROADMAP.md` (phases), `docs/DATA-DESIGN.md` (agreed data design), `docs/VERIFICATION.md`
+- `docs/ROADMAP.md` (phases), `docs/ARCHITECTURE.md` (hosting, store, sign-in), `docs/DATA-DESIGN.md` (agreed data design), `docs/VERIFICATION.md`
   and `DESIGN.md` (every agreed UI decision), `data/README.md` (trip file format),
   `tests/visual/README.md` (visual and style tests).
 

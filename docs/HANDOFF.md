@@ -36,7 +36,7 @@ requests.
 
 ## Next: Phase 2
 
-As `docs/DATA-DESIGN.md` describes under "Building with mock data": mock sources shaped like the
-real ones (now known), the importers, the merge with its tests, then a design round for edit mode
-before building its screens. Thresholds and the proposed matching rules are tuned against the real
-trip locally, never by committing it.
+The architecture is decided: `docs/ARCHITECTURE.md` (Netlify + Firebase, invite links for viewers).
+The steps are listed in `docs/ROADMAP.md` under Phase 2, starting with mock sources shaped like the
+real ones. Thresholds and the proposed matching rules are tuned against the real trip in a private
+draft, never by committing it.
