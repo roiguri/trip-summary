@@ -105,8 +105,13 @@ These replace the prototype `days` and `photos` tables.
    neither has no position and is shown without a pin **(proposed)**.
 7. **Precedence**: edits, then the plan (names, notes, categories), then the Timeline (times, mode),
    then photos (attached to whatever the first three produce).
+8. **Stays** **(proposed)**: a stay keeps its booked check-in and check-out (an overnight visit says
+   when the owner was there, not when the booking ran), and coming back to the lodging on any day of
+   the stay is part of it, never a suggestion.
 
-Distances and times above are starting values to tune on real data.
+Distances and times above are starting values to tune on real data. On the owner's real trip,
+150 m matched about two in five planned places, and 45 more had a visit the same day 150–500 m away;
+the 2 km journey cutoff left over a hundred journey suggestions. Both are tuned in step 8.
 
 ### 3. Edits
 

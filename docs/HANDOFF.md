@@ -37,6 +37,6 @@ requests.
 ## Next: Phase 2
 
 The architecture is decided: `docs/ARCHITECTURE.md` (Netlify + Firebase, invite links for viewers).
-The steps are listed in `docs/ROADMAP.md` under Phase 2, starting with mock sources shaped like the
-real ones. Thresholds and the proposed matching rules are tuned against the real trip in a private
+The steps are listed in `docs/ROADMAP.md` under Phase 2; steps 1–5 are done (mocks, the store,
+both importers, the merge, the page on the store), and step 6 is the design round. Thresholds and the proposed matching rules are tuned against the real trip in a private
 draft, never by committing it.
