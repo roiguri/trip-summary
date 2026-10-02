@@ -69,6 +69,12 @@ test('a file that is not a Jarvis database is refused clearly', () => {
   );
 });
 
+test('column order and Jarvis’s created_at do not count as a change', () => {
+  const a = { entry_id: 1, notes: 'x', title: 'T', created_at: '2026-10-02 10:00:00' };
+  const b = { title: 'T', notes: 'x', entry_id: 1, created_at: '2026-10-02 10:00:01' };
+  assert.deepEqual(diffItinerary([a], [b]), { added: 0, changed: 0, removed: 0, unchanged: 1 });
+});
+
 test('a re-import is summarised by entry ID', () => {
   const row = (entry_id: number, notes: string | null) => ({ entry_id, notes });
   assert.deepEqual(
