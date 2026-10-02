@@ -1,0 +1,122 @@
+{
+  "$comment": "Answer key for the importer and merge tests. Segment keys are kind:startTime(UTC):placeId-or-mode.",
+  "trip": "sample-coast",
+  "slice": {
+    "from": "2026-05-14",
+    "to": "2026-05-21"
+  },
+  "entryIds": {
+    "carmel-beach-visit": 1,
+    "point-lobos-visit": 2,
+    "lunch": 3,
+    "inn": 4,
+    "coast-path-walk": 5,
+    "drive-hwy1": 6,
+    "bixby-visit": 7,
+    "garrapata-visit": 8,
+    "wander-note": 9,
+    "quiet-note": 10,
+    "aquarium-visit": 11,
+    "lovers-point-visit": 12,
+    "drive-south": 13,
+    "parks-pass-span": 14,
+    "point-sur-visit": 15,
+    "festival-span": 16,
+    "mcway-visit": 17,
+    "ebike-span": 18,
+    "ridge-span": 19,
+    "nepenthe-visit": 20,
+    "river-lodge-stay": 21,
+    "fog-note": 22,
+    "shuttle-pfeiffer": 23,
+    "pfeiffer-visit": 24,
+    "molera-visit": 25,
+    "long-he-note": 26,
+    "ridge-cabin-stay": 27,
+    "late-note": 28,
+    "train-north": 29,
+    "flight-home": 30
+  },
+  "matches": {
+    "carmel-beach-visit": {
+      "segment": "visit:2026-05-15T16:28:00.000Z:ChIJmockcarmelbeachxxxxxxxx",
+      "by": "id+distance"
+    },
+    "point-lobos-visit": {
+      "segment": "visit:2026-05-15T18:15:00.000Z:ChIJgmapspointlobosxxxxxxxx",
+      "by": "distance"
+    },
+    "lunch": {
+      "segment": "visit:2026-05-15T20:15:00.000Z:ChIJmockcypresssaltxxxxxxxx",
+      "by": "distance"
+    },
+    "bixby-visit": {
+      "segment": "visit:2026-05-16T16:48:00.000Z:ChIJmockbixbybridgexxxxxxxx",
+      "by": "id+distance"
+    },
+    "garrapata-visit": {
+      "segment": "visit:2026-05-16T18:00:00.000Z:ChIJgmapsgarrapataxxxxxxxxx",
+      "by": "distance"
+    },
+    "aquarium-visit": {
+      "segment": "visit:2026-05-17T18:15:00.000Z:ChIJmockaquariumxxxxxxxxxxx",
+      "by": "id+distance"
+    },
+    "point-sur-visit": {
+      "segment": "visit:2026-05-18T16:20:00.000Z:ChIJmockpointsurxxxxxxxxxxx",
+      "by": "id+distance"
+    },
+    "mcway-visit": {
+      "segment": "visit:2026-05-18T18:15:00.000Z:ChIJgmapsmcwayxxxxxxxxxxxxx",
+      "by": "distance"
+    },
+    "nepenthe-visit": {
+      "segment": "visit:2026-05-18T21:30:00.000Z:ChIJmocknepenthexxxxxxxxxxx",
+      "by": "id"
+    },
+    "pfeiffer-visit": {
+      "segment": "visit:2026-05-19T17:50:00.000Z:ChIJmockpfeifferbeachxxxxxx",
+      "by": "id+distance"
+    },
+    "lovers-point-visit": null,
+    "inn": {
+      "segment": "visit:2026-05-15T22:20:00.000Z:ChIJmockgardeninnxxxxxxxxxx",
+      "by": "id+distance"
+    },
+    "river-lodge-stay": {
+      "segment": "visit:2026-05-18T23:10:00.000Z:ChIJmockriverlodgexxxxxxxxx",
+      "by": "id+distance"
+    },
+    "ridge-cabin-stay": {
+      "segment": "visit:2026-05-20T00:45:00.000Z:ChIJmockridgecabinxxxxxxxxx",
+      "by": "id+distance"
+    }
+  },
+  "transitModes": {
+    "drive-hwy1": "IN_PASSENGER_VEHICLE",
+    "drive-south": "IN_PASSENGER_VEHICLE",
+    "shuttle-pfeiffer": "IN_BUS",
+    "train-north": "IN_TRAIN",
+    "flight-home": "FLYING"
+  },
+  "suggestions": [
+    "visit:2026-05-15T23:30:00.000Z:ChIJmockstop202605151630xxx",
+    "visit:2026-05-16T20:00:00.000Z:ChIJmockstop202605161300xxx",
+    "visit:2026-05-19T02:00:00.000Z:ChIJmockstop202605181900xxx",
+    "visit:2026-05-19T14:55:00.000Z:ChIJmockstop202605190755xxx",
+    "visit:2026-05-20T14:45:00.000Z:ChIJmockstop202605200745xxx",
+    "activity:2026-05-17T20:00:00.000Z:IN_PASSENGER_VEHICLE"
+  ],
+  "filteredOut": [
+    "visit:2026-05-17T18:05:00.000Z:ChIJmockcanneryrowxxxxxxxxx",
+    "visit:2026-05-16T17:25:00.000Z:ChIJmockcoffeexxxxxxxxxxxxx",
+    "activity:2026-05-16T17:33:00.000Z:WALKING",
+    "visit:2026-05-21T16:00:00.000Z:ChIJmockhomexxxxxxxxxxxxxxx",
+    "visit:2026-05-14T15:00:00.000Z:ChIJmockworkxxxxxxxxxxxxxxx"
+  ],
+  "outsideWindow": [
+    "visit:2026-05-12T16:00:00.000Z:ChIJmockhomexxxxxxxxxxxxxxx",
+    "visit:2026-05-24T03:00:00.000Z:ChIJmockdinnerxxxxxxxxxxxxx",
+    "activity:2025-01-10T15:00:00.000Z:IN_BUS"
+  ]
+}

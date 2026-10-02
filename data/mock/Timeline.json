@@ -1,0 +1,646 @@
+{
+  "semanticSegments": [
+    {
+      "startTime": "2025-01-10T08:00:00.000-07:00",
+      "endTime": "2025-01-10T08:40:00.000-07:00",
+      "startTimeTimezoneUtcOffsetMinutes": -420,
+      "endTimeTimezoneUtcOffsetMinutes": -420,
+      "activity": {
+        "start": {
+          "latLng": "32.1000000°, 34.8000000°"
+        },
+        "end": {
+          "latLng": "32.0000000°, 34.7500000°"
+        },
+        "distanceMeters": 12000,
+        "probability": 0.9,
+        "topCandidate": {
+          "type": "IN_BUS",
+          "probability": 0.87
+        }
+      }
+    },
+    {
+      "startTime": "2026-05-12T09:00:00.000-07:00",
+      "endTime": "2026-05-12T18:00:00.000-07:00",
+      "startTimeTimezoneUtcOffsetMinutes": -420,
+      "endTimeTimezoneUtcOffsetMinutes": -420,
+      "visit": {
+        "hierarchyLevel": 0,
+        "probability": 0.83,
+        "topCandidate": {
+          "placeId": "ChIJmockhomexxxxxxxxxxxxxxx",
+          "semanticType": "HOME",
+          "probability": 0.71,
+          "placeLocation": {
+            "latLng": "32.0800000°, 34.7800000°"
+          }
+        }
+      }
+    },
+    {
+      "startTime": "2026-05-14T00:00:00.000-07:00",
+      "endTime": "2026-05-21T00:00:00.000-07:00",
+      "timelineMemory": {
+        "trip": {
+          "distanceFromOriginKms": 12000,
+          "destinations": [
+            {
+              "identifier": {
+                "placeId": "ChIJmockregionxxxxxxxxxxxxx"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "startTime": "2026-05-14T08:00:00.000-07:00",
+      "endTime": "2026-05-14T17:00:00.000-07:00",
+      "visit": {
+        "hierarchyLevel": 0,
+        "probability": 0.83,
+        "topCandidate": {
+          "placeId": "ChIJmockworkxxxxxxxxxxxxxxx",
+          "semanticType": "INFERRED_WORK",
+          "probability": 0.71,
+          "placeLocation": {
+            "latLng": "32.1000000°, 34.8000000°"
+          }
+        }
+      }
+    },
+    {
+      "startTime": "2026-05-15T09:28:00.000-07:00",
+      "endTime": "2026-05-15T10:53:00.000-07:00",
+      "startTimeTimezoneUtcOffsetMinutes": -420,
+      "endTimeTimezoneUtcOffsetMinutes": -420,
+      "visit": {
+        "hierarchyLevel": 0,
+        "probability": 0.83,
+        "topCandidate": {
+          "placeId": "ChIJmockcarmelbeachxxxxxxxx",
+          "semanticType": "UNKNOWN",
+          "probability": 0.71,
+          "placeLocation": {
+            "latLng": "36.5552000°, -121.9246000°"
+          }
+        }
+      }
+    },
+    {
+      "startTime": "2026-05-15T11:15:00.000-07:00",
+      "endTime": "2026-05-15T13:00:00.000-07:00",
+      "startTimeTimezoneUtcOffsetMinutes": -420,
+      "endTimeTimezoneUtcOffsetMinutes": -420,
+      "visit": {
+        "hierarchyLevel": 0,
+        "probability": 0.83,
+        "topCandidate": {
+          "placeId": "ChIJgmapspointlobosxxxxxxxx",
+          "semanticType": "UNKNOWN",
+          "probability": 0.71,
+          "placeLocation": {
+            "latLng": "36.5165593°, -121.9417000°"
+          }
+        }
+      }
+    },
+    {
+      "startTime": "2026-05-15T13:15:00.000-07:00",
+      "endTime": "2026-05-15T14:05:00.000-07:00",
+      "startTimeTimezoneUtcOffsetMinutes": -420,
+      "endTimeTimezoneUtcOffsetMinutes": -420,
+      "visit": {
+        "hierarchyLevel": 0,
+        "probability": 0.83,
+        "topCandidate": {
+          "placeId": "ChIJmockcypresssaltxxxxxxxx",
+          "semanticType": "UNKNOWN",
+          "probability": 0.71,
+          "placeLocation": {
+            "latLng": "36.5548000°, -121.9221000°"
+          }
+        }
+      }
+    },
+    {
+      "startTime": "2026-05-15T15:20:00.000-07:00",
+      "endTime": "2026-05-16T08:30:00.000-07:00",
+      "startTimeTimezoneUtcOffsetMinutes": -420,
+      "endTimeTimezoneUtcOffsetMinutes": -420,
+      "visit": {
+        "hierarchyLevel": 0,
+        "probability": 0.83,
+        "topCandidate": {
+          "placeId": "ChIJmockgardeninnxxxxxxxxxx",
+          "semanticType": "UNKNOWN",
+          "probability": 0.71,
+          "placeLocation": {
+            "latLng": "36.5580000°, -121.9180000°"
+          }
+        }
+      }
+    },
+    {
+      "startTime": "2026-05-15T16:30:00.000-07:00",
+      "endTime": "2026-05-15T17:25:00.000-07:00",
+      "startTimeTimezoneUtcOffsetMinutes": -420,
+      "endTimeTimezoneUtcOffsetMinutes": -420,
+      "visit": {
+        "hierarchyLevel": 0,
+        "probability": 0.83,
+        "topCandidate": {
+          "placeId": "ChIJmockstop202605151630xxx",
+          "semanticType": "UNKNOWN",
+          "probability": 0.71,
+          "placeLocation": {
+            "latLng": "36.5320000°, -121.9310000°"
+          }
+        }
+      }
+    },
+    {
+      "startTime": "2026-05-16T09:00:00.000-07:00",
+      "endTime": "2026-05-16T09:45:00.000-07:00",
+      "startTimeTimezoneUtcOffsetMinutes": -420,
+      "endTimeTimezoneUtcOffsetMinutes": -420,
+      "activity": {
+        "start": {
+          "latLng": "36.5500000°, -121.9200000°"
+        },
+        "end": {
+          "latLng": "36.2700000°, -121.8100000°"
+        },
+        "distanceMeters": 21000,
+        "probability": 0.9,
+        "topCandidate": {
+          "type": "IN_PASSENGER_VEHICLE",
+          "probability": 0.87
+        }
+      }
+    },
+    {
+      "startTime": "2026-05-16T09:00:00.000-07:00",
+      "endTime": "2026-05-16T11:00:00.000-07:00",
+      "timelinePath": [
+        {
+          "point": "36.5500000°, -121.9200000°",
+          "time": "2026-05-16T09:00:00.000-07:00"
+        },
+        {
+          "point": "36.3700000°, -121.9000000°",
+          "time": "2026-05-16T09:44:00.000-07:00"
+        }
+      ]
+    },
+    {
+      "startTime": "2026-05-16T09:48:00.000-07:00",
+      "endTime": "2026-05-16T10:23:00.000-07:00",
+      "startTimeTimezoneUtcOffsetMinutes": -420,
+      "endTimeTimezoneUtcOffsetMinutes": -420,
+      "visit": {
+        "hierarchyLevel": 0,
+        "probability": 0.83,
+        "topCandidate": {
+          "placeId": "ChIJmockbixbybridgexxxxxxxx",
+          "semanticType": "UNKNOWN",
+          "probability": 0.71,
+          "placeLocation": {
+            "latLng": "36.3714000°, -121.9021000°"
+          }
+        }
+      }
+    },
+    {
+      "startTime": "2026-05-16T10:25:00.000-07:00",
+      "endTime": "2026-05-16T10:33:00.000-07:00",
+      "startTimeTimezoneUtcOffsetMinutes": -420,
+      "endTimeTimezoneUtcOffsetMinutes": -420,
+      "visit": {
+        "hierarchyLevel": 0,
+        "probability": 0.83,
+        "topCandidate": {
+          "placeId": "ChIJmockcoffeexxxxxxxxxxxxx",
+          "semanticType": "UNKNOWN",
+          "probability": 0.71,
+          "placeLocation": {
+            "latLng": "36.3700000°, -121.9000000°"
+          }
+        }
+      }
+    },
+    {
+      "startTime": "2026-05-16T10:33:00.000-07:00",
+      "endTime": "2026-05-16T10:45:00.000-07:00",
+      "startTimeTimezoneUtcOffsetMinutes": -420,
+      "endTimeTimezoneUtcOffsetMinutes": -420,
+      "activity": {
+        "start": {
+          "latLng": "36.3700000°, -121.9000000°"
+        },
+        "end": {
+          "latLng": "36.3720000°, -121.8960000°"
+        },
+        "distanceMeters": 600,
+        "probability": 0.9,
+        "topCandidate": {
+          "type": "WALKING",
+          "probability": 0.87
+        }
+      }
+    },
+    {
+      "startTime": "2026-05-16T11:00:00.000-07:00",
+      "endTime": "2026-05-16T12:30:00.000-07:00",
+      "startTimeTimezoneUtcOffsetMinutes": -420,
+      "endTimeTimezoneUtcOffsetMinutes": -420,
+      "visit": {
+        "hierarchyLevel": 0,
+        "probability": 0.83,
+        "topCandidate": {
+          "placeId": "ChIJgmapsgarrapataxxxxxxxxx",
+          "semanticType": "UNKNOWN",
+          "probability": 0.71,
+          "placeLocation": {
+            "latLng": "36.4612085°, -121.9252000°"
+          }
+        }
+      }
+    },
+    {
+      "startTime": "2026-05-16T13:00:00.000-07:00",
+      "endTime": "2026-05-16T13:40:00.000-07:00",
+      "startTimeTimezoneUtcOffsetMinutes": -420,
+      "endTimeTimezoneUtcOffsetMinutes": -420,
+      "visit": {
+        "hierarchyLevel": 0,
+        "probability": 0.83,
+        "topCandidate": {
+          "placeId": "ChIJmockstop202605161300xxx",
+          "semanticType": "UNKNOWN",
+          "probability": 0.71,
+          "placeLocation": {
+            "latLng": "36.4100000°, -121.9150000°"
+          }
+        }
+      }
+    },
+    {
+      "startTime": "2026-05-16T19:00:00.000-07:00",
+      "endTime": "2026-05-17T10:40:00.000-07:00",
+      "startTimeTimezoneUtcOffsetMinutes": -420,
+      "endTimeTimezoneUtcOffsetMinutes": -420,
+      "visit": {
+        "hierarchyLevel": 0,
+        "probability": 0.83,
+        "topCandidate": {
+          "placeId": "ChIJmockgardeninnxxxxxxxxxx",
+          "semanticType": "UNKNOWN",
+          "probability": 0.71,
+          "placeLocation": {
+            "latLng": "36.5580000°, -121.9180000°"
+          }
+        }
+      }
+    },
+    {
+      "startTime": "2026-05-17T11:05:00.000-07:00",
+      "endTime": "2026-05-17T14:00:00.000-07:00",
+      "startTimeTimezoneUtcOffsetMinutes": -420,
+      "endTimeTimezoneUtcOffsetMinutes": -420,
+      "visit": {
+        "hierarchyLevel": 0,
+        "probability": 0.83,
+        "topCandidate": {
+          "placeId": "ChIJmockcanneryrowxxxxxxxxx",
+          "semanticType": "UNKNOWN",
+          "probability": 0.71,
+          "placeLocation": {
+            "latLng": "36.6201000°, -121.9008000°"
+          }
+        }
+      }
+    },
+    {
+      "startTime": "2026-05-17T11:15:00.000-07:00",
+      "endTime": "2026-05-17T13:45:00.000-07:00",
+      "startTimeTimezoneUtcOffsetMinutes": -420,
+      "endTimeTimezoneUtcOffsetMinutes": -420,
+      "visit": {
+        "hierarchyLevel": 1,
+        "probability": 0.83,
+        "topCandidate": {
+          "placeId": "ChIJmockaquariumxxxxxxxxxxx",
+          "semanticType": "UNKNOWN",
+          "probability": 0.71,
+          "placeLocation": {
+            "latLng": "36.6181000°, -121.9018000°"
+          }
+        }
+      }
+    },
+    {
+      "startTime": "2026-05-17T13:00:00.000-07:00",
+      "endTime": "2026-05-17T13:35:00.000-07:00",
+      "startTimeTimezoneUtcOffsetMinutes": -420,
+      "endTimeTimezoneUtcOffsetMinutes": -420,
+      "activity": {
+        "start": {
+          "latLng": "36.6000000°, -121.9000000°"
+        },
+        "end": {
+          "latLng": "36.6200000°, -121.7500000°"
+        },
+        "distanceMeters": 18000,
+        "probability": 0.9,
+        "topCandidate": {
+          "type": "IN_PASSENGER_VEHICLE",
+          "probability": 0.87
+        }
+      }
+    },
+    {
+      "startTime": "2026-05-18T07:30:00.000-07:00",
+      "endTime": "2026-05-18T08:20:00.000-07:00",
+      "startTimeTimezoneUtcOffsetMinutes": -420,
+      "endTimeTimezoneUtcOffsetMinutes": -420,
+      "activity": {
+        "start": {
+          "latLng": "36.5500000°, -121.9200000°"
+        },
+        "end": {
+          "latLng": "36.2700000°, -121.8100000°"
+        },
+        "distanceMeters": 42000,
+        "probability": 0.9,
+        "topCandidate": {
+          "type": "IN_PASSENGER_VEHICLE",
+          "probability": 0.87
+        }
+      }
+    },
+    {
+      "startTime": "2026-05-18T09:20:00.000-07:00",
+      "endTime": "2026-05-18T10:20:00.000-07:00",
+      "startTimeTimezoneUtcOffsetMinutes": -420,
+      "endTimeTimezoneUtcOffsetMinutes": -420,
+      "visit": {
+        "hierarchyLevel": 0,
+        "probability": 0.83,
+        "topCandidate": {
+          "placeId": "ChIJmockpointsurxxxxxxxxxxx",
+          "semanticType": "UNKNOWN",
+          "probability": 0.71,
+          "placeLocation": {
+            "latLng": "36.3066000°, -121.9016000°"
+          }
+        }
+      }
+    },
+    {
+      "startTime": "2026-05-18T11:15:00.000-07:00",
+      "endTime": "2026-05-18T12:30:00.000-07:00",
+      "startTimeTimezoneUtcOffsetMinutes": -420,
+      "endTimeTimezoneUtcOffsetMinutes": -420,
+      "visit": {
+        "hierarchyLevel": 0,
+        "probability": 0.83,
+        "topCandidate": {
+          "placeId": "ChIJgmapsmcwayxxxxxxxxxxxxx",
+          "semanticType": "UNKNOWN",
+          "probability": 0.71,
+          "placeLocation": {
+            "latLng": "36.1580246°, -121.6722000°"
+          }
+        }
+      }
+    },
+    {
+      "startTime": "2026-05-18T14:30:00.000-07:00",
+      "endTime": "2026-05-18T15:30:00.000-07:00",
+      "startTimeTimezoneUtcOffsetMinutes": -420,
+      "endTimeTimezoneUtcOffsetMinutes": -420,
+      "visit": {
+        "hierarchyLevel": 0,
+        "probability": 0.83,
+        "topCandidate": {
+          "placeId": "ChIJmocknepenthexxxxxxxxxxx",
+          "semanticType": "UNKNOWN",
+          "probability": 0.71,
+          "placeLocation": {
+            "latLng": "36.2248932°, -121.7580000°"
+          }
+        }
+      }
+    },
+    {
+      "startTime": "2026-05-18T16:10:00.000-07:00",
+      "endTime": "2026-05-19T09:50:00.000-07:00",
+      "startTimeTimezoneUtcOffsetMinutes": -420,
+      "endTimeTimezoneUtcOffsetMinutes": -420,
+      "visit": {
+        "hierarchyLevel": 0,
+        "probability": 0.83,
+        "topCandidate": {
+          "placeId": "ChIJmockriverlodgexxxxxxxxx",
+          "semanticType": "UNKNOWN",
+          "probability": 0.71,
+          "placeLocation": {
+            "latLng": "36.2475000°, -121.7812000°"
+          }
+        }
+      }
+    },
+    {
+      "startTime": "2026-05-18T19:00:00.000-07:00",
+      "endTime": "2026-05-18T20:35:00.000-07:00",
+      "startTimeTimezoneUtcOffsetMinutes": -420,
+      "endTimeTimezoneUtcOffsetMinutes": -420,
+      "visit": {
+        "hierarchyLevel": 0,
+        "probability": 0.83,
+        "topCandidate": {
+          "placeId": "ChIJmockstop202605181900xxx",
+          "semanticType": "UNKNOWN",
+          "probability": 0.71,
+          "placeLocation": {
+            "latLng": "36.2475000°, -121.7812000°"
+          }
+        }
+      }
+    },
+    {
+      "startTime": "2026-05-19T07:55:00.000-07:00",
+      "endTime": "2026-05-19T08:30:00.000-07:00",
+      "startTimeTimezoneUtcOffsetMinutes": -420,
+      "endTimeTimezoneUtcOffsetMinutes": -420,
+      "visit": {
+        "hierarchyLevel": 0,
+        "probability": 0.83,
+        "topCandidate": {
+          "placeId": "ChIJmockstop202605190755xxx",
+          "semanticType": "UNKNOWN",
+          "probability": 0.71,
+          "placeLocation": {
+            "latLng": "36.2400000°, -121.7900000°"
+          }
+        }
+      }
+    },
+    {
+      "startTime": "2026-05-19T10:30:00.000-07:00",
+      "endTime": "2026-05-19T10:50:00.000-07:00",
+      "startTimeTimezoneUtcOffsetMinutes": -420,
+      "endTimeTimezoneUtcOffsetMinutes": -420,
+      "activity": {
+        "start": {
+          "latLng": "36.5500000°, -121.9200000°"
+        },
+        "end": {
+          "latLng": "36.2700000°, -121.8100000°"
+        },
+        "distanceMeters": 6000,
+        "probability": 0.9,
+        "topCandidate": {
+          "type": "IN_BUS",
+          "probability": 0.87
+        }
+      }
+    },
+    {
+      "startTime": "2026-05-19T10:50:00.000-07:00",
+      "endTime": "2026-05-19T12:05:00.000-07:00",
+      "startTimeTimezoneUtcOffsetMinutes": -420,
+      "endTimeTimezoneUtcOffsetMinutes": -420,
+      "visit": {
+        "hierarchyLevel": 0,
+        "probability": 0.83,
+        "topCandidate": {
+          "placeId": "ChIJmockpfeifferbeachxxxxxx",
+          "semanticType": "UNKNOWN",
+          "probability": 0.71,
+          "placeLocation": {
+            "latLng": "36.2381000°, -121.8163000°"
+          }
+        }
+      }
+    },
+    {
+      "startTime": "2026-05-19T17:45:00.000-07:00",
+      "endTime": "2026-05-20T07:20:00.000-07:00",
+      "startTimeTimezoneUtcOffsetMinutes": -420,
+      "endTimeTimezoneUtcOffsetMinutes": -420,
+      "visit": {
+        "hierarchyLevel": 0,
+        "probability": 0.83,
+        "topCandidate": {
+          "placeId": "ChIJmockridgecabinxxxxxxxxx",
+          "semanticType": "UNKNOWN",
+          "probability": 0.71,
+          "placeLocation": {
+            "latLng": "36.2300000°, -121.7650000°"
+          }
+        }
+      }
+    },
+    {
+      "startTime": "2026-05-20T07:45:00.000-07:00",
+      "endTime": "2026-05-20T08:05:00.000-07:00",
+      "startTimeTimezoneUtcOffsetMinutes": -420,
+      "endTimeTimezoneUtcOffsetMinutes": -420,
+      "visit": {
+        "hierarchyLevel": 0,
+        "probability": 0.83,
+        "topCandidate": {
+          "placeId": "ChIJmockstop202605200745xxx",
+          "semanticType": "UNKNOWN",
+          "probability": 0.71,
+          "placeLocation": {
+            "latLng": "36.6777000°, -121.6555000°"
+          }
+        }
+      }
+    },
+    {
+      "startTime": "2026-05-20T08:10:00.000-07:00",
+      "endTime": "2026-05-20T09:45:00.000-07:00",
+      "startTimeTimezoneUtcOffsetMinutes": -420,
+      "endTimeTimezoneUtcOffsetMinutes": -420,
+      "activity": {
+        "start": {
+          "latLng": "36.5500000°, -121.9200000°"
+        },
+        "end": {
+          "latLng": "36.2700000°, -121.8100000°"
+        },
+        "distanceMeters": 104000,
+        "probability": 0.9,
+        "topCandidate": {
+          "type": "IN_TRAIN",
+          "probability": 0.87
+        }
+      }
+    },
+    {
+      "startTime": "2026-05-20T12:30:00.000-07:00",
+      "endTime": "2026-05-20T15:55:00.000-06:00",
+      "startTimeTimezoneUtcOffsetMinutes": -420,
+      "endTimeTimezoneUtcOffsetMinutes": -360,
+      "activity": {
+        "start": {
+          "latLng": "36.5500000°, -121.9200000°"
+        },
+        "end": {
+          "latLng": "36.2700000°, -121.8100000°"
+        },
+        "distanceMeters": 1530000,
+        "probability": 0.9,
+        "topCandidate": {
+          "type": "FLYING",
+          "probability": 0.87
+        }
+      }
+    },
+    {
+      "startTime": "2026-05-21T09:00:00.000-07:00",
+      "endTime": "2026-05-21T18:00:00.000-07:00",
+      "startTimeTimezoneUtcOffsetMinutes": -420,
+      "endTimeTimezoneUtcOffsetMinutes": -420,
+      "visit": {
+        "hierarchyLevel": 0,
+        "probability": 0.83,
+        "topCandidate": {
+          "placeId": "ChIJmockhomexxxxxxxxxxxxxxx",
+          "semanticType": "HOME",
+          "probability": 0.71,
+          "placeLocation": {
+            "latLng": "32.0800000°, 34.7800000°"
+          }
+        }
+      }
+    },
+    {
+      "startTime": "2026-05-23T20:00:00.000-07:00",
+      "endTime": "2026-05-23T22:00:00.000-07:00",
+      "startTimeTimezoneUtcOffsetMinutes": -420,
+      "endTimeTimezoneUtcOffsetMinutes": -420,
+      "visit": {
+        "hierarchyLevel": 0,
+        "probability": 0.83,
+        "topCandidate": {
+          "placeId": "ChIJmockdinnerxxxxxxxxxxxxx",
+          "semanticType": "UNKNOWN",
+          "probability": 0.71,
+          "placeLocation": {
+            "latLng": "32.0700000°, 34.7700000°"
+          }
+        }
+      }
+    }
+  ],
+  "rawSignals": [],
+  "userLocationProfile": {
+    "frequentPlaces": []
+  }
+}
