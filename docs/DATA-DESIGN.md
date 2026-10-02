@@ -148,10 +148,12 @@ It checks in particular:
 The Photos Picker (whether it gives a photo's location and time zone) is checked at the start of
 Phase 2, as it needs a Google Cloud project and OAuth setup; the design works either way.
 
-## Videos (proposed)
+## Videos (agreed: from the start)
 
-Videos picked with the photos are recorded and shown as a still frame at first; playing them comes
-later.
+Videos picked with the photos are imported like photos: the importer stores the video file and a
+still frame, matched and grouped by the time taken in the same way. The timeline and galleries show
+the still with a play mark; the full-screen viewer plays the video. Video files are larger, so
+storage and serving them (with the same access checks as photos) are part of the hosting decision.
 
 ## Order of the remaining design work
 
