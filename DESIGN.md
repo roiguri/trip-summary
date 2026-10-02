@@ -61,6 +61,31 @@ This document records the agreed visual direction for the local trip-summary pro
 
 Correction (user decision, Sept 26, replacing the "two-track throughout" note): the round-dot lane belongs to multi-day events only, as the locked geometry mock shows. The plain rail is a single solid green line (4px #c4d3c7). While a multi-day span runs, a lane of 2px #739d7c round dots every 12px runs 9px right of the rail centre, from the span's start node to its end diamond. At transit the solid line turns teal through the compact icon stop; the round icon has a pale paper fill and thin teal outline. Transit type remains smaller than full place titles, with teal time and route. Later-day chips use pale paper and a muted border. Single and clustered photo cards, as well as place fans, have edge-to-edge images with light rotation, rounded corners and soft shadows, never a white instant-photo border.
 
+## Home, adding a trip and imports (user decisions, Oct 2)
+
+Options and drawings: https://claude.ai/artifact/4QQeC2zq2rSBUAixmcDmDf (Phase 2, step 6).
+
+- Home (H1): a shelf of trip cards, newest first. Each card has one cover image (no extra small
+  photos), a Draft or Published label, the title, dates, day count and destination, and a footer
+  saying what a draft still needs or who can see a published trip. Editors get a "New trip"
+  button; viewers see only the published trips shared with them.
+- Adding (A3): importing has a page of its own, never shown beside the journey. "New trip" opens it
+  at the plan (choose the Jarvis database file, pick the trip; it becomes a draft). The page lists
+  the three sources one under another, each with its status and its own action (update the plan,
+  add the Timeline, open Google Photos), in any order and as often as needed. The Timeline file is
+  read in the browser and only the trip's days are uploaded.
+- Review (R3): after each import its changes appear on the import page, under the sources, grouped
+  by day: old and new times, travel modes, stops with no visit, and suggestions with their photos
+  to add or dismiss in the list; then Apply or Discard. A published trip changes only on Apply.
+  Marking changes on the journey itself (R2) was preferred but deferred: it needs new states in the
+  locked timeline and map; it can come with edit mode if suggestions appear on the journey there.
+- Trip controls (C1): editors get a bar under the header on the journey: the trip's status,
+  "+ Add sources" (opens the import page), a waiting review with its count, Edit, "Preview as a
+  viewer", and Share. Share lists the people who can see the trip, each with a personal invite link
+  to copy or revoke, and creates a new link by name. Viewers never see the bar.
+- Still open (round 3): the empty state before the first trip, and where a trip's cover comes from
+  when the owner hasn't chosen one.
+
 ## Exact sampled backgrounds and remaining gaps
 
 The locked reference background is RGB (255,253,250), `#fffdfa`, sampled at (10,110), (800,110) and (10,500) across the whole, place and geometry captures. The large card interior in the locked whole/place captures is `#fffdf8` (255,253,248); the implementation sets those tokens explicitly. Recheck these pixels after a build. Remaining gaps: substitute/reused photos are not the original images and may not match captions; reference PNGs do not disclose an exact font binary (Arial/Helvetica family is inferred); the dotted multi-day end bend is still visually subtle rather than the reference's more pronounced curve.
