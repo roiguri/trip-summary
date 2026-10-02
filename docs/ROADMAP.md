@@ -49,7 +49,7 @@ Build what Phase 1 agreed, on the store `docs/ARCHITECTURE.md` decided (Netlify 
 3. Done: plan importer (Jarvis SQLite file).
 4. Done: Timeline importer (slice, parse, store).
 5. Done: the merge, with a test per rule, and the page reading the merged journal from the store. The sample is stored as a ready-made journal and the visual tests pass unchanged through the store; a real import changes what is drawn on purpose (actual times, photos grouped by time gaps), so the merge is checked by its tests and, in step 8, on the real trip.
-6. Design round, with preview pages: the home page (trips list), adding a new trip, the import flow and its review, drafts and publishing.
+6. Done: design round, with preview pages: the home page (trips list), adding a new trip, the import flow and its review, drafts and publishing.
 7. Build those screens, including the photo import (Picker, Cloud Function copy, resizing).
 8. Import the owner's real trip into a private draft and tune the matching, reviewed together.
 
@@ -82,6 +82,6 @@ Designed with mock options and agreed (`docs/VERIFICATION.md`, "Mobile"): a one-
 
 ## Immediate next step
 
-Phase 2, step 6: the design round for the home page, adding a trip and the import flow. Options: https://claude.ai/artifact/4QQeC2zq2rSBUAixmcDmDf. Agreed: home H1, one import page A3, review on it R3, editor's bar C1 (`DESIGN.md`). Round 3, open: the empty state and the trip cover. Open: whether a stay shows its booked check-in and check-out or the Timeline's times (`docs/DATA-DESIGN.md`, merge rule 8), to discuss with the owner before edit mode.
+Phase 2, step 6: the design round for the home page, adding a trip and the import flow. Options: https://claude.ai/artifact/4QQeC2zq2rSBUAixmcDmDf. All agreed (`DESIGN.md`, "Home, adding a trip and imports"). Next: step 7, building them. Open: whether a stay shows its booked check-in and check-out or the Timeline's times (`docs/DATA-DESIGN.md`, merge rule 8), to discuss with the owner before edit mode.
 
 Postponed (user decision, to return to later): the top bar (style, mark, name) and a ChatGPT-style day scroller. Live options for both, with recommendations, are on the options page: https://claude.ai/artifact/V9Fa92HhY897rcKrsadNrw
