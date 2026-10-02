@@ -1,0 +1,10 @@
+rules_version = '2';
+// Media is served only through short-lived signed URLs issued by the app's server after an access
+// check, and uploaded the same way, so direct client access is closed (docs/ARCHITECTURE.md).
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

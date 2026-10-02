@@ -45,6 +45,14 @@ jobs:
       - name: Unit tests
         run: npm test
 
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Store tests (Firebase emulators)
+        run: npm run test:store
+
       - name: Seed the sample trip
         run: npm run seed
 
