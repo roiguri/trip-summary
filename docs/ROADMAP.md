@@ -37,7 +37,7 @@ Real data integration is complex enough to be designed and agreed on before any 
 - **Storage and privacy:** where the DB and photo files live, what's git-ignored, thumbnails.
 - **UX:** import flow (CLI first vs. in-app), and how review/editing corrections feed back.
 
-Output: a written data design, agreed before Phase 2.
+Output: a written data design, agreed before Phase 2. Draft: `docs/DATA-DESIGN.md`.
 
 ## Phase 2 — Real data: implementation
 
