@@ -1,0 +1,1740 @@
+{
+  "mediaItems": [
+    {
+      "id": "mock-media-001",
+      "createTime": "2026-05-15T16:45:00Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-001",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260515_164500000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-002",
+      "createTime": "2026-05-15T16:45:01Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-002",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260515_164501000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-003",
+      "createTime": "2026-05-15T16:45:02Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-003",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260515_164502000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-004",
+      "createTime": "2026-05-15T16:45:03Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-004",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260515_164503000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-005",
+      "createTime": "2026-05-15T16:45:04Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-005",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260515_164504000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-006",
+      "createTime": "2026-05-15T16:45:05Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-006",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260515_164505000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-007",
+      "createTime": "2026-05-15T16:45:06Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-007",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260515_164506000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-008",
+      "createTime": "2026-05-15T16:45:07Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-008",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260515_164507000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-009",
+      "createTime": "2026-05-15T16:45:08Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-009",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260515_164508000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-010",
+      "createTime": "2026-05-15T16:45:09Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-010",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260515_164509000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-011",
+      "createTime": "2026-05-15T16:45:10Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-011",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260515_164510000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-012",
+      "createTime": "2026-05-15T16:45:11Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-012",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260515_164511000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-013",
+      "createTime": "2026-05-15T16:45:12Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-013",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260515_164512000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-014",
+      "createTime": "2026-05-15T16:45:13Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-014",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260515_164513000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-015",
+      "createTime": "2026-05-15T16:45:14Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-015",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260515_164514000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-016",
+      "createTime": "2026-05-15T16:45:15Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-016",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260515_164515000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-017",
+      "createTime": "2026-05-15T18:40:16Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-017",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260515_184016000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-018",
+      "createTime": "2026-05-15T18:40:17Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-018",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260515_184017000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-019",
+      "createTime": "2026-05-15T18:40:18Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-019",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260515_184018000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-020",
+      "createTime": "2026-05-15T18:40:19Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-020",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260515_184019000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-021",
+      "createTime": "2026-05-15T18:40:20Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-021",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260515_184020000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-022",
+      "createTime": "2026-05-15T20:30:21Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-022",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260515_203021000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-023",
+      "createTime": "2026-05-15T20:30:22Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-023",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260515_203022000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-024",
+      "createTime": "2026-05-15T23:42:23Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-024",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260515_234223000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-025",
+      "createTime": "2026-05-16T00:10:24Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-025",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260516_001024000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-026",
+      "createTime": "2026-05-16T00:10:25Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-026",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260516_001025000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-027",
+      "createTime": "2026-05-16T00:10:26Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-027",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260516_001026000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-028",
+      "createTime": "2026-05-16T17:00:27Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-028",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260516_170027000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-029",
+      "createTime": "2026-05-16T17:00:28Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-029",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260516_170028000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-030",
+      "createTime": "2026-05-16T17:00:29Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-030",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260516_170029000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-031",
+      "createTime": "2026-05-16T17:00:30Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-031",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260516_170030000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-032",
+      "createTime": "2026-05-16T18:30:31Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-032",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260516_183031000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-033",
+      "createTime": "2026-05-16T18:30:32Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-033",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260516_183032000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-034",
+      "createTime": "2026-05-16T18:30:33Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-034",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260516_183033000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-035",
+      "createTime": "2026-05-16T20:15:34Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-035",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260516_201534000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-036",
+      "createTime": "2026-05-16T20:15:35Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-036",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260516_201535000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-037",
+      "createTime": "2026-05-16T20:15:36Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-037",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260516_201536000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-038",
+      "createTime": "2026-05-16T20:15:37Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-038",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260516_201537000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-039",
+      "createTime": "2026-05-16T20:15:38Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-039",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260516_201538000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-040",
+      "createTime": "2026-05-17T00:36:39Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-040",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260517_003639000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-041",
+      "createTime": "2026-05-17T18:00:40Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-041",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260517_180040000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-042",
+      "createTime": "2026-05-17T18:00:41Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-042",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260517_180041000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-043",
+      "createTime": "2026-05-17T18:00:42Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-043",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260517_180042000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-044",
+      "createTime": "2026-05-17T22:30:43Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-044",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260517_223043000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-045",
+      "createTime": "2026-05-17T22:30:44Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-045",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260517_223044000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-046",
+      "createTime": "2026-05-16T01:30:45Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-046",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260516_013045000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-047",
+      "createTime": "2026-05-16T01:30:46Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-047",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260516_013046000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-048",
+      "createTime": "2026-05-16T01:30:47Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-048",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260516_013047000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-049",
+      "createTime": "2026-05-18T16:30:48Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-049",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260518_163048000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-050",
+      "createTime": "2026-05-18T16:30:49Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-050",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260518_163049000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-051",
+      "createTime": "2026-05-18T16:30:50Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-051",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260518_163050000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-052",
+      "createTime": "2026-05-18T18:40:51Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-052",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260518_184051000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-053",
+      "createTime": "2026-05-18T18:40:52Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-053",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260518_184052000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-054",
+      "createTime": "2026-05-18T18:40:53Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-054",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260518_184053000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-055",
+      "createTime": "2026-05-18T23:20:54Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-055",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260518_232054000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-056",
+      "createTime": "2026-05-18T23:20:55Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-056",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260518_232055000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-057",
+      "createTime": "2026-05-18T23:20:56Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-057",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260518_232056000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-058",
+      "createTime": "2026-05-19T02:05:57Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-058",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260519_020557000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-059",
+      "createTime": "2026-05-19T03:10:58Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-059",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260519_031058000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-060",
+      "createTime": "2026-05-19T03:11:59Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-060",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260519_031159000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-061",
+      "createTime": "2026-05-19T03:13:00Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-061",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260519_031300000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-062",
+      "createTime": "2026-05-19T03:14:01Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-062",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260519_031401000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-063",
+      "createTime": "2026-05-19T03:15:02Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-063",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260519_031502000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-064",
+      "createTime": "2026-05-19T03:16:03Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-064",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260519_031603000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-065",
+      "createTime": "2026-05-19T03:17:04Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-065",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260519_031704000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-066",
+      "createTime": "2026-05-19T03:18:05Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-066",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260519_031805000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-067",
+      "createTime": "2026-05-19T03:19:06Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-067",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260519_031906000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-068",
+      "createTime": "2026-05-19T03:20:07Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-068",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260519_032007000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-069",
+      "createTime": "2026-05-19T03:11:08Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-069",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260519_031108000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-070",
+      "createTime": "2026-05-19T03:12:09Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-070",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260519_031209000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-071",
+      "createTime": "2026-05-19T03:13:10Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-071",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260519_031310000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-072",
+      "createTime": "2026-05-19T03:14:11Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-072",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260519_031411000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-073",
+      "createTime": "2026-05-19T15:11:12Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-073",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260519_151112000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-074",
+      "createTime": "2026-05-19T15:16:13Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-074",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260519_151613000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-075",
+      "createTime": "2026-05-19T18:31:14Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-075",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260519_183114000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-076",
+      "createTime": "2026-05-19T18:31:15Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-076",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260519_183115000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-077",
+      "createTime": "2026-05-19T21:21:16Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-077",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260519_212116000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-078",
+      "createTime": "2026-05-20T15:01:17Z",
+      "type": "PHOTO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-078",
+        "mimeType": "image/jpeg",
+        "filename": "PXL_20260520_150117000.jpg",
+        "mediaFileMetadata": {
+          "width": 4080,
+          "height": 3072,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "photoMetadata": {
+            "focalLength": 6.9,
+            "apertureFNumber": 1.7,
+            "isoEquivalent": 50,
+            "exposureTime": "0.001s"
+          }
+        }
+      }
+    },
+    {
+      "id": "mock-media-video-1",
+      "createTime": "2026-05-19T03:21:00Z",
+      "type": "VIDEO",
+      "mediaFile": {
+        "baseUrl": "https://mock.photospicker.invalid/mock-media-video-1",
+        "mimeType": "video/mp4",
+        "filename": "PXL_20260519_032100000.TS.mp4",
+        "mediaFileMetadata": {
+          "width": 1920,
+          "height": 1080,
+          "cameraMake": "Google",
+          "cameraModel": "Pixel 9",
+          "videoMetadata": {
+            "fps": 30,
+            "processingStatus": "READY"
+          }
+        }
+      }
+    }
+  ]
+}

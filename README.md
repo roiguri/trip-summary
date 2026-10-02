@@ -4,7 +4,7 @@ A local-only Next.js and SQLite prototype for a trip journal, with a fictional t
 
 ## Run
 
-Requires Node.js 22.5+ (uses the built-in `node:sqlite` module).
+Requires Node.js 22.18+ (uses the built-in `node:sqlite` module and runs the TypeScript scripts directly).
 
 ```sh
 npm install

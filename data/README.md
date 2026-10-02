@@ -13,6 +13,16 @@ Seeding replaces the database. The page reads the database on every request, so 
 - `sample-trip.json`: the fictional sample and the one preview. Days 1–3 are the clean Carmel/Monterey trip the design was locked against. Days 4–6 (Big Sur, day tag "Edge cases") hold the stress cases in one place: four overlapping multi-day events (one beyond the 3-lane cap), a hotel changeover, a stay that checks out after the trip ends, lodging with photos, long English and Hebrew notes and captions, a long title, places without photos or coordinates, a large photo cluster, and train and flight legs across time zones.
 - `fixtures/test-trip.json`: a small, deliberately different trip (other dates, timezone, day count). It only checks that the UI has no sample-specific code; edge cases live in the sample.
 
+## Mock sources (`mock/`)
+
+Generated from `sample-trip.json` by `npm run mocks` (never edited by hand; CI fails if they are out of date). They are the sample trip as the three real sources would deliver it, for building and testing the importers and the merge (`docs/DATA-DESIGN.md`):
+
+- `jarvis.sql`: a Jarvis travel database in the real schema, with explicit IDs, plus a second trip, a second destination and wishlist rows the importer must leave alone.
+- `Timeline.json`: an Android Timeline export. Planned stops are visited a little early or late, or over an hour late; some under a different place ID or up to 400 m from the planned pin; one is skipped; one is nested in a larger place; stays have overnight visits; transit has activities with modes, and the flight lands in another time zone. Unplanned stops where the loose photos were taken become suggestions; a short stop, a short walk and home and work visits are noise; some segments have no UTC offset; some fall outside the trip's slice; a path and a `timelineMemory` are there to be dropped.
+- `picker.json`: a Photos Picker `mediaItems` list (UTC times, no location), including a video. `picker-files.json` stands in for the downloads: the local file for each item and the offset its EXIF would give (missing for some).
+- `edits.json`: what the owner would have written in edit mode (day titles, captions, the subtitle, photo placements). Applying it to the merged mocks must give the sample trip.
+- `expected.json`: the answer key: which Timeline segment each entry matches and how (place ID, distance or both), transit modes, suggestions, filtered noise and what the slice drops. Segment keys are `kind:startTime(UTC):placeId-or-mode`.
+
 Never commit real trip data or photos. Real data files belong outside the repo, or under a git-ignored path.
 
 ## Format

@@ -1,0 +1,311 @@
+{
+  "mock-media-001": {
+    "file": "/photos/coast-1.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-002": {
+    "file": "/photos/coast-2.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-003": {
+    "file": "/photos/coast-3.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-004": {
+    "file": "/photos/coast-4.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-005": {
+    "file": "/photos/coast-5.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-006": {
+    "file": "/photos/coast-6.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-007": {
+    "file": "/photos/coast-7.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-008": {
+    "file": "/photos/coast-8.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-009": {
+    "file": "/photos/coast-9.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-010": {
+    "file": "/photos/coast-10.jpg"
+  },
+  "mock-media-011": {
+    "file": "/photos/coast-11.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-012": {
+    "file": "/photos/coast-12.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-013": {
+    "file": "/photos/coast-13.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-014": {
+    "file": "/photos/coast-14.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-015": {
+    "file": "/photos/coast-15.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-016": {
+    "file": "/photos/coast-16.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-017": {
+    "file": "/photos/coast-17.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-018": {
+    "file": "/photos/coast-18.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-019": {
+    "file": "/photos/coast-19.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-020": {
+    "file": "/photos/coast-20.jpg"
+  },
+  "mock-media-021": {
+    "file": "/photos/coast-21.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-022": {
+    "file": "/photos/coast-22.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-023": {
+    "file": "/photos/coast-23.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-024": {
+    "file": "/photos/coast-24.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-025": {
+    "file": "/photos/coast-25.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-026": {
+    "file": "/photos/coast-1.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-027": {
+    "file": "/photos/coast-2.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-028": {
+    "file": "/photos/coast-3.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-029": {
+    "file": "/photos/coast-4.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-030": {
+    "file": "/photos/coast-5.jpg"
+  },
+  "mock-media-031": {
+    "file": "/photos/coast-6.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-032": {
+    "file": "/photos/coast-7.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-033": {
+    "file": "/photos/coast-8.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-034": {
+    "file": "/photos/coast-9.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-035": {
+    "file": "/photos/coast-10.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-036": {
+    "file": "/photos/coast-11.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-037": {
+    "file": "/photos/coast-12.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-038": {
+    "file": "/photos/coast-13.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-039": {
+    "file": "/photos/coast-14.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-040": {
+    "file": "/photos/coast-15.jpg"
+  },
+  "mock-media-041": {
+    "file": "/photos/coast-16.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-042": {
+    "file": "/photos/coast-17.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-043": {
+    "file": "/photos/coast-18.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-044": {
+    "file": "/photos/coast-19.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-045": {
+    "file": "/photos/coast-20.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-046": {
+    "file": "/photos/coast-1.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-047": {
+    "file": "/photos/coast-2.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-048": {
+    "file": "/photos/coast-3.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-049": {
+    "file": "/photos/coast-4.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-050": {
+    "file": "/photos/coast-5.jpg"
+  },
+  "mock-media-051": {
+    "file": "/photos/coast-6.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-052": {
+    "file": "/photos/coast-7.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-053": {
+    "file": "/photos/coast-8.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-054": {
+    "file": "/photos/coast-9.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-055": {
+    "file": "/photos/coast-10.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-056": {
+    "file": "/photos/coast-11.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-057": {
+    "file": "/photos/coast-12.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-058": {
+    "file": "/photos/coast-13.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-059": {
+    "file": "/photos/coast-14.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-060": {
+    "file": "/photos/coast-15.jpg"
+  },
+  "mock-media-061": {
+    "file": "/photos/coast-16.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-062": {
+    "file": "/photos/coast-17.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-063": {
+    "file": "/photos/coast-18.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-064": {
+    "file": "/photos/coast-19.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-065": {
+    "file": "/photos/coast-20.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-066": {
+    "file": "/photos/coast-21.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-067": {
+    "file": "/photos/coast-22.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-068": {
+    "file": "/photos/coast-23.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-069": {
+    "file": "/photos/coast-24.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-070": {
+    "file": "/photos/coast-25.jpg"
+  },
+  "mock-media-071": {
+    "file": "/photos/coast-1.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-072": {
+    "file": "/photos/coast-2.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-073": {
+    "file": "/photos/coast-3.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-074": {
+    "file": "/photos/coast-4.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-075": {
+    "file": "/photos/coast-5.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-076": {
+    "file": "/photos/coast-6.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-077": {
+    "file": "/photos/coast-7.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-078": {
+    "file": "/photos/coast-8.jpg",
+    "exifOffset": "-07:00"
+  },
+  "mock-media-video-1": {
+    "file": null,
+    "exifOffset": "-07:00"
+  }
+}

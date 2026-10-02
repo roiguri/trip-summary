@@ -39,6 +39,12 @@ jobs:
       - name: Types
         run: npm run typecheck
 
+      - name: Mock sources are up to date
+        run: npm run mocks -- --check
+
+      - name: Unit tests
+        run: npm test
+
       - name: Seed the sample trip
         run: npm run seed
 

@@ -11,13 +11,15 @@
     "capture": "node scripts/capture.mjs",
     "format": "prettier --write .",
     "typecheck": "next typegen && tsc --noEmit",
+    "test": "node --test 'tests/unit/*.test.ts'",
     "seed": "node scripts/seed.ts",
     "snapshot": "bash scripts/snapshot.sh",
     "check:interactions": "node scripts/check-interactions.mjs",
     "format:check": "prettier --check .",
     "visual": "node scripts/visual.mjs",
     "visual:update": "node scripts/visual.mjs --update",
-    "check:styles": "node scripts/style-diff.mjs"
+    "check:styles": "node scripts/style-diff.mjs",
+    "mocks": "node scripts/make-mocks.ts"
   },
   "dependencies": {
     "maplibre-gl": "^6.11.2",
@@ -34,6 +36,6 @@
     "typescript": "^7.0.2"
   },
   "engines": {
-    "node": ">=22.5"
+    "node": ">=22.18"
   }
 }
