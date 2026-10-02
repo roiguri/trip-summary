@@ -83,8 +83,13 @@ Options and drawings: https://claude.ai/artifact/4QQeC2zq2rSBUAixmcDmDf (Phase 2
   "+ Add sources" (opens the import page), a waiting review with its count, Edit, "Preview as a
   viewer", and Share. Share lists the people who can see the trip, each with a personal invite link
   to copy or revoke, and creates a new link by name. Viewers never see the bar.
-- Still open (round 3): the empty state before the first trip, and where a trip's cover comes from
-  when the owner hasn't chosen one.
+- Empty state (E2): before the first trip, a short "No trips yet" with one "New trip" button,
+  under the dashed rail and node drawing (an entry still to come). The import page explains each
+  source when you get there. A viewer with nothing shared sees "No trips to show yet" and what to do
+  with a link, under the same drawing.
+- Trip cover (K2): the owner's pick (from the card's menu, or a highlighted photo in edit mode);
+  until then, the first photo of the trip's most photographed stop. A trip with no photos gets a
+  paper cover: the destination's name over a faint dotted route.
 
 ## Exact sampled backgrounds and remaining gaps
 
