@@ -1,0 +1,111 @@
+import { notFound, redirect } from 'next/navigation';
+import { getStore } from '../../../../lib/store';
+import { accessToTrip, currentAccount } from '../../../../lib/auth/session';
+import { previewPending } from '../../../../lib/import/stage';
+import { review } from '../../../../lib/review';
+import { tripDates } from '../../../../lib/trip-labels';
+import { TripHeader } from '../../../components/TripHeader';
+import { PlanRow } from './PlanRow';
+import { TimelineRow } from './TimelineRow';
+import { ReviewPanel } from './ReviewPanel';
+
+const when = (iso: string) =>
+  new Date(iso).toLocaleString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'UTC',
+  }) + ' UTC';
+
+// The import page (DESIGN.md, "Adding (A3)"): the trip's three sources, one under another, and the
+// review of an import waiting below them.
+export default async function Sources({ params }: { params: Promise<{ tripId: string }> }) {
+  const { tripId } = await params;
+  if (!(await currentAccount()))
+    redirect(`/sign-in?next=${encodeURIComponent(`/trips/${tripId}/sources`)}`);
+  const access = await accessToTrip(tripId);
+  if (access?.access !== 'edit') notFound();
+  const { trip } = access;
+  const store = getStore();
+  const [plan, segments, photos, imports, preview] = await Promise.all([
+    store.getPlan(tripId),
+    store.listTimeline(tripId),
+    store.listPhotos(tripId),
+    store.listImports(tripId),
+    previewPending(store, tripId),
+  ]);
+  const last = (source: string) =>
+    imports.find((i) => i.source === source && i.state === 'applied');
+  const planStatus = plan
+    ? `${plan.itinerary.filter((r) => r.item_type !== 'tag').length} entries · imported ${when(plan.importedAt)}`
+    : 'Not imported';
+  const tl = last('timeline');
+  const timelineStatus = segments.length
+    ? `${segments.length} visits and journeys${tl ? ` · added ${when(tl.at)}` : ''}`
+    : null;
+
+  return (
+    <div className="home-page">
+      <TripHeader
+        crumbs={[
+          { label: 'TRIPS', href: '/' },
+          { label: trip.title.toUpperCase(), href: `/trips/${encodeURIComponent(tripId)}` },
+          { label: 'ADD SOURCES' },
+        ]}
+        status={trip.status}
+        right={
+          <a className="pill-button small" href={`/trips/${encodeURIComponent(tripId)}`}>
+            Back to the journey
+          </a>
+        }
+      />
+      <main className="sources">
+        <small className="sources-kicker">
+          {trip.title.toUpperCase()} · {tripDates(trip.startDate, trip.endDate)}
+        </small>
+        <h1>Sources</h1>
+        <p className="sources-lede">
+          Add them in any order, as often as you like. Each import shows what it changes before it’s
+          applied.
+        </p>
+        <div className="src-rows">
+          <PlanRow tripId={tripId} status={planStatus} />
+          <TimelineRow
+            tripId={tripId}
+            trip={{ startDate: trip.startDate, endDate: trip.endDate, timezone: trip.timezone }}
+            status={timelineStatus}
+          />
+          <div className={`src-row ${photos.length ? '' : 'todo'}`}>
+            <span className="src-icon">{photos.length ? '✓' : '+'}</span>
+            <div>
+              <b>Photos</b>
+              <small>From Google Photos</small>
+            </div>
+            <small>
+              {photos.length
+                ? `${photos.length} photos and videos`
+                : 'Picked in Google Photos and copied into the journal, videos included.'}
+            </small>
+            <span className="pill-button small disabled" aria-disabled="true">
+              Coming next
+            </span>
+          </div>
+        </div>
+        {preview ? (
+          <ReviewPanel
+            tripId={tripId}
+            source={preview.pending.source}
+            review={review(preview.before, preview.after)}
+            decisions={preview.decisions}
+            published={trip.status === 'published'}
+          />
+        ) : (
+          <p className="src-run quiet">
+            Nothing to review. After an import, its changes appear here, under the sources.
+          </p>
+        )}
+      </main>
+    </div>
+  );
+}

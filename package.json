@@ -18,6 +18,7 @@
     "snapshot": "bash scripts/snapshot.sh",
     "check:interactions": "node scripts/check-interactions.mjs",
     "check:access": "node scripts/check-access.mjs",
+    "check:import": "node scripts/check-import.mjs",
     "format:check": "prettier --check .",
     "visual": "node scripts/visual.mjs",
     "visual:update": "node scripts/visual.mjs --update",
