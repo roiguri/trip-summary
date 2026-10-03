@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "predev": "node scripts/copy-maplibre-worker.mjs",
-    "dev": "FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099 NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099 next dev -p 3100",
+    "dev": "FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099 FIREBASE_STORAGE_EMULATOR_HOST=127.0.0.1:9199 NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099 next dev -p 3100",
     "prebuild": "node scripts/copy-maplibre-worker.mjs",
     "build": "next build",
     "start": "next start -p 3100",
@@ -19,6 +19,7 @@
     "check:interactions": "node scripts/check-interactions.mjs",
     "check:access": "node scripts/check-access.mjs",
     "check:import": "node scripts/check-import.mjs",
+    "check:photos": "node scripts/check-photos.mjs",
     "format:check": "prettier --check .",
     "visual": "node scripts/visual.mjs",
     "visual:update": "node scripts/visual.mjs --update",

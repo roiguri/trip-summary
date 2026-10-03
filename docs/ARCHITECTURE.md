@@ -95,11 +95,18 @@ Firebase is a proprietary stack, so moving away is real work. These rules keep i
 - **Sign-in in development**: the Auth emulator stands in for Google. `/api/auth/dev` signs a
   browser in as the mock owner (`owner@example.com` unless `OWNER_EMAIL` is set) or opens a fresh
   invite as a mock viewer; it exists only when the app runs on the emulators with a `demo-` project.
-  The app reads `FIRESTORE_EMULATOR_HOST` and `FIREBASE_AUTH_EMULATOR_HOST` at run time, and the
+  The app reads `FIRESTORE_EMULATOR_HOST`, `FIREBASE_AUTH_EMULATOR_HOST` and
+  `FIREBASE_STORAGE_EMULATOR_HOST` at run time, and the
   sign-in page needs `NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST` at build time.
+- **Photos in development**: on the emulators the import page offers "Use the mock photos", which
+  copies `data/mock/picker.json`'s items through the same path as a real pick. A real pick needs
+  `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` (the OAuth client from the Picker check, in
+  `.env.local`) and works locally, since its redirect is `localhost:3100`.
 - **Settings in production**: `OWNER_EMAIL` (the owner, who edits every trip and creates trips),
   `FIREBASE_PROJECT_ID`, and the web app's `NEXT_PUBLIC_FIREBASE_API_KEY`,
-  `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` and `NEXT_PUBLIC_FIREBASE_PROJECT_ID`.
+  `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` and `NEXT_PUBLIC_FIREBASE_PROJECT_ID`; for photos
+  `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `PHOTOS_TOKEN_KEY` (32 random bytes, base64: it seals
+  the Google token's cookie) and, if not the project's default, `FIREBASE_STORAGE_BUCKET`.
 - **Secrets** (the Admin SDK service account and the Picker's OAuth client secret) live in
   `.env.local` locally and in Netlify's environment settings, never in git.
 - **Blaze** needs a card, but usage stays inside the free allowance at this scale (Cloud Storage

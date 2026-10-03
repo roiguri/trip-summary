@@ -36,3 +36,16 @@ export function openToken(sealed: string | undefined, k = key(), now = Date.now(
     return null;
   }
 }
+
+/** Seals any small value the same way (the sign-in's state and PKCE verifier on its way to Google). */
+export function seal(value: object, expiresAt: number, k = key()) {
+  return sealToken(JSON.stringify(value), expiresAt, k);
+}
+export function unseal<T>(sealed: string | undefined, k = key(), now = Date.now()): T | null {
+  const raw = openToken(sealed, k, now);
+  try {
+    return raw === null ? null : (JSON.parse(raw) as T);
+  } catch {
+    return null;
+  }
+}

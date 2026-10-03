@@ -8,6 +8,9 @@ import { TripHeader } from '../../../components/TripHeader';
 import { PlanRow } from './PlanRow';
 import { TimelineRow } from './TimelineRow';
 import { ReviewPanel } from './ReviewPanel';
+import { PhotosRow } from './PhotosRow';
+import { photosConnected } from '../../../../lib/google/choose';
+import { emulated } from '../../../../lib/firebase-admin';
 
 const when = (iso: string) =>
   new Date(iso).toLocaleString('en-GB', {
@@ -76,21 +79,12 @@ export default async function Sources({ params }: { params: Promise<{ tripId: st
             trip={{ startDate: trip.startDate, endDate: trip.endDate, timezone: trip.timezone }}
             status={timelineStatus}
           />
-          <div className={`src-row ${photos.length ? '' : 'todo'}`}>
-            <span className="src-icon">{photos.length ? '✓' : '+'}</span>
-            <div>
-              <b>Photos</b>
-              <small>From Google Photos</small>
-            </div>
-            <small>
-              {photos.length
-                ? `${photos.length} photos and videos`
-                : 'Picked in Google Photos and copied into the journal, videos included.'}
-            </small>
-            <span className="pill-button small disabled" aria-disabled="true">
-              Coming next
-            </span>
-          </div>
+          <PhotosRow
+            tripId={tripId}
+            status={photos.length ? `${photos.length} photos and videos` : null}
+            connected={await photosConnected()}
+            mock={emulated()}
+          />
         </div>
         {preview ? (
           <ReviewPanel
