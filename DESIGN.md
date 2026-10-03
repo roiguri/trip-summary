@@ -142,10 +142,9 @@ From the first build; same preview page. These replace M2's inbox and refine H5.
   "Show on the journey" puts the selected ones first. "Back to time order" undoes it.
 - Photo highlights (PH1): "★ Highlight" on selected photos; a highlighted photo carries a copper star
   wherever it shows. A Highlights album is for later, apart from edit mode.
-- Marks (K1): the pencil is a small round button with a drawn pencil icon, and the HIGHLIGHT stamp,
+- Marks (K1): the pencil is a drawn outline pencil icon (PA, no circle around it), and the HIGHLIGHT stamp,
   both on the title's side away from the rail (before a left-hand title, after a right-hand one; in
-  one column, after). The stamp keeps H5's look, set larger (11px, less spaced, lightly filled).
-  Which pencil and stamp exactly is still being chosen (round 3 on the preview page).
+  one column, after). The stamp keeps H5's look, set larger (11px, less spaced, lightly filled: SA).
 
 ## Exact sampled backgrounds and remaining gaps
 
