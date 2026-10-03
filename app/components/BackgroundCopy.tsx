@@ -66,8 +66,33 @@ export function BackgroundCopy() {
     };
   }, []);
 
+  // A remembered job is checked with the server first: one that no longer copies (applied, discarded,
+  // or its data gone) is forgotten quietly, and a paused one shows where it stands.
+  const [checked, setChecked] = useState<string | null>(null);
   useEffect(() => {
-    if (!job || job.paused || running.current) return;
+    if (!job || checked === job.tripId) return;
+    let gone = false;
+    fetch(`/api/trips/${encodeURIComponent(job.tripId)}/photos/next`)
+      .then(async (r) => {
+        if (gone) return;
+        if (r.ok) {
+          const p = (await r.json()) as { total: number; done: number };
+          if (job.paused) setState({ kind: 'paused', done: p.done, total: p.total });
+          setChecked(job.tripId);
+        } else if (r.status === 404) {
+          write(JOB, null);
+          setJob(null);
+          setState({ kind: 'idle' });
+        } else setChecked(job.tripId);
+      })
+      .catch(() => !gone && setChecked(job.tripId));
+    return () => {
+      gone = true;
+    };
+  }, [job, checked]);
+
+  useEffect(() => {
+    if (!job || job.paused || running.current || checked !== job.tripId) return;
     if (!tab.current) {
       try {
         tab.current = sessionStorage.getItem('ts_tab') ?? Math.random().toString(36).slice(2);
@@ -99,6 +124,13 @@ export function BackgroundCopy() {
         }
         if (r.status === 401) {
           setState({ kind: 'expired' });
+          break;
+        }
+        if (r.status === 404) {
+          // Nothing left to copy here (applied or discarded meanwhile): forget the job quietly.
+          write(JOB, null);
+          setJob(null);
+          setState({ kind: 'idle' });
           break;
         }
         if (!r.ok) {
@@ -133,7 +165,7 @@ export function BackgroundCopy() {
     return () => {
       stop = true;
     };
-  }, [job, retryCount]);
+  }, [job, retryCount, checked]);
 
   if (!job && (state.kind === 'idle' || state.kind === 'copying' || state.kind === 'paused'))
     return null;

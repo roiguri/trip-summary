@@ -56,6 +56,7 @@ export default async function TripPage({
           edit={view.edit}
           bar={
             <EditorBar
+              key="bar"
               tripId={tripId}
               status={access.trip.status}
               waiting={null}
@@ -96,7 +97,13 @@ export default async function TripPage({
       trip={journal.trip}
       account={name}
       bar={
-        <EditorBar tripId={tripId} status={access.trip.status} waiting={waiting} people={shared} />
+        <EditorBar
+          key="bar"
+          tripId={tripId}
+          status={access.trip.status}
+          waiting={waiting}
+          people={shared}
+        />
       }
     />
   );

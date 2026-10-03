@@ -214,6 +214,29 @@ ok(
   (await p.locator('.hl-stamp').count()) === 1 && (await p.locator('.inbox-panel').count()) === 0,
 );
 
+// A copy job this browser remembers, for an import that is gone (applied, discarded, or the data
+// reset), is forgotten quietly, even when paused.
+await p.evaluate(() =>
+  localStorage.setItem(
+    'ts_copy_job',
+    JSON.stringify({ tripId: 'gone-trip', title: 'Gone', paused: true }),
+  ),
+);
+await p.reload();
+const forgotten = await p
+  .waitForFunction(
+    () => !localStorage.getItem('ts_copy_job') && !document.querySelector('.copy-panel'),
+    null,
+    {
+      timeout: 15_000,
+    },
+  )
+  .then(
+    () => true,
+    () => false,
+  );
+ok('a remembered copy job that no longer exists is forgotten', forgotten);
+
 // Only editors can edit.
 const guest = await browser.newContext();
 await signIn(guest, BASE, 'guest');
