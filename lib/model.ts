@@ -34,6 +34,8 @@ export type Entry = {
   stay: { role: 'checkin' | 'checkout'; stayId: string } | null;
   /** Transit: how the leg was travelled (drives the icon). */
   mode: TransitMode | null;
+  /** Marked by the owner as a high point; absent otherwise, so unedited trips are unchanged. */
+  highlighted?: true;
   /** Transit: the outermost multi-day lane running when the leg starts (-1 if none), so its text can
    *  sit close to the rail but clear of the lanes. */
   outer?: number;
@@ -102,8 +104,10 @@ export type ModelItem = {
   to_location: string | null;
   departure_timezone: string | null;
   arrival_timezone: string | null;
-  /** Set when the Timeline says how a leg was travelled; otherwise guessed from the title. */
+  /** Set when the owner chose how a leg was travelled; otherwise guessed from the title. */
   mode?: TransitMode | null;
+  /** The owner marked it as a high point of the trip (DESIGN.md, "Highlight (H5)"). */
+  highlighted?: boolean;
 };
 /** A photo with the entry it is attached to (null: loose) and its order key. `id` may be empty
  *  (the sample's rows), in which case the order key stands in. */
@@ -229,6 +233,7 @@ export function buildTrip({
           ? { date: i.end_date!, time: i.end_time, lane: laneOf.get(i.entry_id) ?? 0 }
           : null,
         stay: i.item_type === 'lodging' ? { role: 'checkin', stayId: `i${i.entry_id}` } : null,
+        ...(i.highlighted ? { highlighted: true as const } : {}),
         mode:
           i.item_type === 'transit'
             ? (i.mode ?? transitModeFromTitle(i.title ?? i.place_title ?? ''))

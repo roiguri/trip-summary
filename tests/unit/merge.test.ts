@@ -179,3 +179,122 @@ test('an edit whose target is gone is listed, not dropped; one on a hidden entry
   );
   assert.deepEqual(r.orphanEdits, [gone]);
 });
+
+// Edit mode's edits (DESIGN.md, "Edit mode").
+test('the owner can link a visit to a planned entry: it takes that visit and its photos', () => {
+  const stop = expected.suggestions.find(
+    (k: string) => k.startsWith('visit:') && k.includes('2026-05-15'),
+  );
+  const key = String(ids['lovers-point-visit']);
+  const r = merge(input([edit({ target: 'entry', key, field: 'visit', value: stop })]));
+  assert.deepEqual(r.matches[key], { segment: stop, by: 'owner' });
+  assert.equal(
+    r.suggestions.some((s) => s.key === stop),
+    false,
+    'no longer a suggestion',
+  );
+  assert.ok(r.proposals.some((p) => p.entryId === ids['lovers-point-visit'] && p.segment === stop));
+  assert.equal(r.unvisited.includes(ids['lovers-point-visit']), false);
+  assert.ok(
+    entry('lovers-point-visit', r).photos.length > 0,
+    'the photos taken there move with it',
+  );
+});
+
+test('unlinking a wrong match leaves the entry without a visit', () => {
+  const key = String(ids['carmel-beach-visit']);
+  const r = merge(input([edit({ target: 'entry', key, field: 'visit', value: 'none' })]));
+  assert.equal(r.matches[key], undefined);
+  assert.ok(r.unvisited.includes(ids['carmel-beach-visit']));
+});
+
+test('a proposal is gone once accepted or ignored', () => {
+  const p = plain.proposals.find((x) => x.entryId === ids['carmel-beach-visit'])!;
+  const key = String(p.entryId);
+  const accepted = merge(
+    input([
+      edit({ target: 'entry', key, field: 'start_time', value: p.start }),
+      edit({ target: 'entry', key, field: 'end_time', value: p.end }),
+    ]),
+  );
+  assert.equal(
+    accepted.proposals.some((x) => x.entryId === p.entryId),
+    false,
+  );
+  assert.equal(entry('carmel-beach-visit', accepted).time, '09:28');
+  const ignored = merge(
+    input([edit({ target: 'entry', key, field: 'proposal', value: 'ignored' })]),
+  );
+  assert.equal(
+    ignored.proposals.some((x) => x.entryId === p.entryId),
+    false,
+  );
+  assert.equal(entry('carmel-beach-visit', ignored).time, '09:20');
+});
+
+test('a highlight and a chosen travel mode reach the drawing', () => {
+  const r = merge(
+    input([
+      edit({
+        target: 'entry',
+        key: String(ids['point-lobos-visit']),
+        field: 'highlighted',
+        value: true,
+      }),
+      edit({ target: 'entry', key: String(ids['drive-hwy1']), field: 'mode', value: 'bus' }),
+    ]),
+  );
+  assert.equal(entry('point-lobos-visit', r).highlighted, true);
+  assert.equal(entry('carmel-beach-visit', r).highlighted, undefined, 'only where marked');
+  assert.equal(entry('drive-hwy1', r).mode, 'bus');
+});
+
+test('clearing an entry’s times leaves it untimed', () => {
+  const key = String(ids['lunch']);
+  const r = merge(
+    input([
+      edit({ target: 'entry', key, field: 'start_time', value: '' }),
+      edit({ target: 'entry', key, field: 'end_time', value: '' }),
+    ]),
+  );
+  assert.deepEqual([entry('lunch', r).time, entry('lunch', r).end_time], ['', null]);
+});
+
+test('an added stop keeps its times, takes others, or none', () => {
+  const [a] = expected.suggestions;
+  const add = (times?: string) =>
+    merge(
+      input([
+        edit({ target: 'suggestion', key: a, field: 'approved', value: true }),
+        edit({ target: 'suggestion', key: a, field: 'title', value: 'Sunset spot' }),
+        ...(times ? [edit({ target: 'suggestion', key: a, field: 'times', value: times })] : []),
+      ]),
+    );
+  const find = (r: ReturnType<typeof merge>) => entries(r).find((e) => e.title === 'Sunset spot')!;
+  assert.equal(find(add()).time, plain.suggestions.find((s) => s.key === a)!.time);
+  assert.deepEqual(
+    [find(add('17:00-18:00')).time, find(add('17:00-18:00')).end_time],
+    ['17:00', '18:00'],
+  );
+  assert.equal(find(add('none')).time, '');
+});
+
+test('planned stops with no visit are listed, unless the owner said that’s fine', () => {
+  assert.ok(plain.unvisited.includes(ids['lovers-point-visit']));
+  const r = merge(
+    input([
+      edit({
+        target: 'entry',
+        key: String(ids['lovers-point-visit']),
+        field: 'noVisit',
+        value: true,
+      }),
+    ]),
+  );
+  assert.equal(r.unvisited.includes(ids['lovers-point-visit']), false);
+  assert.deepEqual(
+    merge({ plan, segments: [], photos, edits: [] }).unvisited,
+    [],
+    'nothing without a Timeline',
+  );
+});

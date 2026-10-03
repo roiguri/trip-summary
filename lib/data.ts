@@ -39,7 +39,7 @@ export function fixtureTrip(file: string) {
        FROM itinerary i LEFT JOIN places p ON i.place_id=p.place_id
        WHERE i.trip_id=? ORDER BY i.start_date, i.start_time, i.entry_id`,
     )
-    .all(trip.trip_id) as ModelItem[];
+    .all(trip.trip_id) as unknown as ModelItem[];
   const photoRows = db
     .prepare(
       `SELECT photo_id, entry_id, date, time, url, caption, latitude AS lat, longitude AS lng

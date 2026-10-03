@@ -27,6 +27,7 @@ export const THRESHOLDS = {
 };
 
 const NOT_SUGGESTED = new Set(['HOME', 'INFERRED_HOME', 'WORK', 'INFERRED_WORK']);
+const TRANSIT_MODES = new Set(['car', 'train', 'flight', 'bus', 'ferry', 'walk', 'bike']);
 
 const MODES: Record<string, TransitMode> = {
   IN_PASSENGER_VEHICLE: 'car',
@@ -46,7 +47,7 @@ const MODES: Record<string, TransitMode> = {
   RUNNING: 'walk',
 };
 
-export type MatchedBy = 'id' | 'distance' | 'id+distance';
+export type MatchedBy = 'id' | 'distance' | 'id+distance' | 'owner';
 export type Suggestion = {
   key: string;
   kind: 'visit' | 'activity';
@@ -81,8 +82,11 @@ export type MergeResult = {
   matches: Record<string, { segment: string; by: MatchedBy | 'time' }>;
   /** Unmatched visits and activities worth offering, shown only in edit mode. */
   suggestions: Suggestion[];
-  /** Actual times and travel modes for planned entries, offered in edit mode. */
+  /** Actual times and travel modes for planned entries, offered in edit mode until accepted or
+   *  ignored. */
   proposals: Proposal[];
+  /** Planned stops with no visit in the Timeline, for edit mode (unless the owner said that's fine). */
+  unvisited: number[];
   /** Edits whose target is no longer in any source: kept, and listed for the owner. */
   orphanEdits: Edit[];
 };
@@ -178,14 +182,27 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
   const visits = segments.filter((s) => s.kind === 'visit');
   const visitDay = (v: TimelineSegment) => local(v.startUtc, v.startOffsetMin, timeZone).date;
   type Pair = { item: (typeof items)[number]; visit: TimelineSegment; by: MatchedBy; dt: number };
+  // The owner's links come first: "this visit is that entry" (also for a leg and its journey), or
+  // "this entry has no visit", which keeps it out of the automatic matching.
+  const byKey = new Map(segments.map((s) => [s.key, s]));
+  const linked = new Map<number, TimelineSegment>();
+  const unlinked = new Set<number>();
+  for (const item of items) {
+    const link = use('entry', String(item.entry_id), 'visit');
+    if (link === 'none') unlinked.add(item.entry_id);
+    else if (typeof link === 'string' && byKey.has(link))
+      linked.set(item.entry_id, byKey.get(link)!);
+  }
+  const ownerTaken = new Set([...linked.values()].map((s) => s.key));
   const pairs: Pair[] = [];
   for (const item of items) {
+    if (linked.has(item.entry_id) || unlinked.has(item.entry_id)) continue;
     const multiDay =
       item.item_type !== 'lodging' && item.end_date && item.end_date > item.start_date;
     if ((item.item_type !== 'place' && item.item_type !== 'lodging') || multiDay) continue;
     const planned = item.start_time ? utcOf(item.start_date, item.start_time, timeZone) : null;
     for (const v of visits) {
-      if (visitDay(v) !== item.start_date) continue;
+      if (ownerTaken.has(v.key) || visitDay(v) !== item.start_date) continue;
       const sameId = !!item.googlePlaceId && v.placeId === item.googlePlaceId;
       const near =
         item.lat !== null &&
@@ -209,6 +226,14 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
   const matches: MergeResult['matches'] = {};
   const visitOf = new Map<number, TimelineSegment>();
   const takenVisits = new Set<string>();
+  const takenActivities = new Set<string>();
+  for (const [id, seg] of linked) {
+    matches[id] = { segment: seg.key, by: 'owner' };
+    if (seg.kind === 'visit') {
+      visitOf.set(id, seg);
+      takenVisits.add(seg.key);
+    } else takenActivities.add(seg.key);
+  }
   for (const p of pairs) {
     if (visitOf.has(p.item.entry_id) || takenVisits.has(p.visit.key)) continue;
     visitOf.set(p.item.entry_id, p.visit);
@@ -224,15 +249,31 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
     if (!v || item.item_type !== 'place') continue;
     const start = local(v.startUtc, v.startOffsetMin, timeZone).time;
     const end = local(v.endUtc, v.endOffsetMin, timeZone).time;
-    if (start !== item.start_time || end !== item.end_time)
-      proposals.push({ entryId: item.entry_id, segment: v.key, start, end, mode: null });
+    proposals.push({ entryId: item.entry_id, segment: v.key, start, end, mode: null });
   }
 
   // Rule 4, activity → transit: the activity that overlaps the planned leg most sets its mode and
   // actual times.
   const activities = segments.filter((s) => s.kind === 'activity');
-  const takenActivities = new Set<string>();
-  for (const item of items.filter((i) => i.item_type === 'transit' && i.start_time)) {
+  const proposeLeg = (item: (typeof items)[number], a: TimelineSegment) =>
+    proposals.push({
+      entryId: item.entry_id,
+      segment: a.key,
+      start: local(a.startUtc, a.startOffsetMin, timeZone).time,
+      end: local(a.endUtc, a.endOffsetMin, timeZone).time,
+      mode: (a.mode ? MODES[a.mode] : undefined) ?? null,
+    });
+  for (const item of items) {
+    const seg = linked.get(item.entry_id);
+    if (item.item_type === 'transit' && seg?.kind === 'activity') proposeLeg(item, seg);
+  }
+  for (const item of items.filter(
+    (i) =>
+      i.item_type === 'transit' &&
+      i.start_time &&
+      !linked.has(i.entry_id) &&
+      !unlinked.has(i.entry_id),
+  )) {
     const from = utcOf(item.start_date, item.start_time!, item.departure_timezone ?? timeZone);
     const to = item.end_time
       ? utcOf(item.end_date ?? item.start_date, item.end_time, item.arrival_timezone ?? timeZone)
@@ -247,13 +288,7 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
     if (!best) continue;
     takenActivities.add(best.key);
     matches[item.entry_id] = { segment: best.key, by: 'time' };
-    proposals.push({
-      entryId: item.entry_id,
-      segment: best.key,
-      start: local(best.startUtc, best.startOffsetMin, timeZone).time,
-      end: local(best.endUtc, best.endOffsetMin, timeZone).time,
-      mode: (best.mode ? MODES[best.mode] : undefined) ?? null,
-    });
+    proposeLeg(item, best);
   }
 
   // Rule 5, suggestions: what's left, minus noise. A visit that contains a matched one (or sits in
@@ -304,6 +339,9 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
   const approved = suggestions.filter((s) => use('suggestion', s.key, 'approved') === true);
   approved.forEach((s, n) => {
     const title = use('suggestion', s.key, 'title');
+    // Its times: kept, the owner's own ("HH:MM-HH:MM"), or none.
+    const times = use('suggestion', s.key, 'times');
+    const own = typeof times === 'string' ? times.match(/^(\d\d:\d\d)-(\d\d:\d\d)$/) : null;
     items.push({
       entry_id: -(n + 1),
       item_type: s.kind === 'visit' ? 'place' : 'transit',
@@ -311,8 +349,8 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
       place_title: null,
       start_date: s.date,
       end_date: null,
-      start_time: s.time,
-      end_time: s.endTime,
+      start_time: times === 'none' ? null : own ? own[1] : s.time,
+      end_time: times === 'none' ? null : own ? own[2] : s.endTime,
       notes: null,
       lat: s.lat,
       lng: s.lng,
@@ -328,16 +366,45 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
   });
   const remaining = suggestions.filter((s) => !approved.includes(s));
 
-  // Entry edits: text, times, hiding.
+  // Entry edits: text, times (an empty value clears them), travel mode, highlight, hiding.
   const shown = items.filter((item) => {
     const key = String(item.entry_id);
     if (use('entry', key, 'hidden') === true) return false;
     for (const field of ['title', 'notes', 'start_time', 'end_time'] as const) {
       const v = use('entry', key, field);
-      if (typeof v === 'string') item[field] = v;
+      if (typeof v === 'string') item[field] = field.endsWith('_time') && v === '' ? null : v;
     }
+    const mode = use('entry', key, 'mode');
+    if (item.item_type === 'transit' && typeof mode === 'string' && TRANSIT_MODES.has(mode))
+      item.mode = mode as TransitMode;
+    if (use('entry', key, 'highlighted') === true) item.highlighted = true;
     return true;
   });
+
+  // What still needs the owner: a proposal is gone once accepted (the entry's times and mode are
+  // the Timeline's) or ignored; a planned stop with no visit is listed unless they said that's fine.
+  const shownById = new Map(shown.map((i) => [i.entry_id, i]));
+  const open = proposals.filter((p) => {
+    const item = shownById.get(p.entryId);
+    if (!item || use('entry', String(p.entryId), 'proposal') === 'ignored') return false;
+    return (
+      p.start !== item.start_time ||
+      p.end !== item.end_time ||
+      (p.mode !== null && p.mode !== item.mode)
+    );
+  });
+  const unvisited = segments.some((s) => s.kind === 'visit')
+    ? shown
+        .filter(
+          (i) =>
+            i.item_type === 'place' &&
+            i.entry_id > 0 &&
+            !(i.end_date && i.end_date > i.start_date) &&
+            !visitOf.has(i.entry_id) &&
+            use('entry', String(i.entry_id), 'noVisit') !== true,
+        )
+        .map((i) => i.entry_id)
+    : [];
   const entryIds = new Set(shown.map((i) => String(i.entry_id)));
 
   // Rule 6, photos: local time from EXIF, else the Timeline at that moment, else the trip's zone; a
@@ -462,5 +529,5 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
     suggestion: (k) => segments.some((s) => s.key === k),
   };
   const orphanEdits = edits.filter((e) => !exists[e.target](e.key));
-  return { trip, matches, suggestions: remaining, proposals, orphanEdits };
+  return { trip, matches, suggestions: remaining, proposals: open, unvisited, orphanEdits };
 }

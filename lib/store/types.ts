@@ -122,6 +122,7 @@ export type Journal = {
   trip: import('../model.ts').Trip;
   suggestions: import('../merge/index.ts').Suggestion[];
   proposals: import('../merge/index.ts').Proposal[];
+  unvisited: number[];
   orphanEdits: Edit[];
   builtAt: string;
 };
