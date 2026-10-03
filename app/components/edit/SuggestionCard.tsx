@@ -77,7 +77,7 @@ export function SuggestionCard({
   const minutes = Math.round(
     (Date.parse(`2000-01-01T${s.endTime}:00Z`) - Date.parse(`2000-01-01T${s.time}:00Z`)) / 60_000,
   );
-  const maps = mapsLink(s.lat, s.lng, s.placeId);
+  const maps = mapsLink(s);
 
   const add = () =>
     save([
@@ -115,7 +115,7 @@ export function SuggestionCard({
           <>
             {' · '}
             <a href={maps} target="_blank" rel="noreferrer">
-              Open in Google Maps
+              {s.kind === 'activity' ? 'Open the route in Google Maps' : 'Open in Google Maps'}
             </a>
           </>
         )}

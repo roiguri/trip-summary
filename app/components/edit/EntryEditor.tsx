@@ -200,15 +200,13 @@ export function EntryEditor({
                   linked.lng !== null
                     ? ` · ${distance(metres(entry.lat, entry.lng, linked.lat, linked.lng))} from the planned pin`
                     : ''}
-                  {mapsLink(linked.lat, linked.lng, linked.placeId) && (
+                  {mapsLink(linked) && (
                     <>
                       {' · '}
-                      <a
-                        href={mapsLink(linked.lat, linked.lng, linked.placeId)!}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        Open in Google Maps
+                      <a href={mapsLink(linked)!} target="_blank" rel="noreferrer">
+                        {linked.kind === 'activity'
+                          ? 'Open the route in Google Maps'
+                          : 'Open in Google Maps'}
                       </a>
                     </>
                   )}
