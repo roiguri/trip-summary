@@ -78,10 +78,11 @@ Designed with mock options and agreed (`docs/VERIFICATION.md`, "Mobile"): a one-
 
 ## Enhancements (after the phases above)
 
+- **Google Places API** (next): place names for the Timeline's stops (instead of "a stop near …"), and searching for a different place for a suggestion. Until then, places are checked with "Open in Google Maps" (owner's decision, Oct 3). Needs an API key and billing on the Google Cloud project, within Google's free monthly allowance at this scale.
 - **A map of all trips**: a map view of every trip, as a second way to browse the home page (user decision, Oct 2: nice to have, at the end of the plan).
 
 ## Immediate next step
 
-Phase 2, step 8: the owner tries the built app by hand (the Google sign-in popup, a real Google Photos pick, the new pages), then their real trip is imported into a private draft and the matching is tuned together. Open: whether a stay shows its booked check-in and check-out or the Timeline's times (`docs/DATA-DESIGN.md`, merge rule 8), to discuss before edit mode.
+Edit mode's design round: https://claude.ai/artifact/Wvm7oAhSYKQGetpMWAqcXV (where the Timeline's findings wait, editing an entry, an unplanned stop, the highlight), waiting for the owner's picks. Then building it, and step 8: the real trip imported and the matching tuned together. Open: whether a stay shows its booked check-in and check-out or the Timeline's times (`docs/DATA-DESIGN.md`, merge rule 8).
 
 Postponed (user decision, to return to later): the top bar (style, mark, name) and a ChatGPT-style day scroller. Live options for both, with recommendations, are on the options page: https://claude.ai/artifact/V9Fa92HhY897rcKrsadNrw
