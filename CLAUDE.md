@@ -29,7 +29,8 @@ npm run check:styles         # computed-style diff between two builds (BASE_A, B
 node scripts/probe-sources.mjs --jarvis <db> --timeline <Timeline.json>   # shape of real sources only
 npm run mocks                # regenerate data/mock/ from the sample (CI checks it is up to date)
 npm test                     # unit tests (tests/unit)
-npm run test:store           # store tests against the Firebase emulators (needs Java 21+)
+npm run test:store           # store tests against the Firebase emulators (needs Java 21+; on their
+                             # own ports, firebase.test.json, so a running dev setup is untouched)
 npm run emulators            # Firebase emulators for development (Firestore, Storage, Auth)
 node scripts/import-plan.ts <jarvis.sqlite> [--trip <id>]   # list or import a Jarvis trip (emulators up,
                              # FIRESTORE_EMULATOR_HOST=127.0.0.1:8080); the file is opened read-only

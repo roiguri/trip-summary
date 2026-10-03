@@ -1,5 +1,6 @@
 // Photos, end to end in a browser against the running app on the emulators: a new trip from the mock
-// Jarvis database, the mock pick copied in batches, the review, Apply, and the photos served through
+// Jarvis database, the mock pick copied in the background (across pages and a reload), the review,
+// Apply, and the photos served through
 // /media only to people who may see the trip. Exits 1 on a failure.
 //   BASE_URL=http://localhost:3100 npm run check:photos
 import { chromium } from 'playwright';
@@ -40,7 +41,26 @@ ok(
 );
 
 await p.getByRole('button', { name: 'Use the mock photos' }).click();
-await p.waitForSelector('.review', { timeout: 120_000 });
+await p.waitForSelector('.copy-panel');
+ok(
+  'copying shows its progress in a panel',
+  /Copying photos for/.test(await p.locator('.copy-panel').textContent()),
+);
+// It carries on while browsing elsewhere in the app, and across a page load.
+await p.goto(`${BASE}/`);
+await p.waitForSelector('.copy-panel');
+ok('the panel follows you to other pages', (await p.locator('.copy-panel').count()) === 1);
+await p.waitForFunction(
+  () => /: \d+ of \d+/.test(document.querySelector('.copy-panel')?.textContent ?? ''),
+  null,
+  { timeout: 60_000 },
+);
+await p.reload();
+await p.waitForSelector('.copy-panel >> text=are copied', { timeout: 180_000 });
+ok('it finishes after a page load, and says so', true);
+await p.locator('.copy-panel').getByRole('link', { name: 'Review them' }).click();
+await p.waitForURL(new RegExp(`/trips/${TRIP}/sources`));
+await p.waitForSelector('.review');
 const tally = await p.locator('.review h2').textContent();
 ok('every picked item is copied and waits for review', /79 photos/.test(tally), tally);
 ok('the review shows where the photos land', (await p.locator('.review-photos').count()) > 0);

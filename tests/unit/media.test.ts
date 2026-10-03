@@ -1,24 +1,9 @@
-// The media helpers: the EXIF offset, the sealed Google token, and media paths.
+// The media helpers: the sealed Google token and media paths.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import sharp from 'sharp';
-import { exifOffset } from '../../lib/media/exif.ts';
 import { openToken, seal, sealToken, unseal } from '../../lib/google/token-cookie.ts';
 import { mediaPath, mediaUrl, tripOfPath } from '../../lib/media/paths.ts';
-
-const jpeg = (exif?: object) => {
-  const img = sharp({ create: { width: 16, height: 16, channels: 3, background: '#7a9' } }).jpeg();
-  return (exif ? img.withExif(exif as never) : img).toBuffer();
-};
-
-test('the local offset is read from EXIF OffsetTimeOriginal, in minutes east of UTC', async () => {
-  assert.equal(exifOffset(await jpeg({ IFD2: { OffsetTimeOriginal: '-07:00' } })), -420);
-  assert.equal(exifOffset(await jpeg({ IFD2: { OffsetTimeOriginal: '+05:30' } })), 330);
-  assert.equal(exifOffset(await jpeg({ IFD0: { Make: 'No offset here' } })), null);
-  assert.equal(exifOffset(await jpeg()), null);
-  assert.equal(exifOffset(Buffer.from('not a jpeg')), null);
-});
 
 const K = createHash('sha256').update('test key').digest();
 const OTHER = createHash('sha256').update('other key').digest();

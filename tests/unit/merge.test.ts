@@ -37,20 +37,30 @@ test('visits match planned entries as the answer key says, by place ID, distance
   }
 });
 
-test('a matched place shows its actual times; a skipped one and a stay keep the plan’s', () => {
+const proposal = (key: string) => plain.proposals.find((p) => p.entryId === ids[key]);
+
+test('the Timeline changes no planned entry by itself', () => {
   assert.deepEqual(
     [entry('carmel-beach-visit').time, entry('carmel-beach-visit').end_time],
-    ['09:28', '10:53'],
+    ['09:20', '10:45'],
   );
-  assert.equal(entry('aquarium-visit').time, '11:15'); // over an hour late, still matched
-  assert.deepEqual(
-    [entry('lovers-point-visit').time, entry('lovers-point-visit').end_time],
-    ['15:00', '16:00'],
-  );
+  assert.equal(entry('aquarium-visit').time, '10:00');
   assert.equal(entry('inn').time, '15:00');
+  // A leg keeps the mode its title implies until the owner accepts the Timeline's.
+  assert.equal(entry('drive-hwy1').mode, 'car');
 });
 
-test('transit takes its mode and actual times from the overlapping activity', () => {
+test('a matched place gets its actual times as a proposal, even over an hour late', () => {
+  assert.deepEqual(
+    [proposal('carmel-beach-visit')?.start, proposal('carmel-beach-visit')?.end],
+    ['09:28', '10:53'],
+  );
+  assert.equal(proposal('aquarium-visit')?.start, '11:15');
+  assert.equal(proposal('lovers-point-visit'), undefined, 'skipped: nothing to propose');
+  assert.equal(proposal('inn'), undefined, 'a stay keeps its booking');
+});
+
+test('a leg gets its mode and actual times as a proposal, read at each end’s own offset', () => {
   const modes: Record<string, string> = {
     IN_PASSENGER_VEHICLE: 'car',
     IN_BUS: 'bus',
@@ -58,9 +68,11 @@ test('transit takes its mode and actual times from the overlapping activity', ()
     FLYING: 'flight',
   };
   for (const [key, mode] of Object.entries(expected.transitModes) as [string, string][])
-    assert.equal(entry(key).mode, modes[mode], key);
-  // Lands in Denver: the end time is read at the arrival's own offset.
-  assert.deepEqual([entry('flight-home').time, entry('flight-home').end_time], ['12:30', '15:55']);
+    assert.equal(proposal(key)?.mode, modes[mode], key);
+  assert.deepEqual(
+    [proposal('flight-home')?.start, proposal('flight-home')?.end],
+    ['12:30', '15:55'],
+  );
 });
 
 test('suggestions are exactly the unmatched stops and long journeys, without the noise', () => {
@@ -122,7 +134,7 @@ test('the sample’s edits give back its titles, captions and photo placements',
   assert.deepEqual(edited.orphanEdits, []);
 });
 
-test('entry edits hide, retitle and retime; the owner wins over the Timeline', () => {
+test('entry edits hide, retitle and retime', () => {
   const k = String(ids['carmel-beach-visit']);
   const r = merge(
     input([

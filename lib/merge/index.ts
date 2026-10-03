@@ -65,12 +65,24 @@ export type MergeInput = {
   edits: Edit[];
 };
 
+/** What the Timeline found about a planned entry: its actual times, and for a leg how it was
+ *  travelled. Offered in edit mode; never applied by the merge itself. */
+export type Proposal = {
+  entryId: number;
+  segment: string;
+  start: string;
+  end: string;
+  mode: TransitMode | null;
+};
+
 export type MergeResult = {
   trip: Trip;
   /** Jarvis entry ID → the visit or activity that gave it actual times. */
   matches: Record<string, { segment: string; by: MatchedBy | 'time' }>;
   /** Unmatched visits and activities worth offering, shown only in edit mode. */
   suggestions: Suggestion[];
+  /** Actual times and travel modes for planned entries, offered in edit mode. */
+  proposals: Proposal[];
   /** Edits whose target is no longer in any source: kept, and listed for the owner. */
   orphanEdits: Edit[];
 };
@@ -203,13 +215,17 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
     takenVisits.add(p.visit.key);
     matches[p.item.entry_id] = { segment: p.visit.key, by: p.by };
   }
-  // A matched place shows when it was actually visited (agreed). A stay keeps its booked check-in
-  // and check-out: an overnight visit says when the owner was there, not when the booking ran.
+  // The Timeline changes nothing by itself (decided Oct 3): what it found about a planned entry is a
+  // proposal, for the owner to accept in edit mode. A stay is left out: an overnight visit says when
+  // the owner was there, not when the booking ran.
+  const proposals: Proposal[] = [];
   for (const item of items) {
     const v = visitOf.get(item.entry_id);
     if (!v || item.item_type !== 'place') continue;
-    item.start_time = local(v.startUtc, v.startOffsetMin, timeZone).time;
-    item.end_time = local(v.endUtc, v.endOffsetMin, timeZone).time;
+    const start = local(v.startUtc, v.startOffsetMin, timeZone).time;
+    const end = local(v.endUtc, v.endOffsetMin, timeZone).time;
+    if (start !== item.start_time || end !== item.end_time)
+      proposals.push({ entryId: item.entry_id, segment: v.key, start, end, mode: null });
   }
 
   // Rule 4, activity → transit: the activity that overlaps the planned leg most sets its mode and
@@ -231,9 +247,13 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
     if (!best) continue;
     takenActivities.add(best.key);
     matches[item.entry_id] = { segment: best.key, by: 'time' };
-    item.mode = (best.mode ? MODES[best.mode] : undefined) ?? item.mode;
-    item.start_time = local(best.startUtc, best.startOffsetMin, timeZone).time;
-    item.end_time = local(best.endUtc, best.endOffsetMin, timeZone).time;
+    proposals.push({
+      entryId: item.entry_id,
+      segment: best.key,
+      start: local(best.startUtc, best.startOffsetMin, timeZone).time,
+      end: local(best.endUtc, best.endOffsetMin, timeZone).time,
+      mode: (best.mode ? MODES[best.mode] : undefined) ?? null,
+    });
   }
 
   // Rule 5, suggestions: what's left, minus noise. A visit that contains a matched one (or sits in
@@ -442,5 +462,5 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
     suggestion: (k) => segments.some((s) => s.key === k),
   };
   const orphanEdits = edits.filter((e) => !exists[e.target](e.key));
-  return { trip, matches, suggestions: remaining, orphanEdits };
+  return { trip, matches, suggestions: remaining, proposals, orphanEdits };
 }

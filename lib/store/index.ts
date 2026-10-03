@@ -8,6 +8,7 @@ import type {
   ImportRecord,
   Journal,
   Pending,
+  PickedRecord,
   Person,
   PlanSource,
   Trip,
@@ -98,20 +99,71 @@ export function createStore(db: Firestore) {
       );
     },
 
-    /** Stores an import for review, replacing any import already waiting. */
+    /** Stores an import for review, replacing the one of the same source already waiting. */
     async putPending(tripId: string, p: Pending) {
       const bytes = Buffer.byteLength(JSON.stringify(p));
       if (bytes > MAX_DOC_BYTES)
         throw new Error(`This import is too large to review in one go (${bytes} bytes)`);
-      await sub(tripId, 'sources').doc('pending').set(p);
+      await sub(tripId, 'sources').doc(`pending-${p.source}`).set(p);
     },
-    async getPending(tripId: string): Promise<Pending | null> {
-      return (
-        ((await sub(tripId, 'sources').doc('pending').get()).data() as Pending | undefined) ?? null
+    async getPending<S extends Pending['source']>(
+      tripId: string,
+      source: S,
+    ): Promise<Extract<Pending, { source: S }> | null> {
+      const doc = await sub(tripId, 'sources').doc(`pending-${source}`).get();
+      return (doc.data() as Extract<Pending, { source: S }> | undefined) ?? null;
+    },
+    async listPending(tripId: string): Promise<Pending[]> {
+      const docs = await Promise.all(
+        ['plan', 'timeline', 'photos'].map((src) =>
+          sub(tripId, 'sources').doc(`pending-${src}`).get(),
+        ),
+      );
+      return docs.flatMap((d) => (d.exists ? [d.data() as Pending] : []));
+    },
+
+    async updatePending(
+      tripId: string,
+      source: Pending['source'],
+      changes: Record<string, number | string>,
+    ) {
+      await sub(tripId, 'sources').doc(`pending-${source}`).update(changes);
+    },
+    async deletePending(tripId: string, source: Pending['source']) {
+      await sub(tripId, 'sources').doc(`pending-${source}`).delete();
+      if (source === 'photos') {
+        await db.recursiveDelete(sub(tripId, 'pickedItems'));
+        await db.recursiveDelete(sub(tripId, 'pendingPhotos'));
+      }
+    },
+    async putPickedItems(tripId: string, records: PickedRecord[]) {
+      const col = sub(tripId, 'pickedItems');
+      await writeAll(
+        records.map((r) => [col.doc(docId(r.mediaId)), r] as [DocumentReference, object]),
       );
     },
-    async deletePending(tripId: string) {
-      await sub(tripId, 'sources').doc('pending').delete();
+    /** The next picked items still to copy. */
+    async nextPicked(tripId: string, n: number): Promise<PickedRecord[]> {
+      const snap = await sub(tripId, 'pickedItems').where('done', '==', false).limit(n).get();
+      return snap.docs.map((d) => d.data() as PickedRecord);
+    },
+    /** Marks picked items as copied; `failed` ones are marked too, so a broken item can't stall the
+     *  job, and counted. */
+    async markPicked(tripId: string, done: string[], failed: string[] = []) {
+      const col = sub(tripId, 'pickedItems');
+      const batch = db.batch();
+      for (const id of done) batch.update(col.doc(docId(id)), { done: true });
+      for (const id of failed) batch.update(col.doc(docId(id)), { done: true, failed: true });
+      await batch.commit();
+    },
+    async putPendingPhotos(tripId: string, photos: TripPhoto[]) {
+      const col = sub(tripId, 'pendingPhotos');
+      await writeAll(
+        photos.map((p) => [col.doc(docId(p.mediaId)), p] as [DocumentReference, object]),
+      );
+    },
+    async listPendingPhotos(tripId: string): Promise<TripPhoto[]> {
+      return list<TripPhoto>(tripId, 'pendingPhotos');
     },
 
     /** Replaces the trip's Timeline slice: segments not in the new slice are removed. */
@@ -168,7 +220,10 @@ export function createStore(db: Firestore) {
           .filter((d) => d.id.startsWith('day-') && !dayIds.has(d.id))
           .map((d) => [d.ref, null] as [DocumentReference, null]),
         ...days.map((d) => [col.doc(docId(`day-${d.date}`)), d] as [DocumentReference, object]),
-        [col.doc('review'), { suggestions: j.suggestions, orphanEdits: j.orphanEdits }],
+        [
+          col.doc('review'),
+          { suggestions: j.suggestions, proposals: j.proposals, orphanEdits: j.orphanEdits },
+        ],
         // Written last: a reader that finds the meta finds every day it lists.
         [col.doc('meta'), { ...meta, dates: days.map((d) => d.date), builtAt: j.builtAt }],
       ]);
@@ -189,6 +244,7 @@ export function createStore(db: Firestore) {
           days: dates.map((d) => docs.get(`day-${d}`) as Journal['trip']['days'][number]),
         },
         suggestions: review.suggestions ?? [],
+        proposals: review.proposals ?? [],
         orphanEdits: review.orphanEdits ?? [],
         builtAt,
       };

@@ -75,8 +75,12 @@ Options and drawings: https://claude.ai/artifact/4QQeC2zq2rSBUAixmcDmDf (Phase 2
   add the Timeline, open Google Photos), in any order and as often as needed. The Timeline file is
   read in the browser and only the trip's days are uploaded.
 - Review (R3): after each import its changes appear on the import page, under the sources, grouped
-  by day: old and new times, travel modes, stops with no visit, and suggestions with their photos
-  to add or dismiss in the list; then Apply or Discard. A published trip changes only on Apply.
+  by day; then Apply or Discard. A published trip changes only on Apply. Each source waits and is
+  reviewed on its own, so photos can copy while the Timeline is reviewed. **The review shows only
+  what changes in the trip (decided Oct 3):** a plan update's added, removed, renamed or retimed
+  entries, and where new photos land. Everything the Timeline found (actual times, travel modes,
+  stops not visited, new stops) is offered in edit mode instead, and nothing in the review is a
+  suggestion.
   Marking changes on the journey itself (R2) was preferred but deferred: it needs new states in the
   locked timeline and map; it can come with edit mode if suggestions appear on the journey there.
 - Trip controls (C1): editors get a bar under the header on the journey: the trip's status,

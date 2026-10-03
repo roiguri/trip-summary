@@ -14,10 +14,11 @@ export async function rebuildJournal(store: Store, tripId: string) {
     store.listEdits(tripId),
   ]);
   if (!plan) throw new Error(`No plan for "${tripId}": import it first`);
-  const { trip, suggestions, orphanEdits } = merge({ plan, segments, photos, edits });
+  const { trip, suggestions, proposals, orphanEdits } = merge({ plan, segments, photos, edits });
   await store.putJournal(tripId, {
     trip,
     suggestions,
+    proposals,
     orphanEdits,
     builtAt: new Date().toISOString(),
   });
@@ -45,6 +46,7 @@ export async function storeFixture(store: Store, file: string, tripId: string) {
   await store.putJournal(tripId, {
     trip,
     suggestions: [],
+    proposals: [],
     orphanEdits: [],
     builtAt: new Date().toISOString(),
   });

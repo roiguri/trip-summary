@@ -18,31 +18,9 @@ const segments = sliceTimeline(JSON.parse(readFileSync('data/mock/Timeline.json'
 const before = merge({ plan, segments: [], photos: [], edits: [] });
 const after = merge({ plan, segments, photos: [], edits: [] });
 const r = review(before, after);
-const all = r.days.flatMap((d) => d.items);
-const id = (key: string) => `i${expected.entryIds[key]}`;
 
-test('a matched place shows its planned and actual times', () => {
-  const carmel = all.find((i) => i.kind === 'times' && i.id === id('carmel-beach-visit'));
-  assert.deepEqual(
-    carmel && [carmel.kind === 'times' && carmel.from, carmel.kind === 'times' && carmel.to],
-    ['09:20 – 10:45', '09:28 – 10:53'],
-  );
-});
-
-test('a planned stop with no visit is listed once the Timeline arrives', () => {
-  assert.ok(all.some((i) => i.kind === 'unvisited' && i.id === id('lovers-point-visit')));
-});
-
-test('the new suggestions are exactly the answer key’s', () => {
-  const keys = all.flatMap((i) => (i.kind === 'suggestion' ? [i.suggestion.key] : []));
-  assert.deepEqual(new Set(keys), new Set(expected.suggestions));
-  assert.equal(r.counts.suggestion, expected.suggestions.length);
-});
-
-test('days are in order, and each day lists its changes by time', () => {
-  const dates = r.days.map((d) => d.date);
-  assert.deepEqual(dates, [...dates].sort());
-  assert.ok(r.days.every((d) => d.items.length));
+test('a Timeline import changes nothing to review: what it found is for edit mode', () => {
+  assert.equal(r.days.length, 0);
 });
 
 test('reviewing the same sources twice finds nothing', () => {

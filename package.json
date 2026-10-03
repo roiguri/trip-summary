@@ -12,7 +12,7 @@
     "format": "prettier --write .",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "node --test 'tests/unit/*.test.ts'",
-    "test:store": "node scripts/firebase.mjs emulators:exec --only firestore,storage,auth \"node --test --test-concurrency=1 'tests/store/*.test.ts'\"",
+    "test:store": "node scripts/firebase.mjs emulators:exec --config firebase.test.json --only firestore,storage,auth \"node --test --test-concurrency=1 'tests/store/*.test.ts'\"",
     "emulators": "node scripts/firebase.mjs emulators:start --only firestore,storage,auth",
     "seed": "node scripts/seed.ts",
     "snapshot": "bash scripts/snapshot.sh",

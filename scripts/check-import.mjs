@@ -1,6 +1,6 @@
 // Adding a trip and importing, end to end in a browser against the running app on the emulators: a
 // new trip from the mock Jarvis database, its Timeline through the file picker, the review, a
-// suggestion, Apply and Discard. Exits 1 on a failure.
+// Apply and Discard. Exits 1 on a failure.
 //   BASE_URL=http://localhost:3100 npm run check:import
 import { chromium } from 'playwright';
 import { mkdtempSync, readFileSync } from 'node:fs';
@@ -55,15 +55,15 @@ ok(
 await p.getByRole('button', { name: 'Upload the trip’s days' }).click();
 await p.waitForSelector('.review');
 const review = await p.locator('.review').textContent();
-ok('the review shows the actual times', review.includes('09:28 – 10:53'));
-ok('the review lists a stop that wasn’t visited', review.includes('no visit found'));
-ok('the review offers suggestions', (await p.locator('.suggestion').count()) > 0);
+ok(
+  'the Timeline’s review changes nothing in the journey',
+  review.includes('No changes to the journey'),
+);
+ok(
+  'it offers no suggestions or actual times (they’re for edit mode)',
+  !review.includes('09:28') && !review.includes('no visit found'),
+);
 ok('nothing changed before applying', (await p.locator('.src-row.todo').count()) === 2);
-
-await p.locator('.suggestion input').first().fill('Sunset spot');
-await p.locator('.suggestion').first().getByRole('button', { name: 'Add', exact: true }).click();
-await p.waitForSelector('.suggestion.add');
-ok('a suggestion can be added from the review', (await p.locator('.suggestion.add').count()) === 1);
 
 await p.getByRole('button', { name: 'Apply', exact: true }).click();
 await p.waitForSelector('.review', { state: 'detached' });
@@ -74,8 +74,7 @@ ok(
 await p.click('text=Back to the journey');
 await p.waitForURL(new RegExp(`/trips/${TRIP}$`));
 const journey = await p.locator('.left').textContent();
-ok('the journey shows the actual time', journey.includes('09:28'));
-ok('the added suggestion is on the journey', journey.includes('Sunset spot'));
+ok('the journey keeps the planned time', journey.includes('09:20') && !journey.includes('09:28'));
 
 // Another import, discarded.
 await p.goto(`${BASE}/trips/${TRIP}/sources`);
