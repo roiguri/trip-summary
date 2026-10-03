@@ -2969,12 +2969,36 @@ button.pill-button {
 .right.edit-col > .editor {
   flex: 0 1 auto;
   min-height: 0;
+  overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
-  scrollbar-width: thin;
+}
+/* Its scrollbar in the card's style: thin, rounded, the card's soft green, clear of the corners. */
+.right.edit-col > .editor::-webkit-scrollbar {
+  width: 10px;
+}
+.right.edit-col > .editor::-webkit-scrollbar-track {
+  margin: 20px 0;
+  background: transparent;
+}
+.right.edit-col > .editor::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 10px;
+  background: #d5e0d3 padding-box;
+}
+.right.edit-col > .editor::-webkit-scrollbar-thumb:hover {
+  background: #b7c7b5 padding-box;
+}
+@supports not selector(::-webkit-scrollbar) {
+  .right.edit-col > .editor {
+    scrollbar-width: thin;
+    scrollbar-color: #d5e0d3 transparent;
+  }
 }
 .editor {
   display: grid;
+  /* One column as wide as the card: a wide row shrinks to fit instead of widening the card. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   padding: 18px;
   border: 1px solid #e3e8df;
@@ -3006,6 +3030,7 @@ button.pill-button {
 .ed-field input,
 .ed-field textarea,
 .ed-field select {
+  min-width: 0;
   padding: 8px 10px;
   border: 1px solid #d5e1d4;
   border-radius: 9px;
