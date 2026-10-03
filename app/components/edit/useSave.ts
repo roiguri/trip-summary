@@ -1,0 +1,59 @@
+'use client';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+
+export type EditChange = {
+  target: string;
+  key: string;
+  field: string;
+  value?: string | boolean | null;
+};
+
+/** Saves edits (a value of `undefined` undoes one), then re-renders the page from the server. */
+export function useSave(tripId: string) {
+  const router = useRouter();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  async function save(edits: EditChange[]) {
+    if (!edits.length) return true;
+    setBusy(true);
+    setError(null);
+    const r = await fetch(`/api/trips/${encodeURIComponent(tripId)}/edits`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ edits }),
+    }).catch(() => null);
+    setBusy(false);
+    if (!r?.ok) {
+      setError(r ? await r.text() : 'Not saved: check the connection and try again.');
+      return false;
+    }
+    router.refresh();
+    return true;
+  }
+  return { save, busy, error };
+}
+
+/** "Open in Google Maps" for a point, at Google's own place when its ID is known. */
+export const mapsLink = (lat: number | null, lng: number | null, placeId?: string | null) =>
+  lat === null || lng === null
+    ? null
+    : `https://www.google.com/maps/search/?api=1&query=${lat},${lng}${placeId ? `&query_place_id=${encodeURIComponent(placeId)}` : ''}`;
+
+export const metres = (aLat: number, aLng: number, bLat: number, bLng: number) => {
+  const rad = Math.PI / 180;
+  const x = (bLng - aLng) * rad * Math.cos(((aLat + bLat) / 2) * rad);
+  const y = (bLat - aLat) * rad;
+  return Math.sqrt(x * x + y * y) * 6_371_000;
+};
+export const distance = (m: number) =>
+  m < 1000 ? `${Math.round(m / 10) * 10} m` : `${(m / 1000).toFixed(1)} km`;
+export const dayLabel = (date: string) =>
+  new Date(`${date}T12:00:00Z`)
+    .toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      timeZone: 'UTC',
+    })
+    .toUpperCase();

@@ -6,19 +6,56 @@ import { EntryCaption } from './EntryCaption';
 import { TransitIcon } from './icons';
 import { LanePath, laneClass } from './lanes';
 
+/** Edit mode's additions to the rail (DESIGN.md, "Edit mode, round 2", T1), drawn by the caller:
+ *  what goes under an entry, the dashed cards placed at their own times, and a day banner's chip. */
+export type TimelineEdit = {
+  under: (e: Entry) => React.ReactNode;
+  ghosts: (date: string) => { key: string; time: string; node: React.ReactNode }[];
+  day: (date: string) => React.ReactNode;
+  onEdit: (e: Entry) => void;
+  /** An entry added from the Timeline, with a way to undo it. */
+  added: (e: Entry) => React.ReactNode;
+};
+
 type TimelineItem =
   | { kind: 'entry'; entry: Entry; index: number }
-  | { kind: 'end'; id: string; time: string | null; lane: number; outer: number };
-/** A day's entries plus the end markers of multi-day spans, in time order; `index` drives left/right alternation. */
-function timelineItems(d: Day): TimelineItem[] {
+  | { kind: 'end'; id: string; time: string | null; lane: number; outer: number }
+  | { kind: 'ghost'; key: string; time: string; node: React.ReactNode };
+/** A day's entries plus the end markers of multi-day spans (and in edit mode its dashed cards), in
+ *  time order; `index` drives left/right alternation. */
+function timelineItems(d: Day, edit?: TimelineEdit): TimelineItem[] {
   const items: TimelineItem[] = d.entries.map((entry, index) => ({ kind: 'entry', entry, index }));
   const timeOf = (x: TimelineItem) => (x.kind === 'entry' ? x.entry.time : x.time);
+  for (const g of edit?.ghosts(d.date) ?? []) {
+    const at = items.findIndex((x) => (timeOf(x) ?? '') > g.time);
+    items.splice(at === -1 ? items.length : at, 0, { kind: 'ghost', ...g });
+  }
   const ends = [...d.spanEnds].sort((a, b) => (a.time ?? '99').localeCompare(b.time ?? '99'));
   for (const end of ends) {
     const at = items.findIndex((x) => !!end.time && (timeOf(x) ?? '') > end.time);
     items.splice(at === -1 ? items.length : at, 0, { kind: 'end', ...end });
   }
   return items;
+}
+
+/** Each item's side: an entry keeps its own alternation (as viewers see it); a dashed card takes the
+ *  side opposite the item before it. */
+function withSides(items: TimelineItem[]) {
+  let last: 'left' | 'right' = 'right';
+  return items.map((item) => {
+    const side: 'left' | 'right' =
+      item.kind === 'entry'
+        ? item.index % 2 === 0
+          ? 'left'
+          : 'right'
+        : item.kind === 'ghost'
+          ? last === 'left'
+            ? 'right'
+            : 'left'
+          : last;
+    if (item.kind !== 'end') last = side;
+    return { item, side };
+  });
 }
 
 /** Multi-day lanes drawn beside the rail on this day (on phones the text column clears them). */
@@ -55,6 +92,7 @@ export function Timeline({
   entriesById,
   onChoose,
   onShowAlbum,
+  edit,
 }: {
   days: Day[];
   railRef: React.RefObject<HTMLElement | null>;
@@ -63,6 +101,7 @@ export function Timeline({
   entriesById: Map<string, Entry>;
   onChoose: (e: Entry, from?: string) => void;
   onShowAlbum: (date: string) => void;
+  edit?: TimelineEdit;
 }) {
   // Multi-day focus: the hovered span, else the selected one; its lane, labels and end marker
   // are emphasised and other lanes fade (only when more than one lane is drawn).
@@ -138,6 +177,7 @@ export function Timeline({
             </span>
             {d.tags.length > 0 && <small>{d.tags.join(' · ')}</small>}
           </button>
+          {edit?.day(d.date)}
           <div className="entries" style={{ '--day-lanes': dayLanes(d) } as React.CSSProperties}>
             {d.continuing.map((s) => (
               <button
@@ -157,8 +197,17 @@ export function Timeline({
                 {s.title} · {s.final ? 'final day' : `day ${s.dayNumber}`}
               </button>
             ))}
-            {timelineItems(d).map((item) =>
-              item.kind === 'end' ? (
+            {withSides(timelineItems(d, edit)).map(({ item, side }) =>
+              item.kind === 'ghost' ? (
+                <div
+                  key={`ghost-${item.key}`}
+                  className={`entry ghost-entry entry-${side}`}
+                  data-finding={item.key}
+                >
+                  <span className="entry-node" />
+                  <span className="entry-content">{item.node}</span>
+                </div>
+              ) : item.kind === 'end' ? (
                 <div
                   key={`end-${item.id}`}
                   className={`multiday-end ${laneClass(item.lane)} ${spanFocus(item.id)}`}
@@ -174,7 +223,8 @@ export function Timeline({
                 <TimelineEntry
                   key={item.entry.id}
                   entry={item.entry}
-                  side={item.index % 2 === 0 ? 'left' : 'right'}
+                  side={side}
+                  edit={edit}
                   active={
                     !!selected &&
                     !album &&
@@ -218,18 +268,27 @@ function TimelineEntry({
   active,
   onClick,
   hover,
+  edit,
 }: {
   entry: Entry;
   side: 'left' | 'right';
   active: boolean;
   onClick: () => void;
   hover: object;
+  edit?: TimelineEdit;
 }) {
+  // In edit mode the entry holds buttons of its own (its findings' answers), so it is a container
+  // with a real edit button (the pencil); a click anywhere on it opens the editor too.
+  const Tag = edit ? 'div' : 'button';
+  const editable = edit && entry.stay?.role !== 'checkout';
   return (
-    <button
+    <Tag
       data-entry-id={entry.id}
       className={`entry ${entry.span_end ? 'multiday-start' : ''} ${active ? 'active' : ''} type-${entry.type} ${entry.title ? '' : 'no-title'} entry-${side}`}
-      onClick={onClick}
+      onClick={(ev: React.MouseEvent) => {
+        if (edit && (ev.target as HTMLElement).closest('button, a, input, label')) return;
+        onClick();
+      }}
       {...hover}
       style={
         entry.outer !== undefined ? ({ '--outer': entry.outer } as React.CSSProperties) : undefined
@@ -240,7 +299,17 @@ function TimelineEntry({
         className="entry-content"
         dir={entry.type === 'note' ? noteDir(entry.notes || entry.title) : undefined}
       >
-        {entry.title && <strong>{entry.title}</strong>}
+        {entry.title && (
+          <strong>
+            {/* Marks sit on the side away from the rail (DESIGN.md, "Edit mode, round 2", K1): before
+                a left-hand title, after a right-hand one; in one column (narrow) always after. */}
+            {side === 'left' && (
+              <TitleMarks entry={entry} edit={editable ? edit : undefined} place="before" />
+            )}
+            {entry.title}
+            <TitleMarks entry={entry} edit={editable ? edit : undefined} place="after" />
+          </strong>
+        )}
         <small>{byline(entry)}</small>
         {entry.type === 'transit' && (
           <span className="transit-route">
@@ -255,13 +324,86 @@ function TimelineEntry({
             {entry.photos.slice(0, entry.type === 'photo' ? 1 : 3).map((p, i) => (
               <img key={p.id} src={p.url} alt="" style={{ '--i': i } as React.CSSProperties} />
             ))}
+            {entry.photos.slice(0, entry.type === 'photo' ? 1 : 3).map(
+              (p, i) =>
+                p.highlighted && (
+                  <b
+                    key={`star-${p.id}`}
+                    className="photo-star"
+                    style={{ '--i': i } as React.CSSProperties}
+                    aria-label="A highlight"
+                  >
+                    ★
+                  </b>
+                ),
+            )}
           </span>
         )}
         {entry.notes && (entry.type === 'place' || entry.stay?.role === 'checkin') && (
           <EntryCaption text={entry.notes} />
         )}
         {entry.notes && entry.type === 'note' && <EntryCaption text={entry.notes} lines={4} />}
+        {edit?.added(entry)}
+        {edit?.under(entry)}
       </span>
+    </Tag>
+  );
+}
+
+/** The highlight's stamp and, in edit mode, the round pencil that opens the editor. */
+function TitleMarks({
+  entry,
+  edit,
+  place,
+}: {
+  entry: Entry;
+  edit?: TimelineEdit;
+  place: 'before' | 'after';
+}) {
+  if (!entry.highlighted && !edit) return null;
+  const stamp = entry.highlighted && <span className="hl-stamp">HIGHLIGHT</span>;
+  const pencil = edit && (
+    <button
+      className="pencil"
+      aria-label={`Edit ${entry.title}`}
+      onClick={() => edit.onEdit(entry)}
+    >
+      <PencilIcon />
     </button>
+  );
+  // The pencil is outermost on either side.
+  return (
+    <span className={`title-marks marks-${place}`}>
+      {place === 'before' ? (
+        <>
+          {pencil}
+          {stamp}
+        </>
+      ) : (
+        <>
+          {stamp}
+          {pencil}
+        </>
+      )}
+    </span>
+  );
+}
+
+function PencilIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="13"
+      height="13"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M17 3a2.85 2.85 0 0 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+      <path d="m15 5 4 4" />
+    </svg>
   );
 }

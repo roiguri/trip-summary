@@ -298,3 +298,43 @@ test('planned stops with no visit are listed, unless the owner said that’s fin
     'nothing without a Timeline',
   );
 });
+
+test('what the owner set aside is kept, not dropped: ignored, dismissed, fine as it is', () => {
+  const p = plain.proposals.find((x) => x.entryId === ids['carmel-beach-visit'])!;
+  const [stop] = expected.suggestions;
+  const r = merge(
+    input([
+      edit({ target: 'entry', key: String(p.entryId), field: 'proposal', value: 'ignored' }),
+      edit({ target: 'suggestion', key: stop, field: 'dismissed', value: true }),
+      edit({
+        target: 'entry',
+        key: String(ids['lovers-point-visit']),
+        field: 'noVisit',
+        value: true,
+      }),
+    ]),
+  );
+  assert.ok(r.setAside.ignored.some((x) => x.entryId === p.entryId));
+  assert.ok(r.setAside.dismissed.some((s) => s.key === stop));
+  assert.ok(r.setAside.fine.includes(ids['lovers-point-visit']));
+  assert.deepEqual(plain.setAside, { dismissed: [], ignored: [], fine: [] });
+});
+
+test('an entry’s chosen photos come first, in order; a highlighted photo is marked', () => {
+  const photosOf = entry('carmel-beach-visit').photos;
+  const [a, b, c, d] = photosOf.map((x) => x.id);
+  const key = String(ids['carmel-beach-visit']);
+  const r = merge(
+    input([
+      edit({ target: 'entry', key, field: 'photos', value: `${d},${a}` }),
+      edit({ target: 'photo', key: b, field: 'highlighted', value: true }),
+    ]),
+  );
+  const ordered = entry('carmel-beach-visit', r).photos;
+  assert.deepEqual(
+    ordered.slice(0, 4).map((x) => x.id),
+    [d, a, b, c],
+  );
+  assert.equal(ordered.find((x) => x.id === b)?.highlighted, true);
+  assert.equal(ordered.find((x) => x.id === a)?.highlighted, undefined, 'only where marked');
+});

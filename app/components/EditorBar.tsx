@@ -70,6 +70,9 @@ export function EditorBar({
         </a>
       )}
       <span className="bar-space" />
+      <a className="pill-button small primary" href="?edit=1">
+        Edit
+      </a>
       <a className="pill-button small" href="?view=viewer">
         Preview as a viewer
       </a>

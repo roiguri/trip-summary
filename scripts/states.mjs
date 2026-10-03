@@ -11,14 +11,23 @@ export const viewportOf = (name) => {
   return { viewport: { width: 1440, height: 900 } };
 };
 
-/** The page a state starts on: the home page for `home` states, else the sample trip. */
-export const pageOf = (name) => (/(^|-)home/.test(name) ? '/' : null);
+/** The page a state starts on: the home page for `home` states, edit mode and the highlight on the
+ *  mock trip (imported and merged, with its Timeline and photos: `npm run seed -- --mocks`), else the
+ *  sample trip. */
+export const pageOf = (name) =>
+  /(^|-)home/.test(name)
+    ? '/'
+    : /(^|-)edit-/.test(name)
+      ? '/trips/sample-coast-merged?edit=1'
+      : name === 'highlight'
+        ? '/trips/sample-coast-merged'
+        : null;
 /** Who is signed in: the locked journey states are what a viewer sees; the home page and the
  *  editors' bar are the owner's; the empty home page is a guest's on no trip. */
 export const accountOf = (name) =>
   name.endsWith('home-empty')
     ? 'guest'
-    : /(^|-)(home|editor-bar|share)/.test(name)
+    : /(^|-)(home|editor-bar|share|edit-|highlight)/.test(name)
       ? 'editor'
       : 'viewer';
 
@@ -126,6 +135,20 @@ export const STATES = {
   'editor-bar': async () => {},
   share: (p) => p.click('.editor-bar [aria-controls="share"]'),
   'phone-editor-bar': async () => {},
+  'edit-timeline': async () => {},
+  'edit-entry': (p) =>
+    p
+      .locator('.left .entry', { hasText: 'Carmel Beach' })
+      .first()
+      .locator('.pencil:visible')
+      .click(),
+  'edit-stop': (p) =>
+    p.locator('.left .ghost-card').first().getByRole('button', { name: 'Add…' }).click(),
+  'edit-next': async (p) => {
+    for (let i = 0; i < 3; i++) await p.getByRole('button', { name: 'Next finding' }).click();
+  },
+  'phone-edit-timeline': (p) => p.evaluate(() => document.querySelector('.left')?.scrollTo(0, 500)),
+  highlight: (p) => scrollToDay(p, '2026-05-15', 300),
   'home-empty': async () => {},
   'phone-home': async () => {},
 };

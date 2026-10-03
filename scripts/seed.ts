@@ -42,6 +42,15 @@ if (process.argv.includes('--mocks')) {
   );
   await store.upsertPhotos(id, mockPhotos());
   for (const e of mockEdits(id)) await store.setEdit(id, e);
+  // A highlight, so the visual tests see one (DESIGN.md, "Highlight (H5)").
+  const ids = JSON.parse(readFileSync('data/mock/expected.json', 'utf8')).entryIds;
+  await store.setEdit(id, {
+    target: 'entry',
+    key: String(ids['point-lobos-visit']),
+    field: 'highlighted',
+    value: true,
+    by: 'seed',
+  });
   await rebuildJournal(store, id);
   console.log(`Seeded "${id}" from the mock sources`);
 } else {

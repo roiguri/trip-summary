@@ -1,7 +1,19 @@
 import { getStore } from '../../../../../../lib/store';
-import { editorOnly } from '../../../../../../lib/auth/guard';
+import { editorOnly, editorReads } from '../../../../../../lib/auth/guard';
 import { pickerFor } from '../../../../../../lib/google/choose';
 import { copyNextPhotos, StageError } from '../../../../../../lib/import/stage';
+
+// Where the copying stands, without copying: 404 when no photo import is copying (it was applied,
+// discarded, or the data is gone), so a browser forgets a job it remembers.
+export async function GET(_req: Request, { params }: { params: Promise<{ tripId: string }> }) {
+  const { tripId } = await params;
+  const denied = await editorReads(tripId);
+  if (denied) return denied;
+  const store = getStore();
+  const pending = await store.getPending(tripId, 'photos');
+  if (!pending) return new Response('There is no photo import copying', { status: 404 });
+  return Response.json({ total: pending.total, ...(await store.countPicked(tripId)) });
+}
 
 // Copies the next few picked items, in parallel; the page's background copier calls it until none
 // are left. Each call is short, so it fits any host's time limit.

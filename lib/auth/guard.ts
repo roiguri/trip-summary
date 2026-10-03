@@ -13,6 +13,15 @@ export async function editorOnly(req: Request, tripId: string) {
   return null;
 }
 
+/** The same check for a read that changes nothing (a GET), which browsers send without an Origin
+ *  header; another site can't read the answer. */
+export async function editorReads(tripId: string) {
+  if (!(await currentAccount())) return new Response('Sign in first', { status: 401 });
+  if ((await accessToTrip(tripId))?.access !== 'edit')
+    return new Response('Not found', { status: 404 });
+  return null;
+}
+
 export async function ownerOnly(req: Request) {
   if (!sameOrigin(req)) return new Response('Forbidden', { status: 403 });
   if (!(await currentAccount())) return new Response('Sign in first', { status: 401 });

@@ -134,10 +134,8 @@ export async function copyNextPhotos(
     copied.map((p) => p.mediaId),
     expired ? [] : failed,
   );
-  const done = pending.done + copied.length;
-  const failedTotal = pending.failed + (expired ? 0 : failed.length);
+  const { done, failed: failedTotal, remaining } = await store.countPicked(tripId);
   await store.updatePending(tripId, 'photos', { done, failed: failedTotal });
-  const remaining = Math.max(0, pending.total - done - failedTotal);
   if (!remaining) await picker.deleteSession(pending.sessionId);
   return { total: pending.total, done, failed: failedTotal, remaining };
 }

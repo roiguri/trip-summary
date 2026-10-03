@@ -72,6 +72,21 @@ test('a copy job works through the picked items a batch at a time, then waits fo
   assert.ok(urls.length === 20 && urls.every((u) => u.startsWith(`/media/trips/${TRIP}/media/`)));
 });
 
+test('overlapping copy requests (a page reloaded mid-request) still count every item', async () => {
+  const picked = (await items()).slice(20, 44);
+  await beginPhotos(store, TRIP, 'mock', picked, 'e');
+  const loop = async () => {
+    let p = await copyNextPhotos(store, TRIP, picker, 8);
+    while (p.remaining) p = await copyNextPhotos(store, TRIP, picker, 8);
+    return p;
+  };
+  const [a, b] = await Promise.all([loop(), loop()]);
+  for (const p of [a, b]) assert.equal(p.remaining, 0);
+  const pending = await store.getPending(TRIP, 'photos');
+  assert.deepEqual([pending?.done, pending?.failed], [24, 0]);
+  await discardPending(store, TRIP, 'photos');
+});
+
 test('a re-pick skips photos already in the trip; applying before copying ends is refused', async () => {
   const all = await items();
   const { pending } = await beginPhotos(store, TRIP, 'mock', all.slice(15, 30), 'e');

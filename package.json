@@ -20,9 +20,12 @@
     "check:access": "node scripts/check-access.mjs",
     "check:import": "node scripts/check-import.mjs",
     "check:photos": "node scripts/check-photos.mjs",
+    "check:edit": "node scripts/check-edit.mjs",
     "format:check": "prettier --check .",
     "visual": "node scripts/visual.mjs",
     "visual:update": "node scripts/visual.mjs --update",
+    "visual:edit": "node scripts/visual.mjs --edit",
+    "visual:edit:update": "node scripts/visual.mjs --edit --update",
     "check:styles": "node scripts/style-diff.mjs",
     "mocks": "node scripts/make-mocks.ts"
   },

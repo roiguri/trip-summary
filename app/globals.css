@@ -2971,3 +2971,582 @@ button.pill-button {
     transition: none;
   }
 }
+
+/* Edit mode (DESIGN.md, "Edit mode"): the right column becomes the edit panel; nothing here applies
+   outside edit mode except the highlight's stamp. */
+.bar-hint {
+  font-size: 12px;
+  color: #6b766f;
+}
+.right.edit-col {
+  overflow-y: auto;
+  pointer-events: auto;
+  scrollbar-width: thin;
+}
+.editor {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid #e3e8df;
+  border-radius: 18px;
+  background: #fffdf8;
+  box-shadow: 0 8px 20px #28382e14;
+  color: #26382e;
+}
+.ed-kick {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: #8b9a8d;
+}
+.ed-kick .link-button {
+  letter-spacing: 0;
+}
+.ed-field {
+  display: grid;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #6e8779;
+}
+.ed-field input,
+.ed-field textarea,
+.ed-field select {
+  padding: 8px 10px;
+  border: 1px solid #d5e1d4;
+  border-radius: 9px;
+  background: #fffdfa;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: #26382e;
+}
+.ed-field textarea {
+  resize: vertical;
+  line-height: 1.45;
+}
+.ed-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 10px;
+}
+.ed-modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.ed-modes b {
+  width: 100%;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: #6e8779;
+}
+.ed-modes button {
+  padding: 5px 10px;
+  border: 1px solid #a7d0c7;
+  border-radius: 14px;
+  background: #f2f7f1;
+  font-size: 12px;
+  font-weight: 700;
+  color: #397b78;
+}
+.ed-modes button.on {
+  background: #397b78;
+  color: #fff;
+}
+.ed-visit {
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #eef4ea;
+  font-size: 12px;
+}
+.ed-visit small {
+  color: #5d6b62;
+}
+.ed-visit .acts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.ed-photos {
+  display: grid;
+  gap: 8px;
+  font-size: 12px;
+}
+.ed-photos > small {
+  color: #7f8c84;
+}
+.ed-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.ed-photo {
+  position: relative;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: none;
+}
+.ed-photo img,
+.ed-photo-img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  object-fit: cover;
+}
+.ed-photo.on img {
+  outline: 3px solid #3f5c4b;
+  outline-offset: -3px;
+}
+.ed-photo.hidden img {
+  opacity: 0.35;
+}
+.ed-photo em {
+  position: absolute;
+  left: 5px;
+  bottom: 5px;
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: #1d2420aa;
+  font-size: 9px;
+  font-weight: 800;
+  font-style: normal;
+  letter-spacing: 0.08em;
+  color: #fff;
+}
+.ed-selbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: #eef4ea;
+}
+.ed-moveto,
+.sg-plan {
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+  border: 1px solid #d5e0d3;
+  border-radius: 12px;
+}
+.ed-moveto > small {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: #8b9a8d;
+}
+.ed-moveto button,
+.sg-plan button {
+  display: grid;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 9px;
+  background: none;
+  font-size: 13px;
+  text-align: left;
+  color: #26382e;
+}
+.ed-moveto button:hover,
+.sg-plan button:hover {
+  background: #f3f6ef;
+}
+.ed-moveto button span,
+.sg-plan button span,
+.sg-plan small {
+  font-size: 11px;
+  color: #7f8c84;
+}
+.ed-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.toggle {
+  padding: 5px 10px;
+  border: 1px solid #d5e1d4;
+  border-radius: 14px;
+  background: #fffdf8;
+  font-size: 12px;
+  font-weight: 700;
+  color: #3f5c4b;
+}
+.toggle.on {
+  border-color: #b0734f;
+  background: #f6e3d3;
+  color: #9a5a36;
+}
+.mini-map {
+  height: 150px;
+  overflow: hidden;
+  border-radius: 12px;
+}
+.mini-pin {
+  display: block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #b0734f;
+  box-shadow: 0 0 0 4px #b0734f40;
+}
+.mini-pin.plan {
+  border: 2px solid #b98468;
+  background: #fffdfa;
+  box-shadow: none;
+}
+.sg-meta {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.sg-choice {
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid #e3e8df;
+  border-radius: 12px;
+  font-size: 13px;
+}
+.sg-choice.on {
+  border-color: #3f5c4b;
+  box-shadow: 0 0 0 2px #e3eedf;
+}
+.sg-radio {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  cursor: pointer;
+}
+.radio {
+  padding: 4px 10px;
+  border: 1px solid #d5e1d4;
+  border-radius: 12px;
+  background: #fffdf8;
+  font-size: 11px;
+  font-weight: 700;
+  color: #3f5c4b;
+}
+.radio.on {
+  border-color: #3f5c4b;
+  background: #3f5c4b;
+  color: #fff;
+}
+.ed-field input:focus-visible,
+.ed-field textarea:focus-visible,
+.ed-field select:focus-visible,
+.ed-photo:focus-visible,
+.toggle:focus-visible,
+.radio:focus-visible {
+  outline: 2px solid #b0734f;
+  outline-offset: 2px;
+}
+
+/* Marks beside an entry's title, on the side away from the rail (DESIGN.md, "Edit mode, round 2",
+   K1): the highlight's stamp, and in edit mode the round pencil that opens the editor. They flow with
+   the title's words. A left-hand entry draws them before its title (its text ends at the rail). */
+.title-marks {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  vertical-align: 2px;
+}
+.marks-before {
+  margin-right: 9px;
+}
+.marks-after {
+  margin-left: 9px;
+}
+.entry-left .marks-after {
+  display: none;
+}
+.hl-stamp {
+  display: inline-block;
+  padding: 3px 7px 2px;
+  border: 1.5px solid #a8653f;
+  border-radius: 3px;
+  background: #fdf3ea;
+  transform: rotate(-2deg);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.08em;
+  color: #985733;
+}
+.pencil {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: #9a5a36;
+}
+.pencil:hover {
+  color: #6f3d20;
+}
+.pencil:focus-visible {
+  outline: 2px solid #b0734f;
+  outline-offset: 2px;
+}
+.shell.editing .entry {
+  cursor: pointer;
+}
+/* A highlighted photo's star, on its card in the photo fan (PH1). */
+.photo-star {
+  position: absolute;
+  z-index: 2;
+  top: -2px;
+  left: calc(var(--i) * 86px + 70px);
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #b0734f;
+  box-shadow: 0 1px 3px #0005;
+  font-size: 12px;
+  line-height: 1;
+  color: #fff;
+}
+
+/* Findings on the timeline (T1): under their entry, or as a dashed entry at their own time. */
+.fnd-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+.entry-left .fnd-row {
+  align-items: flex-end;
+}
+.entry-right .fnd-row {
+  align-items: flex-start;
+}
+.fnd {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border: 1px solid #e2c6ad;
+  border-radius: 10px;
+  background: #fff8f0;
+  font-size: 11px;
+  color: #7a4e33;
+}
+.fnd b {
+  font-weight: 800;
+}
+.fnd.set-aside,
+.ghost-card.set-aside {
+  border-style: dashed;
+  border-color: #cfd6cc;
+  background: #f5f6f2;
+  color: #7f8a83;
+}
+.fnd.current,
+.ghost-card.current {
+  box-shadow: 0 0 0 3px #f2d7c0;
+}
+.entry.ghost-entry {
+  min-height: 0;
+  cursor: default;
+}
+.ghost-entry .entry-node {
+  border-style: dashed;
+  border-color: #c9b49f;
+}
+.ghost-entry .entry-node::after {
+  display: none;
+}
+.ghost-entry .entry-content::before {
+  border-top-style: dashed;
+  border-top-color: #c9b49f;
+}
+.ghost-card {
+  display: grid;
+  gap: 6px;
+  max-width: 290px;
+  padding: 10px 12px;
+  border: 2px dashed #c9b49f;
+  border-radius: 14px;
+  background: #fffaf2;
+  text-align: left;
+}
+.entry-left .ghost-card {
+  margin-left: auto;
+}
+.ghost-card small {
+  margin: 0;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: #a8653f;
+}
+.ghost-card.set-aside small {
+  color: #8a948d;
+}
+.ghost-card strong {
+  font-size: 15px;
+}
+.ghost-card .loose {
+  display: flex;
+  gap: 4px;
+}
+.ghost-card .loose img {
+  width: 44px;
+  height: 44px;
+  border-radius: 5px;
+  object-fit: cover;
+}
+.ghost-card .acts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.day-accept {
+  position: relative;
+  z-index: 2;
+  width: max-content;
+  margin: 26px auto 18px;
+  padding: 4px 10px;
+  border: 1px solid #e2c6ad;
+  border-radius: 12px;
+  background: #fff8f0;
+  font-size: 11px;
+  font-weight: 700;
+  color: #7a4e33;
+}
+.from-timeline {
+  display: block;
+  margin-top: 6px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #a8653f;
+}
+.from-timeline .link-button {
+  font-size: 10px;
+  letter-spacing: 0;
+}
+
+/* The edit-mode bar: stepping through the findings, and "Show resolved" (R1). */
+.review-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 3px 2px 10px;
+  border: 1px solid #e2c6ad;
+  border-radius: 16px;
+  background: #fff8f0;
+  font-size: 12px;
+  font-weight: 700;
+  color: #7a4e33;
+}
+.switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #3f5c4b;
+  cursor: pointer;
+}
+.switch input {
+  position: absolute;
+  opacity: 0;
+}
+.switch i {
+  position: relative;
+  width: 26px;
+  height: 15px;
+  border-radius: 8px;
+  background: #cfd8cc;
+}
+.switch i::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #fff;
+}
+.switch input:checked + i {
+  background: #3f5c4b;
+}
+.switch input:checked + i::after {
+  left: 13px;
+}
+.switch input:focus-visible + i {
+  outline: 2px solid #b0734f;
+  outline-offset: 2px;
+}
+
+/* The editor's photo grid: the journey's photos numbered, highlights starred (MP1, PH1). */
+.ed-photo .num {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  display: grid;
+  place-items: center;
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  background: #3f5c4b;
+  font-size: 10px;
+  font-weight: 800;
+  color: #fff;
+}
+.ed-photo .pstar {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: grid;
+  place-items: center;
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  background: #b0734f;
+  font-size: 11px;
+  line-height: 1;
+  color: #fff;
+}
+
+/* One column (under 1200px): every entry's text starts at the rail, so the marks follow the title. */
+@media (max-width: 1199px) {
+  .entry-left .marks-before {
+    display: none;
+  }
+  .entry-left .marks-after {
+    display: inline-flex;
+  }
+  .entry-left .fnd-row {
+    align-items: flex-start;
+  }
+  .entry-left .ghost-card {
+    margin-left: 0;
+  }
+  .day-accept {
+    margin-left: var(--text-x, 0);
+  }
+}

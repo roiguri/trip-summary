@@ -17,6 +17,10 @@ import { signIn, TRIP } from './signed-in.mjs';
 const BASE = process.env.BASE_URL || 'http://localhost:3100';
 const UPDATE = process.argv.includes('--update');
 const ONLY = process.argv.find((a) => a.startsWith('--only='))?.slice(7);
+// Edit mode's states use the mock trip (`npm run seed -- --mocks`), which also shows on the home
+// page; they run in a second pass, after it is seeded: `--edit`.
+const EDIT = process.argv.includes('--edit');
+const isEdit = (n) => /(^|-)edit-/.test(n) || n === 'highlight';
 const DIR = 'tests/visual';
 // A pixel differs when a channel moves by more than PIXEL_DELTA; a state fails when more than
 // MAX_RATIO of its pixels differ (absorbs anti-aliasing noise, catches any real change).
@@ -108,7 +112,7 @@ async function compare(page, a, b) {
   }
   const tool = await (await browser.newContext()).newPage();
   const failed = [];
-  const names = Object.keys(STATES).filter((n) => !ONLY || n === ONLY);
+  const names = Object.keys(STATES).filter((n) => (ONLY ? n === ONLY : isEdit(n) === EDIT));
   for (const name of names) {
     const page = await pageFor(name);
     await page.goto(BASE + (pageOf(name) ?? TRIP), { waitUntil: 'networkidle' });
@@ -117,12 +121,16 @@ async function compare(page, a, b) {
     await page.waitForTimeout(1200);
     await STATES[name](page);
     await page.waitForTimeout(1200);
+    // Images still loading, for at most 5s: a lazy image out of view never loads.
     await page.evaluate(() =>
-      Promise.all(
-        [...document.images]
-          .filter((i) => !i.complete)
-          .map((i) => new Promise((r) => (i.onload = i.onerror = r))),
-      ),
+      Promise.race([
+        Promise.all(
+          [...document.images]
+            .filter((i) => !i.complete)
+            .map((i) => new Promise((r) => (i.onload = i.onerror = r))),
+        ),
+        new Promise((r) => setTimeout(r, 5000)),
+      ]),
     );
     const shot = await page.screenshot();
     const file = `${DIR}/baseline/${name}.png`;
@@ -145,7 +153,7 @@ async function compare(page, a, b) {
     ? []
     : readdirSync(`${DIR}/baseline`)
         .map((f) => f.replace(/\.png$/, ''))
-        .filter((n) => !ONLY && !STATES[n]);
+        .filter((n) => !ONLY && !STATES[n] && isEdit(n) === EDIT);
   for (const n of stale) console.log(`stale    ${n}  (baseline without a state; delete it)`);
   for (const e of errors) console.log(`error    ${e}`);
   await browser.close();

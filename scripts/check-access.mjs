@@ -54,7 +54,8 @@ ok(
 await ep.goto(BASE + '/');
 ok(
   'the owner’s home lists every trip and offers a new one',
-  (await ep.locator('.trip-card').count()) === 2 &&
+  // the sample, the test trip and the mock trip (seeded for edit mode)
+  (await ep.locator('.trip-card').count()) === 3 &&
     (await ep.locator('text=+ New trip').count()) === 1,
 );
 const res = await ep.goto(BASE + '/trips/no-such-trip');

@@ -156,6 +156,19 @@ export function createStore(db: Firestore) {
       for (const id of failed) batch.update(col.doc(docId(id)), { done: true, failed: true });
       await batch.commit();
     },
+    /** Where the picked items stand, counted from their records: overlapping copy requests (a page
+     *  reloaded mid-request) can't lose an update the way a stored counter can. */
+    async countPicked(tripId: string) {
+      const col = sub(tripId, 'pickedItems');
+      const [waiting, failed, all] = await Promise.all([
+        col.where('done', '==', false).count().get(),
+        col.where('failed', '==', true).count().get(),
+        col.count().get(),
+      ]);
+      const left = waiting.data().count;
+      const bad = failed.data().count;
+      return { done: all.data().count - left - bad, failed: bad, remaining: left };
+    },
     async putPendingPhotos(tripId: string, photos: TripPhoto[]) {
       const col = sub(tripId, 'pendingPhotos');
       await writeAll(

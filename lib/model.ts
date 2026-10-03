@@ -9,6 +9,8 @@ export type Photo = {
   lng: number | null;
   date: string;
   time: string;
+  /** One of the owner's favourite photos (DESIGN.md, "Edit mode, round 2", PH1). */
+  highlighted?: true;
 };
 export type Entry = {
   id: string;
