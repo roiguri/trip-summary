@@ -34,11 +34,7 @@ export function useSave(tripId: string) {
   return { save, busy, error };
 }
 
-/** "Open in Google Maps" for a point, at Google's own place when its ID is known. */
-export const mapsLink = (lat: number | null, lng: number | null, placeId?: string | null) =>
-  lat === null || lng === null
-    ? null
-    : `https://www.google.com/maps/search/?api=1&query=${lat},${lng}${placeId ? `&query_place_id=${encodeURIComponent(placeId)}` : ''}`;
+export { mapsLink } from '../../../lib/maps-link';
 
 export const metres = (aLat: number, aLng: number, bLat: number, bLng: number) => {
   const rad = Math.PI / 180;

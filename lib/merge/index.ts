@@ -58,6 +58,9 @@ export type Suggestion = {
   endTime: string;
   lat: number | null;
   lng: number | null;
+  /** Where a journey ended (null for a visit). */
+  endLat: number | null;
+  endLng: number | null;
   mode: TransitMode | null;
 };
 
@@ -77,6 +80,9 @@ export type SegmentView = {
   endTime: string;
   lat: number | null;
   lng: number | null;
+  /** Where a journey ended (null for a visit). */
+  endLat: number | null;
+  endLng: number | null;
   placeId: string | null;
   mode: TransitMode | null;
   /** The entry it is matched or linked to, if any. */
@@ -360,6 +366,8 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
       endTime: local(s.endUtc, s.endOffsetMin, timeZone).time,
       lat: s.lat,
       lng: s.lng,
+      endLat: s.kind === 'activity' ? s.endLat : null,
+      endLng: s.kind === 'activity' ? s.endLng : null,
       mode: s.kind === 'activity' && s.mode ? (MODES[s.mode] ?? null) : null,
     });
   }
@@ -575,6 +583,8 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
         endTime: local(s.endUtc, s.endOffsetMin, timeZone).time,
         lat: s.lat,
         lng: s.lng,
+        endLat: s.kind === 'activity' ? s.endLat : null,
+        endLng: s.kind === 'activity' ? s.endLng : null,
         placeId: s.placeId,
         mode: s.kind === 'activity' && s.mode ? (MODES[s.mode] ?? null) : null,
         entryId: matchedTo.get(s.key) ?? null,

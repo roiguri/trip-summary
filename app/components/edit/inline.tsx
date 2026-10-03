@@ -151,7 +151,7 @@ export function GhostCard({
     );
   if (f.kind !== 'stop') return null;
   const s = f.suggestion;
-  const maps = mapsLink(s.lat, s.lng, s.placeId);
+  const maps = mapsLink(s);
   const what =
     s.kind === 'visit' ? 'A stop you didn’t plan' : `A journey by ${MODE[s.mode ?? ''] ?? 'road'}`;
   if (f.setAside)
