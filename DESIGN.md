@@ -151,6 +151,8 @@ From the first build; same preview page. These replace M2's inbox and refine H5.
 - Timeline nodes are a plain copper ring, without the inner dot.
 - The right column (map, details, editor) sits 16px from the screen's right edge at every width.
 - Previous and Next in the edit-mode bar use thin drawn chevrons.
+- The map draws travel legs only from about city level in (zoom 10); zoomed out over a whole trip
+  they crowded the pins. The selected leg always shows.
 
 ## Exact sampled backgrounds and remaining gaps
 

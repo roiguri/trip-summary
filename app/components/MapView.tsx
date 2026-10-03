@@ -19,6 +19,9 @@ function boundsOf(points: { lat: number | null; lng: number | null }[]): Bounds 
     [Math.max(...lngs), Math.max(...lats)],
   ];
 }
+/** The zoom from which travel legs are drawn on the map. */
+const LEG_MIN_ZOOM = 10;
+
 export function MapView({
   trip,
   selected,
@@ -289,7 +292,10 @@ export function MapView({
           : div.classList.contains('dim-pin')
             ? '1'
             : '2');
+      // Travel legs only from about city level in (user decision, Oct 3): zoomed out over a whole
+      // trip they would crowd the map. The selected leg always shows.
       for (const leg of legs) {
+        if (m.getZoom() < LEG_MIN_ZOOM && selected?.id !== leg.entry.id) continue;
         const div = document.createElement('button');
         div.className = `map-leg ${onDay(leg.entry) ? '' : 'dim-pin'} ${selected?.id === leg.entry.id ? 'chosen-pin' : ''}`;
         div.title = leg.entry.title;
