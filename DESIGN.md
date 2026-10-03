@@ -153,6 +153,8 @@ From the first build; same preview page. These replace M2's inbox and refine H5.
 - Previous and Next in the edit-mode bar use thin drawn chevrons.
 - The map draws travel legs only from about city level in (zoom 10); zoomed out over a whole trip
   they crowded the pins. The selected leg always shows.
+- In edit mode the right column doesn't scroll: the map stays fixed as in display mode, and the
+  editor below it scrolls inside its own card.
 
 ## Exact sampled backgrounds and remaining gaps
 

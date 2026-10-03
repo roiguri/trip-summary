@@ -2964,9 +2964,13 @@ button.pill-button {
   font-size: 12px;
   color: #6b766f;
 }
-.right.edit-col {
+/* The map stays put, as in display mode; the editor takes the rest of the column and scrolls
+   inside (user decision, Oct 3). */
+.right.edit-col > .editor {
+  flex: 0 1 auto;
+  min-height: 0;
   overflow-y: auto;
-  pointer-events: auto;
+  overscroll-behavior: contain;
   scrollbar-width: thin;
 }
 .editor {
