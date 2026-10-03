@@ -146,6 +146,12 @@ From the first build; same preview page. These replace M2's inbox and refine H5.
   both on the title's side away from the rail (before a left-hand title, after a right-hand one; in
   one column, after). The stamp keeps H5's look, set larger (11px, less spaced, lightly filled: SA).
 
+## Cosmetic changes (user decisions, Oct 3)
+
+- Timeline nodes are a plain copper ring, without the inner dot.
+- The right column (map, details, editor) sits 16px from the screen's right edge at every width.
+- Previous and Next in the edit-mode bar use thin drawn chevrons.
+
 ## Exact sampled backgrounds and remaining gaps
 
 The locked reference background is RGB (255,253,250), `#fffdfa`, sampled at (10,110), (800,110) and (10,500) across the whole, place and geometry captures. The large card interior in the locked whole/place captures is `#fffdf8` (255,253,248); the implementation sets those tokens explicitly. Recheck these pixels after a build. Remaining gaps: substitute/reused photos are not the original images and may not match captions; reference PNGs do not disclose an exact font binary (Arial/Helvetica family is inferred); the dotted multi-day end bend is still visually subtle rather than the reference's more pronounced curve.

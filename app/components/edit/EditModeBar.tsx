@@ -33,14 +33,14 @@ export function EditModeBar({
             onClick={() => onStep(-1)}
             aria-label="Previous finding"
           >
-            ▲ <span className="long">Previous</span>
+            <Chevron up /> <span className="long">Previous</span>
           </button>
           <button
             className="pill-button small primary"
             onClick={() => onStep(1)}
             aria-label="Next finding"
           >
-            <span className="long">Next</span> ▼
+            <span className="long">Next</span> <Chevron />
           </button>
         </span>
       ) : (
@@ -69,5 +69,23 @@ export function EditModeBar({
         Done
       </a>
     </div>
+  );
+}
+
+function Chevron({ up = false }: { up?: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 12 12"
+      width="11"
+      height="11"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d={up ? 'M2.5 7.5 6 4l3.5 3.5' : 'M2.5 4.5 6 8l3.5-3.5'} />
+    </svg>
   );
 }
