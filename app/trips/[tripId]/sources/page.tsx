@@ -31,13 +31,22 @@ export default async function Sources({ params }: { params: Promise<{ tripId: st
   if (access?.access !== 'edit') notFound();
   const { trip } = access;
   const store = getStore();
-  const [plan, segments, photos, imports, preview] = await Promise.all([
+  const [plan, segments, photos, imports, waiting] = await Promise.all([
     store.getPlan(tripId),
     store.listTimeline(tripId),
     store.listPhotos(tripId),
     store.listImports(tripId),
-    previewPending(store, tripId),
+    store.listPending(tripId),
   ]);
+  const copying = waiting.find((p) => p.source === 'photos' && p.done + p.failed < p.total);
+  const reviews = await Promise.all(
+    waiting
+      .filter((p) => p !== copying)
+      .map(async (p) => ({
+        source: p.source,
+        preview: await previewPending(store, tripId, p.source),
+      })),
+  );
   const last = (source: string) =>
     imports.find((i) => i.source === source && i.state === 'applied');
   const planStatus = plan
@@ -81,24 +90,36 @@ export default async function Sources({ params }: { params: Promise<{ tripId: st
           />
           <PhotosRow
             tripId={tripId}
+            title={trip.title}
+            copying={!!copying}
             status={photos.length ? `${photos.length} photos and videos` : null}
             connected={await photosConnected()}
             mock={emulated()}
           />
         </div>
-        {preview ? (
-          <ReviewPanel
-            tripId={tripId}
-            source={preview.pending.source}
-            review={review(preview.before, preview.after)}
-            decisions={preview.decisions}
-            published={trip.status === 'published'}
-          />
-        ) : (
-          <p className="src-run quiet">
-            Nothing to review. After an import, its changes appear here, under the sources.
+        {copying?.source === 'photos' && (
+          <p className="src-run quiet" id="review-title">
+            Copying photos: {copying.done} of {copying.total}. Their review appears here when
+            they’re all in; meanwhile you can review the other sources.
           </p>
         )}
+        {reviews.map(
+          ({ source, preview }) =>
+            preview && (
+              <ReviewPanel
+                key={source}
+                tripId={tripId}
+                source={source}
+                review={review(preview.before, preview.after)}
+                published={trip.status === 'published'}
+              />
+            ),
+        )}
+        {!waiting.length && (
+          <p className="src-run quiet" id="review-title">
+            Nothing to review. After an import, its changes appear here, under the sources.
+          </p>
+        )}{' '}
       </main>
     </div>
   );

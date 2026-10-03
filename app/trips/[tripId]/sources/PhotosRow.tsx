@@ -1,23 +1,27 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { startBackgroundCopy } from '../../../components/BackgroundCopy';
 
-/** Picking photos in Google Photos and copying them in (DESIGN.md, "Adding (A3)"): connect once an
- *  hour, pick in Google's own picker, then the picked items are copied a few at a time. */
+/** Picking photos in Google Photos (DESIGN.md, "Adding (A3)"): connect once an hour, pick in Google's
+ *  own picker; the picked items then copy in the background while you carry on (agreed Oct 3). */
 export function PhotosRow({
   tripId,
+  title,
   status,
+  copying,
   connected,
   mock,
 }: {
   tripId: string;
+  title: string;
   status: string | null;
+  copying: boolean;
   connected: boolean;
   mock: boolean;
 }) {
   const router = useRouter();
-  const [stage, setStage] = useState<'idle' | 'picking' | 'copying'>('idle');
-  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
+  const [stage, setStage] = useState<'idle' | 'picking' | 'starting'>('idle');
   const [error, setError] = useState<string | null>(null);
   const api = `/api/trips/${encodeURIComponent(tripId)}/photos`;
   const post = async (path: string, body: object) => {
@@ -29,19 +33,6 @@ export function PhotosRow({
     if (!r.ok) throw new Error(await r.text());
     return r.json();
   };
-
-  async function copyAll(sessionId: string) {
-    setStage('copying');
-    for (;;) {
-      const r = (await post('/copy', { sessionId })) as {
-        total: number;
-        done: number;
-        remaining: number;
-      };
-      setProgress({ done: r.done, total: r.total });
-      if (!r.remaining) break;
-    }
-  }
 
   async function pick(useMock: boolean) {
     setError(null);
@@ -60,16 +51,18 @@ export function PhotosRow({
           if (((await post('/poll', { sessionId })) as { done: boolean }).done) break;
         }
       }
-      await copyAll(sessionId);
+      setStage('starting');
+      await post('/start', { sessionId });
+      startBackgroundCopy(tripId, title);
       router.refresh();
     } catch (e) {
       tab?.close();
       setError(e instanceof Error ? e.message : String(e));
     }
     setStage('idle');
-    setProgress(null);
   }
 
+  const busy = stage !== 'idle' || copying;
   return (
     <div className={`src-row ${status ? '' : 'todo'}`}>
       <span className="src-icon">{status ? '✓' : '+'}</span>
@@ -80,28 +73,22 @@ export function PhotosRow({
       <small>
         {stage === 'picking'
           ? 'Pick photos in the Google Photos tab, then press Done there.'
-          : stage === 'copying'
-            ? `Copying ${progress?.done ?? 0} of ${progress?.total ?? '…'}: photos at display and thumbnail size, location removed.`
-            : (status ??
-              'Pick an album or photos; they’re copied into the journal, videos included.')}
+          : stage === 'starting'
+            ? 'Getting the list of picked photos…'
+            : copying
+              ? 'Copying in the background: you can carry on, its progress shows at the bottom of every page.'
+              : (status ??
+                'Pick an album or photos; they’re copied into the journal, videos included.')}
       </small>
       <span className="src-actions">
-        {mock && stage === 'idle' && (
+        {mock && !busy && (
           <button className="link-button" onClick={() => pick(true)}>
             Use the mock photos
           </button>
         )}
         {connected ? (
-          <button
-            className="pill-button small copper"
-            disabled={stage !== 'idle'}
-            onClick={() => pick(false)}
-          >
-            {stage === 'idle'
-              ? 'Open Google Photos'
-              : stage === 'picking'
-                ? 'Waiting…'
-                : 'Copying…'}
+          <button className="pill-button small copper" disabled={busy} onClick={() => pick(false)}>
+            {stage === 'picking' ? 'Waiting…' : copying ? 'Copying…' : 'Open Google Photos'}
           </button>
         ) : (
           <a

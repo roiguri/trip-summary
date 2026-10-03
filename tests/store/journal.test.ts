@@ -24,6 +24,7 @@ test('a shorter journal leaves no old days behind', async () => {
   await store.putJournal('j-short', {
     trip: { ...trip, days: trip.days.slice(0, 2) },
     suggestions: [],
+    proposals: [],
     orphanEdits: [],
     builtAt: new Date().toISOString(),
   });

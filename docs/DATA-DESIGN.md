@@ -40,9 +40,9 @@ What the Picker gives, checked on the real API (see "Findings from the real sour
 
 - **No location.** The API has no location field, and downloads have GPS stripped from EXIF. A
   photo's place always comes from the Timeline at the time it was taken (merge rule 6).
-- **Time taken is UTC** (`createTime`). The local offset comes from the downloaded file's EXIF
-  `OffsetTimeOriginal` when present, else from the Timeline at that moment, else the destination's
-  time zone.
+- **Time taken is UTC** (`createTime`). The local offset comes from the Timeline at that moment,
+  else the destination's time zone. Google's resized copies are downloaded, not originals, so there
+  is no EXIF offset to read **(decided Oct 3)**.
 - **Files are reachable only with the owner's token**, through a base URL that Google documents as
   lasting 60 minutes, so the importer copies everything right after the pick. Photos download with
   `=d`, videos with `=dv` (a video can be tens of MB).
@@ -72,7 +72,7 @@ fields and keys.
   (a visit's place; an activity's start and end), activity mode, distance. Locations arrive as
   `latLng` strings and are parsed into numbers on import.
 - **`trip_photos`**: trip, Google media ID, kind (photo / video), time taken (UTC), local offset
-  (from EXIF, else the Timeline at that moment, else the destination's time zone), size, MIME type,
+  (from the Timeline at that moment, else the destination's time zone), size, MIME type,
   stored file paths.
 - **`imports`**: one row per import: trip, source, when, by whom, a summary of what changed, and its
   state (`pending`, `applied`, `discarded`).
@@ -90,11 +90,14 @@ These replace the prototype `days` and `photos` tables.
    the one closest to the planned time wins, preferring the one that is both near and the same ID;
    a planned time is a hint, not a window. Each visit matches at most one entry. Nested visits (a
    shop inside a mall) are matched at any level; a nested visit inside a matched one is not a
-   separate suggestion. A matched entry shows the visit's actual times **(agreed)**; an entry
-   without a match keeps its planned times. The candidate and tie-break rules are **(proposed)**.
-4. **Activity → transit**: an activity matches a transit entry when they overlap in time. It sets
-   the transit mode (replacing today's guess from the title), the actual times, and the UTC offsets
-   at both ends, which the plan usually lacks (most transit legs carry no time zones).
+   separate suggestion. The candidate and tie-break rules are **(proposed)**. **The Timeline changes
+   no entry by itself (decided Oct 3, replacing "a matched entry shows the visit's actual times"):**
+   a matched entry keeps its planned times, and the visit's actual times are a proposal the owner
+   accepts or ignores in edit mode. Matching still decides where photos belong.
+4. **Activity → transit**: an activity matches a transit entry when they overlap in time. Its
+   mode and actual times (read at each end's own offset, which the plan usually lacks) are a
+   proposal for edit mode, like a visit's times **(decided Oct 3)**; until accepted, the leg keeps
+   its planned times and the mode guessed from its title.
 5. **Unmatched visits and activities** become **suggestions**, shown only in edit mode, filtered to
    cut noise: visits of at least 15 minutes that aren't home or work, and activities over 2 km. A
    suggestion becomes an entry only when the owner approves it **(agreed)**.

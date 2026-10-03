@@ -121,6 +121,7 @@ export type ImportRecord = {
 export type Journal = {
   trip: import('../model.ts').Trip;
   suggestions: import('../merge/index.ts').Suggestion[];
+  proposals: import('../merge/index.ts').Proposal[];
   orphanEdits: Edit[];
   builtAt: string;
 };
@@ -149,10 +150,28 @@ export type Person = {
   revokedAt: string | null;
 };
 
-/** `trips/{tripId}/sources/pending`: an import waiting for its review. One at a time: a newer import
- *  replaces it. */
+/** `trips/{tripId}/sources/pending-{source}`: an import waiting for review, one per source, so a
+ *  photo import can copy in the background while the Timeline is reviewed. A newer import of the
+ *  same source replaces it. */
 export type Pending =
   | { importId: string; source: 'plan'; plan: PlanSource; at: string }
   | { importId: string; source: 'timeline'; segments: TimelineSegment[]; at: string }
-  /** Picked photos, filled in batch by batch as they are copied; `sessionId` is the Picker's. */
-  | { importId: string; source: 'photos'; sessionId: string; photos: TripPhoto[]; at: string };
+  /** Picked photos: the items are kept in `pickedItems` and copied a few at a time into
+   *  `pendingPhotos`; `total` and `done` count them. `sessionId` is the Picker's. */
+  | {
+      importId: string;
+      source: 'photos';
+      sessionId: string;
+      total: number;
+      done: number;
+      failed: number;
+      at: string;
+    };
+
+/** `trips/{tripId}/pickedItems/{mediaId}`: one picked item still to copy, or copied. */
+export type PickedRecord = {
+  mediaId: string;
+  item: import('../google/picker.ts').PickedItem;
+  done: boolean;
+  failed: boolean;
+};

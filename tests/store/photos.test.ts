@@ -1,20 +1,21 @@
-// Copying picked photos into storage and staging them for review, on the emulators (Firestore,
-// Storage), with the mock picker.
+// Copying picked photos into storage as a job, and staging them for review, on the emulators
+// (Firestore, Storage), with the mock picker.
 import { test, before } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import sharp from 'sharp';
 import { getStore } from '../../lib/store/index.ts';
-import { mockPicker } from '../../lib/google/picker.ts';
+import { mockPicker, type Picker } from '../../lib/google/picker.ts';
 import { copyItem } from '../../lib/media/copy.ts';
 import { bucket } from '../../lib/media/storage.ts';
 import {
-  addPendingPhotos,
   applyPending,
   beginPhotos,
+  copyNextPhotos,
   createTripFromPlan,
   discardPending,
   previewPending,
+  StageError,
 } from '../../lib/import/stage.ts';
 import { review } from '../../lib/review.ts';
 import { jarvisFile } from '../helpers.ts';
@@ -25,6 +26,7 @@ const TRIP = 'photos-trip';
 const picker = mockPicker();
 const read = async (path: string) => (await bucket().file(path).download())[0];
 const exists = async (path: string) => (await bucket().file(path).exists())[0];
+const items = async () => picker.listItems('mock');
 
 before(async () => {
   await store.deleteTrip(TRIP);
@@ -36,9 +38,8 @@ before(async () => {
 });
 
 test('a photo is stored at display and thumbnail size, with no metadata left', async () => {
-  const [item] = await picker.listItems('mock');
+  const [item] = await items();
   const p = await copyItem(TRIP, item, picker);
-  assert.equal(p.kind, 'photo');
   const display = await sharp(await read(p.files.display!)).metadata();
   const thumb = await sharp(await read(p.files.thumb!)).metadata();
   assert.ok(Math.max(display.width!, display.height!) <= 2048);
@@ -47,42 +48,78 @@ test('a photo is stored at display and thumbnail size, with no metadata left', a
   assert.equal(thumb.exif, undefined);
 });
 
-test('a video is stored as it is, with a still', async () => {
-  const video = (await picker.listItems('mock')).find((i) => i.type === 'VIDEO')!;
+test('a video is stored as it is, with a still and a thumbnail', async () => {
+  const video = (await items()).find((i) => i.type === 'VIDEO')!;
   const p = await copyItem(TRIP, video, picker);
-  assert.equal(p.kind, 'video');
-  assert.ok(await exists(p.files.video!));
-  assert.ok(await exists(p.files.still!));
+  for (const f of [p.files.video, p.files.still, p.files.thumb]) assert.ok(await exists(f!));
 });
 
-test('picked photos wait for review, then apply into the trip', async () => {
-  const items = (await picker.listItems('mock')).slice(0, 3);
-  await beginPhotos(store, TRIP, 'mock', 'e');
-  await addPendingPhotos(
-    store,
-    TRIP,
-    await Promise.all(items.map((i) => copyItem(TRIP, i, picker))),
+test('a copy job works through the picked items a batch at a time, then waits for review', async () => {
+  const picked = (await items()).slice(0, 20);
+  await beginPhotos(store, TRIP, 'mock', picked, 'e');
+  let p = await copyNextPhotos(store, TRIP, picker, 8);
+  assert.deepEqual([p.done, p.remaining], [8, 12]);
+  while (p.remaining) p = await copyNextPhotos(store, TRIP, picker, 8);
+  assert.equal(p.done, 20);
+  assert.equal((await store.listPhotos(TRIP)).length, 0, 'nothing in the trip before applying');
+  const preview = await previewPending(store, TRIP, 'photos');
+  assert.equal(review(preview!.before, preview!.after).counts.photos, 20);
+  await applyPending(store, TRIP, 'photos');
+  assert.equal((await store.listPhotos(TRIP)).length, 20);
+  const urls = (await store.getJournal(TRIP))!.trip.days.flatMap((d) =>
+    d.entries.flatMap((e) => e.photos.map((x) => x.url)),
   );
-  assert.equal((await store.listPhotos(TRIP)).length, 0);
-  const preview = await previewPending(store, TRIP);
-  const r = review(preview!.before, preview!.after);
-  assert.equal(r.counts.photos, 3);
-  await applyPending(store, TRIP);
-  assert.equal((await store.listPhotos(TRIP)).length, 3);
-  const journal = await store.getJournal(TRIP);
-  const urls = journal!.trip.days.flatMap((d) =>
-    d.entries.flatMap((e) => e.photos.map((p) => p.url)),
+  assert.ok(urls.length === 20 && urls.every((u) => u.startsWith(`/media/trips/${TRIP}/media/`)));
+});
+
+test('a re-pick skips photos already in the trip; applying before copying ends is refused', async () => {
+  const all = await items();
+  const { pending } = await beginPhotos(store, TRIP, 'mock', all.slice(15, 30), 'e');
+  assert.equal(pending.source === 'photos' && pending.total, 10);
+  await assert.rejects(applyPending(store, TRIP, 'photos'), /still copying/);
+  await discardPending(store, TRIP, 'photos');
+});
+
+test('an item that fails is counted and skipped; an expired connection stops the job', async () => {
+  const broken: Picker = {
+    ...picker,
+    fetchFile: async (item, s) =>
+      item.id === 'mock-media-031'
+        ? Promise.reject(new Error('Google Photos answered 500'))
+        : picker.fetchFile(item, s),
+  };
+  const all = await items();
+  await beginPhotos(store, TRIP, 'mock', all.slice(30, 33), 'e');
+  const p = await copyNextPhotos(store, TRIP, broken, 8);
+  assert.deepEqual([p.done, p.failed, p.remaining], [2, 1, 0]);
+  await discardPending(store, TRIP, 'photos');
+
+  const expired: Picker = {
+    ...picker,
+    fetchFile: async () => Promise.reject(new Error('Google Photos answered 403')),
+  };
+  await beginPhotos(store, TRIP, 'mock', all.slice(33, 35), 'e');
+  await assert.rejects(
+    copyNextPhotos(store, TRIP, expired, 8),
+    (e) => e instanceof StageError && /expired/.test(e.message),
   );
-  assert.ok(urls.length === 3 && urls.every((u) => u.startsWith(`/media/trips/${TRIP}/media/`)));
+  const pending = await store.getPending(TRIP, 'photos');
+  assert.equal(
+    pending!.done + pending!.failed,
+    0,
+    'nothing marked, so connecting again carries on',
+  );
+  await discardPending(store, TRIP, 'photos');
 });
 
 test('discarding a photo import removes its copied files, but not those already in the trip', async () => {
-  const items = await picker.listItems('mock');
+  const all = await items();
   const kept = (await store.listPhotos(TRIP))[0];
-  await beginPhotos(store, TRIP, 'mock', 'e');
-  const fresh = await copyItem(TRIP, items[5], picker);
-  await addPendingPhotos(store, TRIP, [fresh, kept]);
-  await discardPending(store, TRIP);
+  await beginPhotos(store, TRIP, 'mock', all.slice(40, 41), 'e');
+  await copyNextPhotos(store, TRIP, picker);
+  const fresh = (await store.listPendingPhotos(TRIP))[0];
+  await discardPending(store, TRIP, 'photos');
   assert.equal(await exists(fresh.files.display!), false);
   assert.equal(await exists(kept.files.display!), true);
+  assert.equal((await store.listPendingPhotos(TRIP)).length, 0);
 });

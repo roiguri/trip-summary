@@ -57,11 +57,14 @@ app's functions costs too much.
 - **Photos and videos**: the editor connects Google Photos (a separate, read-only consent for the
   photos they pick; the access token lives about an hour in an encrypted HTTP-only cookie, and no
   refresh token is asked for) and picks in the Google Photos Picker. The app copies the picked items
-  in small batches, a few per request so each fits a short function's time limit: originals are
-  downloaded from Google, photos are stored as 2048px and 400px copies (`sharp`, location removed),
-  videos as they are, with Google's own thumbnail as the still frame. The local time comes from the
-  photo's EXIF. Like every import, picked photos wait for review before they're applied **(agreed,
-  Oct 2)**.
+  as a job: the picked items are listed once and kept, then copied 8 at a time per request, so each
+  request fits a short function's time limit. Google's own 2048px and 400px versions are downloaded
+  (not originals, about fifty times less data **(decided Oct 3)**) and re-encoded with all metadata,
+  location included, removed; videos are kept as they are, with Google's thumbnail as the still.
+  The copying runs in the owner's browser in the background **(decided Oct 3)**: it carries on
+  across the app's pages and resumes after a reload, with its progress shown on every page; two
+  tabs never copy the same job. Like every import, picked photos wait for review before they're
+  applied **(agreed, Oct 2)**.
 - **Cloud Functions, if needed**: copying lives in one module (`lib/media/`). If long videos turn out
   to exceed the host's time limit, the same module moves into a Cloud Function driven by a job queue,
   and how the function gets the Google token is decided then **(agreed, Oct 2: decided at hosting,
