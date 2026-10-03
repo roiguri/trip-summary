@@ -107,8 +107,8 @@ export function SuggestionCard({
         </b>{' '}
         · {minutes >= 60 ? `${Math.floor(minutes / 60)} h ${minutes % 60} min` : `${minutes} min`}
         {s.kind === 'activity' && s.mode ? ` · by ${s.mode}` : ''}
-        {finding.photos.length
-          ? ` · ${finding.photos.length} ${finding.photos.length === 1 ? 'photo' : 'photos'}`
+        {finding.photoCount
+          ? ` · ${finding.photoCount} ${finding.photoCount === 1 ? 'photo' : 'photos'}`
           : ''}
         {nearest ? ` · ${distance(nearest.m)} from ${nearest.e.title}` : ''}
         {maps && (
