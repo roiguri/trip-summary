@@ -1,0 +1,39 @@
+import { getStore } from '../../../../../lib/store';
+import { actor, editorOnly } from '../../../../../lib/auth/guard';
+import { checkEdit, type EditRequest } from '../../../../../lib/edits';
+import { rebuildJournal } from '../../../../../lib/journal';
+
+/** One request can carry a day's worth ("accept the day's times"), but not unbounded work. */
+const MAX_EDITS = 500;
+
+// The owner's edits, several at once: each sets one field, or with no value undoes it. The journal is
+// rebuilt once after them, so viewers of a published trip see the change at once (agreed).
+export async function POST(req: Request, { params }: { params: Promise<{ tripId: string }> }) {
+  const { tripId } = await params;
+  const denied = await editorOnly(req, tripId);
+  if (denied) return denied;
+  const { edits } = ((await req.json().catch(() => ({}))) ?? {}) as {
+    edits?: Partial<EditRequest>[];
+  };
+  if (!Array.isArray(edits) || !edits.length || edits.length > MAX_EDITS)
+    return new Response('Send between 1 and 500 edits', { status: 400 });
+  for (const e of edits) {
+    const wrong = checkEdit(e);
+    if (wrong) return new Response(wrong, { status: 400 });
+  }
+  const store = getStore();
+  if (!(await store.getPlan(tripId))) return new Response('Import the plan first', { status: 409 });
+  const by = await actor();
+  for (const e of edits as EditRequest[])
+    if (e.value === undefined) await store.removeEdit(tripId, e.target, e.key, e.field);
+    else
+      await store.setEdit(tripId, {
+        target: e.target,
+        key: e.key,
+        field: e.field,
+        value: e.value,
+        by,
+      });
+  await rebuildJournal(store, tripId);
+  return new Response(null, { status: 204 });
+}

@@ -222,7 +222,12 @@ export function createStore(db: Firestore) {
         ...days.map((d) => [col.doc(docId(`day-${d.date}`)), d] as [DocumentReference, object]),
         [
           col.doc('review'),
-          { suggestions: j.suggestions, proposals: j.proposals, orphanEdits: j.orphanEdits },
+          {
+            suggestions: j.suggestions,
+            proposals: j.proposals,
+            unvisited: j.unvisited,
+            orphanEdits: j.orphanEdits,
+          },
         ],
         // Written last: a reader that finds the meta finds every day it lists.
         [col.doc('meta'), { ...meta, dates: days.map((d) => d.date), builtAt: j.builtAt }],
@@ -245,6 +250,7 @@ export function createStore(db: Firestore) {
         },
         suggestions: review.suggestions ?? [],
         proposals: review.proposals ?? [],
+        unvisited: review.unvisited ?? [],
         orphanEdits: review.orphanEdits ?? [],
         builtAt,
       };

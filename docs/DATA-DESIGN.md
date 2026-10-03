@@ -131,7 +131,16 @@ What can be edited, for everything shown **(agreed)**:
   Timeline's).
 - **Photos**: attach a loose photo to any entry or place, detach it, or move it between entries
   **(agreed)**.
-- **Suggestions**: approve (it becomes an entry) or dismiss.
+- **Suggestions**: approve (it becomes an entry, its times kept, the owner's own, or none) or
+  dismiss.
+- **The Timeline's findings** (edit mode, decided Oct 3): accept a proposal (the entry takes the
+  visit's times or the leg's mode, as ordinary time and mode edits) or ignore it; link a visit to an
+  entry by hand, which wins over the automatic matching, or say an entry has no visit; say a planned
+  stop with no visit is fine as it is.
+- **Highlight**: an entry's mark as a high point of the trip, drawn as a label (DESIGN.md, H5).
+
+The fields an edit may set, and their values, are listed in `lib/edits.ts`; anything else is
+refused.
 
 An edit whose target disappears from its source (for example, an entry deleted in Jarvis) is kept
 and listed in edit mode as "refers to something no longer in the plan", never silently dropped.

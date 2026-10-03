@@ -25,6 +25,7 @@ test('a shorter journal leaves no old days behind', async () => {
     trip: { ...trip, days: trip.days.slice(0, 2) },
     suggestions: [],
     proposals: [],
+    unvisited: [],
     orphanEdits: [],
     builtAt: new Date().toISOString(),
   });

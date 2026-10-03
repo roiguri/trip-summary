@@ -101,6 +101,30 @@ Options and drawings: https://claude.ai/artifact/4QQeC2zq2rSBUAixmcDmDf (Phase 2
   until then, the first photo of the trip's most photographed stop. A trip with no photos gets a
   paper cover: the destination's name over a faint dotted route.
 
+## Edit mode (user decisions, Oct 3)
+
+Options and drawings: https://claude.ai/artifact/Wvm7oAhSYKQGetpMWAqcXV.
+
+- Where (M2): "Edit" in the editors' bar switches edit mode on. The right column becomes an inbox of
+  what the Timeline found, grouped by day, with filters (times, new stops, not visited), a count down
+  to zero, and "accept the day's times". Picking an item scrolls the journey to it. On a phone the
+  inbox is its own screen. Nothing the Timeline found changes the journal until accepted here.
+- Entry (E1): clicking an entry while editing opens its editor in the right column: title, times
+  (each optional; clearing them leaves it untimed), note, the visit from the Timeline (use its times,
+  unlink a wrong match, link the right visit), for a leg its travel mode (car, bus, train, flight,
+  ferry, on foot, bike), highlight, hide, and undo. Photos (P1): tick photos, then "Move to…" (same
+  day and nearest in time first, loose moments, or another day), make loose moments, hide (shown
+  faded, so they can come back), or set as cover.
+- Suggestion (S1): an unplanned stop opens a card with its time and length, a small map with the
+  nearest planned stop, "Open in Google Maps", and its photos; then add it as a new stop (named by
+  the owner; its times kept, changed or none), "it's a stop already in the plan" (that entry takes
+  this visit's times and photos), or dismiss. Place names and search wait for the Places API.
+- Highlight (H5): a small stamped "HIGHLIGHT" label after the title: square corners, a copper
+  outline, uppercase, slightly tilted, unlike the day's pale green rounded labels.
+- Sorting photos (P2): "Sort photos" on a day's banner in edit mode shows the day's photos in time
+  order, each labelled with where it is; select several (shift-click for a run), then click the
+  entry they belong to.
+
 ## Exact sampled backgrounds and remaining gaps
 
 The locked reference background is RGB (255,253,250), `#fffdfa`, sampled at (10,110), (800,110) and (10,500) across the whole, place and geometry captures. The large card interior in the locked whole/place captures is `#fffdf8` (255,253,248); the implementation sets those tokens explicitly. Recheck these pixels after a build. Remaining gaps: substitute/reused photos are not the original images and may not match captions; reference PNGs do not disclose an exact font binary (Arial/Helvetica family is inferred); the dotted multi-day end bend is still visually subtle rather than the reference's more pronounced curve.
