@@ -89,26 +89,54 @@ ok(
   (await p.locator('.review-step').textContent()).includes(`1 of ${before}`),
 );
 
+// An answer shows Saving… until the page has it, then a ✓ with Undo on the entry.
 await entry('Carmel Beach').locator('.fnd').getByRole('button', { name: 'Use' }).click();
 ok(
-  'using a time changes the journey',
+  'Use shows Saving… at once',
+  (await entry('Carmel Beach').locator('.fnd.saving').count()) === 1 ||
+    (await entry('Carmel Beach').locator('.fnd.done').count()) === 1,
+);
+ok(
+  'using a time changes the journey, and says so with Undo',
   await until(() =>
     [...document.querySelectorAll('.left .entry')].some(
       (e) =>
         e.textContent.includes('Carmel Beach') &&
         e.textContent.includes('09:28') &&
-        !e.querySelector('.fnd'),
+        !e.querySelector('.fnd:not(.done)') &&
+        e.querySelector('.fnd.done')?.textContent.includes('Using the Timeline’s times'),
     ),
+  ),
+);
+await entry('Carmel Beach').locator('.fnd.done').getByRole('button', { name: 'Undo' }).click();
+ok(
+  'Undo puts the planned time back and the finding waits again',
+  await until(() =>
+    [...document.querySelectorAll('.left .entry')].some(
+      (e) =>
+        e.textContent.includes('Carmel Beach') &&
+        e.textContent.includes('09:20') &&
+        !e.querySelector('.fnd.done') &&
+        e.querySelector('.fnd')?.textContent.includes('Visited'),
+    ),
+  ),
+);
+await entry('Carmel Beach').locator('.fnd').getByRole('button', { name: 'Use' }).click();
+await until(() =>
+  [...document.querySelectorAll('.left .entry')].some(
+    (e) => e.textContent.includes('Carmel Beach') && e.querySelector('.fnd.done'),
   ),
 );
 await entry('Cypress & Salt Café').locator('.fnd').getByRole('button', { name: 'Ignore' }).click();
 ok(
-  'ignoring a time takes it off the timeline',
-  await until(
-    () =>
-      ![...document.querySelectorAll('.left .entry')].some(
-        (e) => e.textContent.includes('Cypress & Salt') && e.querySelector('.fnd'),
-      ),
+  'ignoring a time takes it off the timeline, and says so',
+  await until(() =>
+    [...document.querySelectorAll('.left .entry')].some(
+      (e) =>
+        e.textContent.includes('Cypress & Salt') &&
+        !e.querySelector('.fnd:not(.done)') &&
+        e.querySelector('.fnd.done')?.textContent.includes('Ignored'),
+    ),
   ),
 );
 // Set aside, not gone (R1).

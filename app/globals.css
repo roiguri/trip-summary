@@ -34,6 +34,11 @@ button:disabled {
   /* An editor's bar under the header takes this much height (DESIGN.md, "Trip controls (C1)");
      viewers have none. */
   --bar: 0px;
+  /* The right column's width, and the timeline's area: from the left edge to 16px short of the
+     column (which sits 16px from the right edge), so the timeline centres in the space left and its
+     scrollbar sits beside the cards (user decision, Oct 3). */
+  --col-w: 424px;
+  --left-w: calc(100vw - var(--col-w) - 32px);
   height: 100dvh;
   overflow: hidden;
 }
@@ -94,17 +99,48 @@ button:disabled {
    --------------------------------------------------------------------------------------------- */
 .left {
   position: relative;
-  width: min(928px, calc(100vw - 512px));
+  width: var(--left-w);
   height: calc(100dvh - 65px - var(--bar));
   overflow: auto;
-  scrollbar-width: thin;
-  scrollbar-color: #d7dcd1 transparent;
   transition: width 0s linear 0.34s;
 }
 .left > .intro,
 .left > .rail {
-  width: min(928px, calc(100vw - 512px));
+  width: min(928px, var(--left-w));
+  transform: translateX(calc((var(--left-w) - min(928px, var(--left-w))) / 2));
   transition: transform var(--col-motion);
+}
+/* Scrollbars of the timeline and the editor card: thin, rounded, the cards' soft green, no track. */
+.left::-webkit-scrollbar,
+.right.edit-col > .editor::-webkit-scrollbar {
+  width: 10px;
+}
+.left::-webkit-scrollbar-track,
+.right.edit-col > .editor::-webkit-scrollbar-track {
+  background: transparent;
+}
+.left::-webkit-scrollbar-track {
+  margin: 8px 0;
+}
+.right.edit-col > .editor::-webkit-scrollbar-track {
+  margin: 20px 0;
+}
+.left::-webkit-scrollbar-thumb,
+.right.edit-col > .editor::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 10px;
+  background: #d5e0d3 padding-box;
+}
+.left::-webkit-scrollbar-thumb:hover,
+.right.edit-col > .editor::-webkit-scrollbar-thumb:hover {
+  background: #b7c7b5 padding-box;
+}
+@supports not selector(::-webkit-scrollbar) {
+  .left,
+  .right.edit-col > .editor {
+    scrollbar-width: thin;
+    scrollbar-color: #d5e0d3 transparent;
+  }
 }
 .shell.collapsed .left {
   width: 100vw;
@@ -752,7 +788,6 @@ button:disabled {
    the details.
    --------------------------------------------------------------------------------------------- */
 .right {
-  --col-w: 424px;
   position: fixed;
   top: calc(78px + var(--bar));
   right: 16px;
@@ -1684,11 +1719,8 @@ button:disabled {
 
 /* 900-1199px: the right column stays, 380px wide. */
 @media (min-width: 900px) and (max-width: 1199px) {
-  .right {
+  .shell {
     --col-w: 380px;
-  }
-  .left {
-    width: calc(100vw - 420px);
   }
 }
 
@@ -2973,28 +3005,6 @@ button.pill-button {
   overflow-y: auto;
   overscroll-behavior: contain;
 }
-/* Its scrollbar in the card's style: thin, rounded, the card's soft green, clear of the corners. */
-.right.edit-col > .editor::-webkit-scrollbar {
-  width: 10px;
-}
-.right.edit-col > .editor::-webkit-scrollbar-track {
-  margin: 20px 0;
-  background: transparent;
-}
-.right.edit-col > .editor::-webkit-scrollbar-thumb {
-  border: 3px solid transparent;
-  border-radius: 10px;
-  background: #d5e0d3 padding-box;
-}
-.right.edit-col > .editor::-webkit-scrollbar-thumb:hover {
-  background: #b7c7b5 padding-box;
-}
-@supports not selector(::-webkit-scrollbar) {
-  .right.edit-col > .editor {
-    scrollbar-width: thin;
-    scrollbar-color: #d5e0d3 transparent;
-  }
-}
 .editor {
   display: grid;
   /* One column as wide as the card: a wide row shrinks to fit instead of widening the card. */
@@ -3374,6 +3384,16 @@ button.pill-button {
   border-color: #cfd6cc;
   background: #f5f6f2;
   color: #7f8a83;
+}
+.fnd.saving {
+  border-style: dashed;
+  color: #9a7a63;
+}
+.fnd.done {
+  border-color: #c9dcc6;
+  background: #eef4ea;
+  color: #3f5c4b;
+  font-weight: 700;
 }
 .fnd.current,
 .ghost-card.current {

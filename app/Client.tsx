@@ -4,7 +4,15 @@ import type { Entry, Photo, Trip } from '../lib/data';
 import { DetailPanel } from './components/DetailPanel';
 import { EditPanel } from './components/edit/EditPanel';
 import { EditModeBar } from './components/edit/EditModeBar';
-import { accept, findingKey, FindingChip, GhostCard } from './components/edit/inline';
+import {
+  accept,
+  DoneChip,
+  findingKey,
+  FindingChip,
+  GhostCard,
+  type Done,
+} from './components/edit/inline';
+import type { EditChange } from './components/edit/useSave';
 import { useSave } from './components/edit/useSave';
 import type { EditData, Finding } from '../lib/edit-view';
 import { Header } from './components/Header';
@@ -45,6 +53,27 @@ export default function Client({
   const [showSetAside, setShowSetAside] = useState(false);
   const [stepKey, setStepKey] = useState<string | null>(null);
   const { save, busy } = useSave(edit?.tripId ?? '');
+  // The finding being saved ("Saving…" until the page shows it), and what was just resolved: each
+  // stays on its entry with Undo while editing.
+  const [pendingKey, setPendingKey] = useState<string | null>(null);
+  const [recent, setRecent] = useState<Done[]>([]);
+  useEffect(() => {
+    if (!busy) setPendingKey(null);
+  }, [busy]);
+  const act = {
+    busy,
+    pending: pendingKey,
+    save: (changes: EditChange[], done?: Done[]) => {
+      if (done?.length) setPendingKey(done[0].key);
+      void save(changes).then((ok) => {
+        if (!ok) return;
+        if (done?.length)
+          setRecent((r) => [...r.filter((x) => !done.some((d) => d.key === x.key)), ...done]);
+        // An undo takes its own ✓ away.
+        else setRecent((r) => r.filter((x) => x.undo !== changes));
+      });
+    },
+  };
   const [day, setDay] = useState(trip.days[0]?.date ?? '');
   const [album, setAlbum] = useState<string | null>(null);
   const [photoPage, setPhotoPage] = useState(0);
@@ -192,6 +221,24 @@ export default function Client({
     setStopKey(key);
   };
 
+  // What Undo after "Use" writes back: the entry's times (and mode) as they were, which is no edit
+  // at all where the owner hadn't changed them.
+  const undoUse = (e: Entry, mode: boolean): EditChange[] => {
+    const key = e.id.slice(1);
+    const had = edit?.edited[key] ?? [];
+    const back = (field: string, value: string) => ({
+      target: 'entry',
+      key,
+      field,
+      value: had.includes(field) ? value : undefined,
+    });
+    return [
+      back('start_time', e.time),
+      back('end_time', e.end_time ?? ''),
+      ...(mode && e.mode ? [back('mode', e.mode)] : []),
+    ];
+  };
+
   // The findings drawn on the timeline (DESIGN.md, "Edit mode, round 2", T1 and R1).
   const shownFindings = useMemo(
     () => (edit ? [...edit.findings, ...(showSetAside ? edit.setAside : [])] : []),
@@ -201,18 +248,23 @@ export default function Client({
     onEdit: (e) => choose(e),
     under: (e) => {
       const id = Number(e.id.slice(1));
+      const done = recent.filter((d) => d.entryId === id && /^i\d+$/.test(e.id));
       const mine = shownFindings.filter(
         (f) => f.kind !== 'stop' && f.kind !== 'hidden' && f.entryId === id && /^i\d+$/.test(e.id),
       );
-      return mine.length ? (
+      return mine.length || done.length ? (
         <span className="fnd-row">
+          {done.map((d) => (
+            <DoneChip key={`done-${d.key}`} d={d} act={act} />
+          ))}
           {mine.map((f) => (
             <FindingChip
               key={findingKey(f) + (f.setAside ?? '')}
               f={f}
-              act={{ save, busy }}
+              act={act}
               current={stepKey === findingKey(f)}
               onLink={() => choose(e)}
+              undoUse={undoUse(e, f.kind === 'mode')}
             />
           ))}
         </span>
@@ -227,7 +279,7 @@ export default function Client({
           node: (
             <GhostCard
               f={f}
-              act={{ save, busy }}
+              act={act}
               current={stepKey === findingKey(f)}
               onOpen={() => f.kind === 'stop' && openStop(f.suggestion.key)}
             />
@@ -243,7 +295,24 @@ export default function Client({
           <button
             className="link-button"
             disabled={busy}
-            onClick={() => save(times.flatMap(accept))}
+            onClick={() =>
+              act.save(
+                times.flatMap(accept),
+                times.flatMap((f) => {
+                  const e = 'entryId' in f ? entriesById.get(`i${f.entryId}`) : undefined;
+                  return e && 'entryId' in f
+                    ? [
+                        {
+                          key: findingKey(f),
+                          entryId: f.entryId,
+                          label: 'Using the Timeline’s times',
+                          undo: undoUse(e, f.kind === 'mode'),
+                        },
+                      ]
+                    : [];
+                }),
+              )
+            }
           >
             Accept the day’s
           </button>
