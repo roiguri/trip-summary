@@ -12,8 +12,10 @@ import { signIn } from './signed-in.mjs';
 const BASE = process.env.BASE_URL || 'http://localhost:3100';
 const TRIP = `edit-check-${Date.now()}`;
 const R = [];
-const ok = (name, cond, extra = '') =>
+const ok = (name, cond, extra = '') => {
   R.push(`${cond ? 'PASS' : 'FAIL'}  ${name}${extra ? ` (${extra})` : ''}`);
+  if (process.env.VERBOSE) console.error(R[R.length - 1]);
+};
 
 const sample = JSON.parse(readFileSync('data/mock/expected.json', 'utf8')).trip;
 const jarvis = path.join(mkdtempSync(path.join(tmpdir(), 'check-edit-')), 'travel.sqlite');
@@ -54,53 +56,100 @@ await p
   .click();
 await p.waitForSelector('#review-photos', { state: 'detached', timeout: 60_000 });
 
-// The inbox.
+// Edit mode: the findings drawn on the timeline (DESIGN.md, "Edit mode, round 2", T1).
+const until = (fn, arg) =>
+  p.waitForFunction(fn, arg, { timeout: 15_000 }).then(
+    () => true,
+    () => false,
+  );
+const resolved = (on) =>
+  p.locator('.switch input').evaluate((el, on) => el.checked !== on && el.click(), on);
+const entry = (title) => p.locator('.left .entry', { hasText: title }).first();
+const toReview = async () =>
+  Number(
+    (await p.locator('.review-step').textContent())
+      .match(/(\d+) to review|of (\d+)/)
+      ?.slice(1)
+      .find(Boolean) ?? 0,
+  );
 await p.goto(journey);
 await p.getByRole('link', { name: 'Edit', exact: true }).click();
-await p.waitForSelector('.inbox-panel');
-const before = Number((await p.locator('.inbox-head span').textContent()).match(/\d+/)?.[0] ?? 0);
-ok('the inbox lists what the Timeline found', before > 0, before);
+await p.waitForSelector('.review-step');
+const before = await toReview();
+ok('the bar counts what the Timeline found', before > 0, before);
 ok(
-  'it has times, new stops and not-visited',
-  ['planned 09:20 · visited', 'A stop you didn’t plan', 'no visit found'].every(async () => true) &&
-    (await p.locator('.finding.times').count()) > 0 &&
-    (await p.locator('.finding.stop').count()) > 0 &&
-    (await p.locator('.finding.unvisited').count()) > 0,
+  'times, new stops and not-visited are drawn on the timeline',
+  (await p.locator('.left .fnd', { hasText: 'Visited' }).count()) > 0 &&
+    (await p.locator('.left .ghost-card').count()) > 0 &&
+    (await p.locator('.left .fnd', { hasText: 'No visit found' }).count()) > 0,
 );
-const carmel = p.locator('.finding.times', { hasText: 'Carmel Beach' });
-await carmel.getByRole('button', { name: 'Use' }).click();
-await p.waitForFunction(
-  () => !document.querySelector('.finding.times')?.textContent?.includes('Carmel Beach'),
+await p.getByRole('button', { name: 'Next finding' }).click();
+ok(
+  'Next steps to the first finding',
+  (await p.locator('.review-step').textContent()).includes(`1 of ${before}`),
 );
-ok('using a time changes the journey', (await p.locator('.left').textContent()).includes('09:28'));
-const ignoreTarget = p.locator('.finding.times').first();
-const ignoredTitle = await ignoreTarget.locator('b').textContent();
-await ignoreTarget.getByRole('button', { name: 'Ignore' }).click();
-await p.waitForFunction(
-  (t) => ![...document.querySelectorAll('.finding.times b')].some((b) => b.textContent === t),
-  ignoredTitle,
+
+await entry('Carmel Beach').locator('.fnd').getByRole('button', { name: 'Use' }).click();
+ok(
+  'using a time changes the journey',
+  await until(() =>
+    [...document.querySelectorAll('.left .entry')].some(
+      (e) =>
+        e.textContent.includes('Carmel Beach') &&
+        e.textContent.includes('09:28') &&
+        !e.querySelector('.fnd'),
+    ),
+  ),
 );
-ok('ignoring a time removes it from the inbox', true, ignoredTitle);
+await entry('Cypress & Salt Café').locator('.fnd').getByRole('button', { name: 'Ignore' }).click();
+ok(
+  'ignoring a time takes it off the timeline',
+  await until(
+    () =>
+      ![...document.querySelectorAll('.left .entry')].some(
+        (e) => e.textContent.includes('Cypress & Salt') && e.querySelector('.fnd'),
+      ),
+  ),
+);
+// Set aside, not gone (R1).
+await resolved(true);
+const ignored = entry('Cypress & Salt Café').locator('.fnd.set-aside');
+ok(
+  '"Show resolved" draws it faded',
+  (await ignored.count()) === 1 && (await ignored.textContent()).includes('Ignored'),
+);
+await ignored.getByRole('button', { name: 'Bring back' }).click();
+ok(
+  'and Bring back makes it wait again',
+  await until(() =>
+    [...document.querySelectorAll('.left .entry')].some(
+      (e) => e.textContent.includes('Cypress & Salt') && e.querySelector('.fnd:not(.set-aside)'),
+    ),
+  ),
+);
+await resolved(false);
 
 // Not visited: link a visit by hand.
-await p
-  .locator('.finding.unvisited', { hasText: 'Lovers Point' })
-  .getByRole('button', { name: 'Link a visit' })
-  .click();
+await entry('Lovers Point').locator('.fnd').getByRole('button', { name: 'Link a visit' }).click();
 await p.waitForSelector('.editor >> #ed-link');
 const option = await p.locator('#ed-link option').nth(1).getAttribute('value');
 await p.selectOption('#ed-link', option);
 await p.waitForSelector('.editor >> text=Visit from your Timeline');
 ok('linking a visit gives the entry its visit', true);
-await p.getByRole('button', { name: 'Back to the inbox' }).click();
+await p.getByRole('button', { name: 'Close' }).click();
 ok(
-  'and it is no longer "not visited"',
-  (await p.locator('.finding.unvisited', { hasText: 'Lovers Point' }).count()) === 0,
+  'and it is no longer "not visited" (its visit’s times are offered instead)',
+  await until(
+    () =>
+      ![...document.querySelectorAll('.left .entry')].some(
+        (e) => e.textContent.includes('Lovers Point') && e.textContent.includes('No visit found'),
+      ),
+  ),
 );
 
-// An unplanned stop: add it, named, keeping its times; dismiss another.
-const stops = await p.locator('.finding.stop').count();
-await p.locator('.finding.stop').first().getByRole('button', { name: 'Open' }).click();
+// An unplanned stop: add it, named, keeping its times; dismiss another, then bring it back.
+const stops = await p.locator('.left .ghost-card').count();
+await p.locator('.left .ghost-card').first().getByRole('button', { name: 'Add…' }).click();
 await p.waitForSelector('.editor[aria-label="A stop you didn’t plan"]');
 ok(
   'a stop shows its time and a Google Maps link',
@@ -108,57 +157,93 @@ ok(
 );
 await p.fill('#sg-name', 'Sunset spot');
 await p.getByRole('button', { name: 'Add to the journey' }).click();
-await p.waitForSelector('.inbox-panel');
-const added = await p
-  .waitForFunction(
-    () => document.querySelector('.left')?.textContent.includes('Sunset spot'),
-    null,
-    {
-      timeout: 15_000,
-    },
-  )
-  .then(
-    () => true,
-    () => false,
-  );
-ok('an added stop is on the journey, named', added);
-await p.locator('.finding.stop').first().getByRole('button', { name: 'Dismiss' }).click();
-await p.waitForFunction((n) => document.querySelectorAll('.finding.stop').length === n, stops - 2);
-ok('dismissing a stop removes it', true);
+ok(
+  'an added stop takes its place on the journey, marked as added',
+  await until(() =>
+    [...document.querySelectorAll('.left .entry')].some(
+      (e) =>
+        e.textContent.includes('Sunset spot') && e.textContent.includes('ADDED FROM YOUR TIMELINE'),
+    ),
+  ),
+);
+await p.locator('.left .ghost-card').first().getByRole('button', { name: 'Dismiss' }).click();
+ok(
+  'dismissing a stop takes it off',
+  await until((n) => document.querySelectorAll('.left .ghost-card').length === n, stops - 2),
+);
+await resolved(true);
+await p
+  .locator('.left .ghost-card.set-aside')
+  .first()
+  .getByRole('button', { name: 'Bring back' })
+  .click();
+ok(
+  'a dismissed stop can be brought back',
+  await until(
+    (n) => document.querySelectorAll('.left .ghost-card:not(.set-aside)').length === n,
+    stops - 1,
+  ),
+);
+await resolved(false);
 
-// The entry editor: highlight, travel mode, a photo moved, hide and show, undo.
+// The entry editor, opened with the pencil: highlight, travel mode, photos, hide and show, undo.
 const open = async (title) => {
-  await p.locator('.left .entry', { hasText: title }).first().click();
+  await entry(title).locator('.pencil:visible').click();
   await p.waitForSelector(`.editor[aria-label="Edit ${title}"]`);
 };
 await open('Point Lobos State Natural Reserve');
 await p.getByRole('button', { name: '★ Highlight' }).click();
-await p.waitForSelector('.left .hl-stamp');
 ok(
   'a highlight shows its stamp on the journey',
-  (await p.locator('.left .entry', { hasText: 'Point Lobos' }).locator('.hl-stamp').count()) === 1,
+  await until(() => !!document.querySelector('.left .entry .hl-stamp')),
 );
-await p.getByRole('button', { name: 'Back to the inbox' }).click();
+await p.getByRole('button', { name: 'Close' }).click();
 await open('Drive down Highway 1');
 await p.getByRole('button', { name: 'Bus', exact: true }).click();
 await p.waitForSelector('.ed-modes button[aria-pressed="true"] >> text=Bus');
 ok('a leg’s travel mode can be chosen', true);
-await p.getByRole('button', { name: 'Back to the inbox' }).click();
+await p.getByRole('button', { name: 'Close' }).click();
+
+// Main photos (MP1) and photo highlights (PH1).
+await open('Carmel Beach');
+const fourth = await p.locator('.ed-photo img').nth(3).getAttribute('src');
+await p.locator('.ed-photo').nth(3).click();
+await p.getByRole('button', { name: 'Show on the journey' }).click();
+ok(
+  'a picked photo is shown first on the journey',
+  await until(
+    (src) =>
+      document.querySelector('[data-entry-id] .stack img') &&
+      [...document.querySelectorAll('.left .entry')]
+        .find((e) => e.textContent.includes('Carmel Beach'))
+        ?.querySelector('.stack img')
+        ?.getAttribute('src') === src,
+    fourth,
+  ),
+);
+// The second is a photo also among the first three by time, so it stays on the journey after undo.
+await p.locator('.ed-photo').nth(1).click();
+await p.getByRole('button', { name: '★ Highlight photo' }).click();
+ok(
+  'a highlighted photo gets its star',
+  await until(() => !!document.querySelector('.left .photo-star')),
+);
 const photoCount = async (title) => {
   await open(title);
   const n = Number(
     (await p.locator('.ed-photos > b').first().textContent()).match(/\d+/)?.[0] ?? 0,
   );
-  await p.getByRole('button', { name: 'Back to the inbox' }).click();
+  await p.getByRole('button', { name: 'Close' }).click();
   return n;
 };
+await p.getByRole('button', { name: 'Close' }).click();
 const lobosBefore = await photoCount('Point Lobos State Natural Reserve');
 await open('Carmel Beach');
-await p.locator('.ed-photo').first().click();
+await p.locator('.ed-photo').nth(5).click();
 await p.getByRole('button', { name: 'Move to…' }).click();
 await p.locator('.ed-moveto button', { hasText: 'Point Lobos' }).click();
 await p.waitForFunction(() => !document.querySelector('.ed-moveto'));
-await p.getByRole('button', { name: 'Back to the inbox' }).click();
+await p.getByRole('button', { name: 'Close' }).click();
 await p.waitForTimeout(500);
 ok(
   'a photo can be moved to another entry',
@@ -167,51 +252,48 @@ ok(
 );
 await open('Carmel Beach');
 await p.getByRole('button', { name: 'Undo my edits' }).click();
-const undone = await p
-  .waitForFunction(
-    () =>
-      [...document.querySelectorAll('.left .entry')].some(
-        (e) => e.textContent.includes('Carmel Beach') && e.textContent.includes('09:20'),
-      ),
-    null,
-    { timeout: 15_000 },
-  )
-  .then(
-    () => true,
-    () => false,
-  );
-ok('undo brings back the planned time', undone);
-await p.getByRole('button', { name: 'Back to the inbox' }).click();
+ok(
+  'undo brings back the planned time',
+  await until(() =>
+    [...document.querySelectorAll('.left .entry')].some(
+      (e) => e.textContent.includes('Carmel Beach') && e.textContent.includes('09:20'),
+    ),
+  ),
+);
+await p.getByRole('button', { name: 'Close' }).click();
 await open('Cypress & Salt Café');
 await p.getByRole('button', { name: 'Hide from the journey' }).click();
-await p.waitForSelector('.inbox-hidden');
 ok(
   'a hidden entry leaves the journey',
-  (await p.locator('.left .entry', { hasText: 'Cypress & Salt' }).count()) === 0,
-);
-await p.locator('.inbox-hidden summary').click();
-await p.locator('.inbox-hidden').getByRole('button', { name: 'Show again' }).click();
-const back = await p
-  .waitForFunction(
+  await until(
     () =>
-      [...document.querySelectorAll('.left .entry')].some((e) =>
+      ![...document.querySelectorAll('.left .entry:not(.ghost-entry)')].some((e) =>
         e.textContent.includes('Cypress & Salt'),
       ),
-    null,
-    { timeout: 15_000 },
-  )
-  .then(
-    () => true,
-    () => false,
-  );
-ok('and can be shown again', back);
+  ),
+);
+await resolved(true);
+await p
+  .locator('.left .ghost-card', { hasText: 'Cypress & Salt' })
+  .getByRole('button', { name: 'Show again' })
+  .click();
+ok(
+  'and can be shown again',
+  await until(() =>
+    [...document.querySelectorAll('.left .entry:not(.ghost-entry)')].some((e) =>
+      e.textContent.includes('Cypress & Salt'),
+    ),
+  ),
+);
 
 // Done: the journey keeps the edits, without the edit tools.
 await p.getByRole('link', { name: 'Done' }).click();
 await p.waitForURL(journey);
 ok(
-  'after Done, the highlight stays and the tools go',
-  (await p.locator('.hl-stamp').count()) === 1 && (await p.locator('.inbox-panel').count()) === 0,
+  'after Done, the highlights stay and the tools go',
+  (await p.locator('.hl-stamp').count()) === 1 &&
+    (await p.locator('.photo-star').count()) === 1 &&
+    (await p.locator('.pencil, .fnd, .ghost-card').count()) === 0,
 );
 
 // A copy job this browser remembers, for an import that is gone (applied, discarded, or the data

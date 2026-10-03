@@ -45,7 +45,7 @@ export function fixtureTrip(file: string) {
       `SELECT photo_id, entry_id, date, time, url, caption, latitude AS lat, longitude AS lng
        FROM photos WHERE trip_id=? ORDER BY date, time, photo_id`,
     )
-    .all(trip.trip_id) as ModelPhoto[];
+    .all(trip.trip_id) as unknown as ModelPhoto[];
   const dayRows = db.prepare('SELECT date, title FROM days WHERE trip_id=?').all(trip.trip_id) as {
     date: string;
     title: string | null;

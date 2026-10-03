@@ -50,21 +50,7 @@ export default async function TripPage({
     const view = await editView(store, tripId);
     if (view)
       return (
-        <Client
-          trip={view.trip}
-          account={name}
-          edit={view.edit}
-          bar={
-            <EditorBar
-              key="bar"
-              tripId={tripId}
-              status={access.trip.status}
-              waiting={null}
-              people={[]}
-              editing
-            />
-          }
-        />
+        <Client trip={view.trip} account={name} edit={view.edit} status={access.trip.status} />
       );
   }
 

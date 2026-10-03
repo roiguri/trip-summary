@@ -104,6 +104,9 @@ export type MergeResult = {
   proposals: Proposal[];
   /** Planned stops with no visit in the Timeline, for edit mode (unless the owner said that's fine). */
   unvisited: number[];
+  /** What the owner set aside, kept so edit mode can show it and bring it back (DESIGN.md, "Edit
+   *  mode, round 2", R1): dismissed suggestions, ignored proposals, stops "fine" without a visit. */
+  setAside: { dismissed: Suggestion[]; ignored: Proposal[]; fine: number[] };
   /** Every visit and journey of the trip's days, with what it is matched to (edit mode's linking). */
   segments: SegmentView[];
   /** Stops and journeys the owner added from suggestions: their entry ID here, and the suggestion's
@@ -336,6 +339,7 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
         v.lng !== null &&
         metres(st.lat, st.lng, v.lat, v.lng) <= THRESHOLDS.matchMetres));
   const suggestions: Suggestion[] = [];
+  const dismissed: Suggestion[] = [];
   for (const s of segments) {
     if (takenVisits.has(s.key) || takenActivities.has(s.key)) continue;
     const start = local(s.startUtc, s.startOffsetMin, timeZone);
@@ -347,8 +351,7 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
         continue;
       if (stays.some((st) => atStay(st, s, start.date))) continue;
     } else if ((s.distanceMeters ?? 0) / 1000 <= THRESHOLDS.suggestActivityKm) continue;
-    if (use('suggestion', s.key, 'dismissed') === true) continue;
-    suggestions.push({
+    (use('suggestion', s.key, 'dismissed') === true ? dismissed : suggestions).push({
       key: s.key,
       kind: s.kind,
       placeId: s.placeId,
@@ -409,27 +412,30 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
   // What still needs the owner: a proposal is gone once accepted (the entry's times and mode are
   // the Timeline's) or ignored; a planned stop with no visit is listed unless they said that's fine.
   const shownById = new Map(shown.map((i) => [i.entry_id, i]));
-  const open = proposals.filter((p) => {
+  const differs = (p: Proposal) => {
     const item = shownById.get(p.entryId);
-    if (!item || use('entry', String(p.entryId), 'proposal') === 'ignored') return false;
     return (
-      p.start !== item.start_time ||
-      p.end !== item.end_time ||
-      (p.mode !== null && p.mode !== item.mode)
+      !!item &&
+      (p.start !== item.start_time ||
+        p.end !== item.end_time ||
+        (p.mode !== null && p.mode !== item.mode))
     );
-  });
-  const unvisited = segments.some((s) => s.kind === 'visit')
-    ? shown
-        .filter(
-          (i) =>
-            i.item_type === 'place' &&
-            i.entry_id > 0 &&
-            !(i.end_date && i.end_date > i.start_date) &&
-            !visitOf.has(i.entry_id) &&
-            use('entry', String(i.entry_id), 'noVisit') !== true,
-        )
-        .map((i) => i.entry_id)
+  };
+  const isIgnored = (p: Proposal) => use('entry', String(p.entryId), 'proposal') === 'ignored';
+  const open = proposals.filter((p) => differs(p) && !isIgnored(p));
+  const ignored = proposals.filter((p) => differs(p) && isIgnored(p));
+  const noVisit = segments.some((s) => s.kind === 'visit')
+    ? shown.filter(
+        (i) =>
+          i.item_type === 'place' &&
+          i.entry_id > 0 &&
+          !(i.end_date && i.end_date > i.start_date) &&
+          !visitOf.has(i.entry_id),
+      )
     : [];
+  const isFine = (i: ModelItem) => use('entry', String(i.entry_id), 'noVisit') === true;
+  const unvisited = noVisit.filter((i) => !isFine(i)).map((i) => i.entry_id);
+  const fine = noVisit.filter(isFine).map((i) => i.entry_id);
   const entryIds = new Set(shown.map((i) => String(i.entry_id)));
 
   // Rule 6, photos: local time from EXIF, else the Timeline at that moment, else the trip's zone; a
@@ -480,6 +486,7 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
       entry_id: entry,
       url: mediaUrl((p.kind === 'video' ? p.files.still : p.files.display) ?? ''),
       caption: typeof caption === 'string' ? caption : '',
+      ...(use('photo', p.mediaId, 'highlighted') === true ? { highlighted: true as const } : {}),
       lat,
       lng,
       date: when.date,
@@ -574,6 +581,15 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
       },
     ];
   });
+  // The photos an entry shows on the journey, in the owner's order, come first (MP1).
+  for (const d of trip.days)
+    for (const e of d.entries) {
+      const main = /^i\d+$/.test(e.id) ? use('entry', e.id.slice(1), 'photos') : undefined;
+      if (typeof main !== 'string' || !main) continue;
+      const order = main.split(',');
+      const rank = (id: string) => (order.includes(id) ? order.indexOf(id) : order.length);
+      e.photos = [...e.photos].sort((a, b) => rank(a.id) - rank(b.id));
+    }
   const hidden = hiddenPhotos.map((p) => ({
     id: p.id!,
     url: p.url,
@@ -587,6 +603,7 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
     suggestions: remaining,
     proposals: open,
     unvisited,
+    setAside: { dismissed, ignored, fine },
     segments: views,
     hidden,
     added: approved.map((s, n) => ({ entryId: -(n + 1), key: s.key })),

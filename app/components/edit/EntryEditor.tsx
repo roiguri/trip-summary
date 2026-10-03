@@ -66,9 +66,25 @@ export function EntryEditor({
   );
   const hidden = edit.hidden.filter((p) => p.entryId === id);
   const photos = [
-    ...entry.photos.map((p) => ({ id: p.id, url: p.url, time: p.time, hidden: false })),
-    ...hidden.map((p) => ({ ...p, hidden: true })),
+    ...entry.photos.map((p) => ({
+      id: p.id,
+      url: p.url,
+      time: p.time,
+      hidden: false,
+      star: !!p.highlighted,
+    })),
+    ...hidden.map((p) => ({ ...p, hidden: true, star: false })),
   ];
+  // The photos shown on the journey, in order (DESIGN.md, "Edit mode, round 2", MP1): numbered in
+  // the grid; "Show on the journey" puts the selected first.
+  const canPick = !loose && !fromSuggestion;
+  const main = canPick ? entry.photos.slice(0, 3).map((p) => p.id) : [];
+  const showOnJourney = () => {
+    const chosen = picked.filter((p) => !hidden.some((h) => h.id === p));
+    const order = [...chosen, ...main.filter((m) => !chosen.includes(m))].slice(0, 3);
+    return save([set('photos', order.join(','))]).then(() => setPicked([]));
+  };
+  const allStarred = picked.length > 0 && picked.every((p) => photos.find((x) => x.id === p)?.star);
   const edited = edit.edited[String(id)] ?? [];
   const highlighted = !!entry.highlighted;
 
@@ -102,7 +118,7 @@ export function EntryEditor({
           {KICKERS[entry.type]} · {dayLabel(entry.day)}
         </span>
         <button className="link-button" onClick={onClose}>
-          Back to the inbox
+          Close
         </button>
       </div>
       {!loose && (
@@ -297,6 +313,19 @@ export function EntryEditor({
               >
                 {/* eslint-disable-next-line @next/next/no-img-element -- stored media, served as is */}
                 <img src={p.url} alt="" loading="lazy" />
+                {main.includes(p.id) && (
+                  <span
+                    className="num"
+                    aria-label={`Shown on the journey, ${main.indexOf(p.id) + 1}`}
+                  >
+                    {main.indexOf(p.id) + 1}
+                  </span>
+                )}
+                {p.star && (
+                  <b className="pstar" aria-label="A highlight">
+                    ★
+                  </b>
+                )}
                 {edit.cover === p.id && <em>COVER</em>}
                 {p.hidden && <em>HIDDEN</em>}
               </button>
@@ -305,7 +334,36 @@ export function EntryEditor({
           {picked.length > 0 ? (
             <div className="ed-selbar">
               <b>{picked.length} selected</b>
-              <button className="pill-button small primary" onClick={() => setMoving(!moving)}>
+              {canPick && (
+                <button
+                  className="pill-button small primary"
+                  disabled={busy}
+                  onClick={showOnJourney}
+                >
+                  Show on the journey
+                </button>
+              )}
+              <button
+                className="pill-button small"
+                disabled={busy}
+                onClick={() =>
+                  save(
+                    picked.map((p) => ({
+                      target: 'photo',
+                      key: p,
+                      field: 'highlighted',
+                      value: allStarred ? undefined : true,
+                    })),
+                  ).then(() => setPicked([]))
+                }
+              >
+                {allStarred
+                  ? 'Remove highlight'
+                  : picked.length === 1
+                    ? '★ Highlight photo'
+                    : '★ Highlight photos'}
+              </button>
+              <button className="pill-button small" onClick={() => setMoving(!moving)}>
                 {loose ? 'Attach to…' : 'Move to…'}
               </button>
               {!loose && (
@@ -363,7 +421,22 @@ export function EntryEditor({
               )}
             </div>
           ) : (
-            <small>Select photos to move them, hide them, or make one the trip’s cover.</small>
+            <small>
+              {canPick ? '1 2 3: the photos shown on the journey. ' : ''}Select photos to show them
+              on the journey, highlight, move or hide them, or make one the trip’s cover.
+              {edited.includes('photos') && (
+                <>
+                  {' '}
+                  <button
+                    className="link-button"
+                    disabled={busy}
+                    onClick={() => save([set('photos', undefined)])}
+                  >
+                    Back to time order
+                  </button>
+                </>
+              )}
+            </small>
           )}
           {moving && picked.length > 0 && (
             <div className="ed-moveto" role="menu">

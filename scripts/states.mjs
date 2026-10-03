@@ -135,11 +135,19 @@ export const STATES = {
   'editor-bar': async () => {},
   share: (p) => p.click('.editor-bar [aria-controls="share"]'),
   'phone-editor-bar': async () => {},
-  'edit-inbox': async () => {},
-  'edit-entry': (p) => p.locator('.left .entry', { hasText: 'Carmel Beach' }).first().click(),
+  'edit-timeline': async () => {},
+  'edit-entry': (p) =>
+    p
+      .locator('.left .entry', { hasText: 'Carmel Beach' })
+      .first()
+      .locator('.pencil:visible')
+      .click(),
   'edit-stop': (p) =>
-    p.locator('.finding.stop').first().getByRole('button', { name: 'Open' }).click(),
-  'phone-edit-inbox': (p) => p.click('.map-fab'),
+    p.locator('.left .ghost-card').first().getByRole('button', { name: 'Add…' }).click(),
+  'edit-next': async (p) => {
+    for (let i = 0; i < 3; i++) await p.getByRole('button', { name: 'Next finding' }).click();
+  },
+  'phone-edit-timeline': (p) => p.evaluate(() => document.querySelector('.left')?.scrollTo(0, 500)),
   highlight: (p) => scrollToDay(p, '2026-05-15', 300),
   'home-empty': async () => {},
   'phone-home': async () => {},

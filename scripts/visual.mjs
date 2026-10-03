@@ -121,12 +121,16 @@ async function compare(page, a, b) {
     await page.waitForTimeout(1200);
     await STATES[name](page);
     await page.waitForTimeout(1200);
+    // Images still loading, for at most 5s: a lazy image out of view never loads.
     await page.evaluate(() =>
-      Promise.all(
-        [...document.images]
-          .filter((i) => !i.complete)
-          .map((i) => new Promise((r) => (i.onload = i.onerror = r))),
-      ),
+      Promise.race([
+        Promise.all(
+          [...document.images]
+            .filter((i) => !i.complete)
+            .map((i) => new Promise((r) => (i.onload = i.onerror = r))),
+        ),
+        new Promise((r) => setTimeout(r, 5000)),
+      ]),
     );
     const shot = await page.screenshot();
     const file = `${DIR}/baseline/${name}.png`;

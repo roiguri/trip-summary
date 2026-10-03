@@ -40,3 +40,13 @@ test('anything else is refused', () => {
   ] as const)
     assert.notEqual(checkEdit(e as never), null, JSON.stringify(e));
 });
+
+test('main photos are up to three media IDs; a photo can be highlighted', () => {
+  assert.equal(checkEdit({ target: 'entry', key: '1', field: 'photos', value: 'a,b,c' }), null);
+  assert.notEqual(
+    checkEdit({ target: 'entry', key: '1', field: 'photos', value: 'a,b,c,d' }),
+    null,
+  );
+  assert.notEqual(checkEdit({ target: 'entry', key: '1', field: 'photos', value: 'a b' }), null);
+  assert.equal(checkEdit({ target: 'photo', key: 'm', field: 'highlighted', value: true }), null);
+});

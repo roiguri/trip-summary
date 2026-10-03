@@ -125,6 +125,28 @@ Options and drawings: https://claude.ai/artifact/Wvm7oAhSYKQGetpMWAqcXV.
   order, each labelled with where it is; select several (shift-click for a run), then click the
   entry they belong to.
 
+## Edit mode, round 2 (user decisions, Oct 3)
+
+From the first build; same preview page. These replace M2's inbox and refine H5.
+
+- On the timeline (T1): every finding is drawn where it happened, not in a list. A proposed time or
+  mode sits under its entry (Use, Ignore); "No visit found" under a planned stop (Link a visit, Fine
+  as it is); an unplanned stop or journey is a dashed entry at its own time on the day's rail (Add…,
+  It's a planned stop, Dismiss, Google Maps). A day banner offers "Accept the day's" times. The bar
+  counts what's left ("18 to review") with Previous and Next, which scroll to each finding in turn.
+  The right column stays the map, with the editor (E1, S1) under it once something is opened. A stop
+  added from the Timeline is marked "Added from your Timeline · Undo" while editing.
+- Set aside, not gone (R1): ignored times and modes, dismissed stops, "fine as it is" and hidden
+  entries are drawn faded when "Show resolved" is on, each with Bring back (or Show again).
+- Main photos (MP1): the photos an entry shows on the journey are numbered 1, 2, 3 in its photo grid;
+  "Show on the journey" puts the selected ones first. "Back to time order" undoes it.
+- Photo highlights (PH1): "★ Highlight" on selected photos; a highlighted photo carries a copper star
+  wherever it shows. A Highlights album is for later, apart from edit mode.
+- Marks (K1): the pencil is a small round button with a drawn pencil icon, and the HIGHLIGHT stamp,
+  both on the title's side away from the rail (before a left-hand title, after a right-hand one; in
+  one column, after). The stamp keeps H5's look, set larger (11px, less spaced, lightly filled).
+  Which pencil and stamp exactly is still being chosen (round 3 on the preview page).
+
 ## Exact sampled backgrounds and remaining gaps
 
 The locked reference background is RGB (255,253,250), `#fffdfa`, sampled at (10,110), (800,110) and (10,500) across the whole, place and geometry captures. The large card interior in the locked whole/place captures is `#fffdf8` (255,253,248); the implementation sets those tokens explicitly. Recheck these pixels after a build. Remaining gaps: substitute/reused photos are not the original images and may not match captions; reference PNGs do not disclose an exact font binary (Arial/Helvetica family is inferred); the dotted multi-day end bend is still visually subtle rather than the reference's more pronounced curve.

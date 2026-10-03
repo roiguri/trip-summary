@@ -29,8 +29,18 @@ const FIELDS: Record<EditTarget, Record<string, Rule>> = {
     visit: key,
     proposal: oneOf('ignored'),
     noVisit: bool,
+    /** The photos shown on the journey, in order: up to three media IDs, comma-separated. */
+    photos: (v) =>
+      typeof v === 'string' &&
+      v.split(',').length <= 3 &&
+      v.split(',').every((id) => /^[\w.-]{1,200}$/.test(id)),
   },
-  photo: { entry: (v) => v === null || key(v), hidden: bool, caption: text(500) },
+  photo: {
+    entry: (v) => v === null || key(v),
+    hidden: bool,
+    caption: text(500),
+    highlighted: bool,
+  },
   day: { title: text(120) },
   trip: { title: text(200), subtitle: text(300), cover: key },
   suggestion: {

@@ -97,7 +97,7 @@ export function SuggestionCard({
       <div className="ed-kick">
         <span>NOT IN YOUR PLAN · {dayLabel(s.date)}</span>
         <button className="link-button" onClick={onClose}>
-          Back to the inbox
+          Close
         </button>
       </div>
       {at && <MiniMap at={at} near={nearest ? [nearest.e.lat!, nearest.e.lng!] : null} />}

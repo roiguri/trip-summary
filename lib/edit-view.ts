@@ -5,7 +5,11 @@ import { merge, type SegmentView, type Suggestion } from './merge/index.ts';
 import type { Entry, Photo, TransitMode, Trip } from './model.ts';
 import type { Store } from './store/index.ts';
 
-export type Finding =
+/** A finding the owner set aside (DESIGN.md, "Edit mode, round 2", R1): shown only with "Show
+ *  resolved", and each can be brought back. */
+export type SetAside = 'ignored' | 'dismissed' | 'fine' | 'hidden';
+
+export type Finding = (
   | {
       kind: 'times';
       entryId: number;
@@ -27,11 +31,16 @@ export type Finding =
       end: string;
     }
   | { kind: 'unvisited'; entryId: number; title: string; date: string; time: string }
-  | { kind: 'stop'; date: string; time: string; suggestion: Suggestion; photos: Photo[] };
+  | { kind: 'stop'; date: string; time: string; suggestion: Suggestion; photos: Photo[] }
+  | { kind: 'hidden'; entryId: number; title: string; date: string; time: string }
+) & { setAside?: SetAside };
 
 export type EditData = {
   tripId: string;
+  /** Open findings, in date and time order: "n to review". */
   findings: Finding[];
+  /** What the owner set aside, in the same order. */
+  setAside: Finding[];
   segments: SegmentView[];
   /** Entry ID → the fields the owner has changed, for "Undo my edits". */
   edited: Record<string, string[]>;
@@ -40,8 +49,6 @@ export type EditData = {
   cover: string | null;
   /** Entry ID → the suggestion an added stop came from (its edits are kept under that key). */
   added: Record<string, string>;
-  /** Entries the owner hid, so they can be shown again. */
-  hiddenEntries: { entryId: number; title: string; date: string; time: string }[];
 };
 
 const span = (e: { time: string; end_time: string | null }) =>
@@ -69,49 +76,69 @@ export async function editView(
     d.entries.filter((e) => e.type === 'photo' || e.type === 'cluster').flatMap((e) => e.photos),
   );
 
-  const findings: Finding[] = [];
-  for (const p of r.proposals) {
-    const e = entries.get(p.entryId);
-    if (!e) continue;
-    if (p.mode && p.mode !== e.mode)
-      findings.push({
-        kind: 'mode',
-        entryId: p.entryId,
-        title: e.title,
-        date: e.day,
-        time: e.time,
-        planned: e.mode,
-        mode: p.mode,
-        start: p.start,
-        end: p.end,
-      });
-    else
-      findings.push({
-        kind: 'times',
-        entryId: p.entryId,
-        title: e.title,
-        date: e.day,
-        planned: span(e),
-        start: p.start,
-        end: p.end,
-      });
-  }
-  for (const id of r.unvisited) {
-    const e = entries.get(id);
-    if (e)
-      findings.push({ kind: 'unvisited', entryId: id, title: e.title, date: e.day, time: span(e) });
-  }
-  for (const s of r.suggestions)
-    findings.push({
+  const fromProposals = (list: typeof r.proposals, setAside?: SetAside): Finding[] =>
+    list.flatMap((p): Finding[] => {
+      const e = entries.get(p.entryId);
+      if (!e) return [];
+      const base = { entryId: p.entryId, title: e.title, date: e.day, start: p.start, end: p.end };
+      return [
+        p.mode && p.mode !== e.mode
+          ? { kind: 'mode', ...base, time: e.time, planned: e.mode, mode: p.mode, setAside }
+          : { kind: 'times', ...base, planned: span(e), setAside },
+      ];
+    });
+  const fromUnvisited = (ids: number[], setAside?: SetAside): Finding[] =>
+    ids.flatMap((id): Finding[] => {
+      const e = entries.get(id);
+      return e
+        ? [{ kind: 'unvisited', entryId: id, title: e.title, date: e.day, time: span(e), setAside }]
+        : [];
+    });
+  const fromSuggestions = (list: Suggestion[], setAside?: SetAside): Finding[] =>
+    list.map((s) => ({
       kind: 'stop',
       date: s.date,
       time: s.time,
       suggestion: s,
       photos: loose.filter((p) => p.date === s.date && p.time >= s.time && p.time <= s.endTime),
-    });
+      setAside,
+    }));
+  const hiddenEntries: Finding[] = plan.itinerary.flatMap((row): Finding[] => {
+    const hide = edits.some(
+      (e) =>
+        e.target === 'entry' &&
+        e.key === String(row.entry_id) &&
+        e.field === 'hidden' &&
+        e.value === true,
+    );
+    if (!hide) return [];
+    const place = plan.places.find((p) => p.place_id === row.place_id);
+    return [
+      {
+        kind: 'hidden',
+        entryId: Number(row.entry_id),
+        title: String(row.title ?? place?.title ?? 'An entry'),
+        date: String(row.start_date),
+        time: String(row.start_time ?? ''),
+        setAside: 'hidden',
+      },
+    ];
+  });
   const timeOf = (f: Finding) =>
-    f.kind === 'stop' ? f.time : f.kind === 'times' ? f.start : f.kind === 'mode' ? f.time : f.time;
-  findings.sort((a, b) => a.date.localeCompare(b.date) || timeOf(a).localeCompare(timeOf(b)));
+    f.kind === 'times' ? f.start : f.kind === 'stop' ? f.time : f.time;
+  const ordered = (list: Finding[]) =>
+    list.sort((a, b) => a.date.localeCompare(b.date) || timeOf(a).localeCompare(timeOf(b)));
+  const findings = ordered([
+    ...fromProposals(r.proposals),
+    ...fromUnvisited(r.unvisited),
+    ...fromSuggestions(r.suggestions),
+  ]);
+  const setAside = ordered([
+    ...fromProposals(r.setAside.ignored, 'ignored'),
+    ...fromUnvisited(r.setAside.fine, 'fine'),
+    ...fromSuggestions(r.setAside.dismissed, 'dismissed'),
+    ...hiddenEntries,
+  ]);
 
   const edited: Record<string, string[]> = {};
   for (const e of edits) if (e.target === 'entry') (edited[e.key] ??= []).push(e.field);
@@ -123,30 +150,12 @@ export async function editView(
     edit: {
       tripId,
       findings,
+      setAside,
       segments: r.segments,
       edited,
       hidden: r.hidden,
       cover: typeof cover === 'string' ? cover : null,
       added: Object.fromEntries(r.added.map((a) => [String(a.entryId), a.key])),
-      hiddenEntries: plan.itinerary.flatMap((row) => {
-        const hide = edits.some(
-          (e) =>
-            e.target === 'entry' &&
-            e.key === String(row.entry_id) &&
-            e.field === 'hidden' &&
-            e.value === true,
-        );
-        if (!hide) return [];
-        const place = plan.places.find((p) => p.place_id === row.place_id);
-        return [
-          {
-            entryId: Number(row.entry_id),
-            title: String(row.title ?? place?.title ?? 'An entry'),
-            date: String(row.start_date),
-            time: String(row.start_time ?? ''),
-          },
-        ];
-      }),
     },
   };
 }
