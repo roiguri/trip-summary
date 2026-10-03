@@ -69,6 +69,7 @@ jobs:
         env:
           FIRESTORE_EMULATOR_HOST: 127.0.0.1:8080
           FIREBASE_AUTH_EMULATOR_HOST: 127.0.0.1:9099
+          FIREBASE_STORAGE_EMULATOR_HOST: 127.0.0.1:9199
 
       - name: Browser for the interaction checks
         run: npx playwright install --with-deps chromium
@@ -80,6 +81,7 @@ jobs:
         env:
           FIRESTORE_EMULATOR_HOST: 127.0.0.1:8080
           FIREBASE_AUTH_EMULATOR_HOST: 127.0.0.1:9099
+          FIREBASE_STORAGE_EMULATOR_HOST: 127.0.0.1:9199
 
       - name: Interaction checks
         run: BASE_URL=http://localhost:3100 npm run check:interactions
@@ -96,6 +98,10 @@ jobs:
       - name: Adding a trip and importing
         if: ${{ !inputs.update_baselines }}
         run: BASE_URL=http://localhost:3100 npm run check:import
+
+      - name: Photos
+        if: ${{ !inputs.update_baselines }}
+        run: BASE_URL=http://localhost:3100 npm run check:photos
 
       - name: Visual differences (baseline | now | diff)
         if: failure()

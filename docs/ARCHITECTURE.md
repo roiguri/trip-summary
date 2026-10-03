@@ -12,7 +12,8 @@ in git-ignored env files.
   - **Firestore** holds the trips, the imported sources, the edits and the merged journal.
   - **Cloud Storage** holds photos, videos and their resized copies.
   - **Firebase Auth** signs editors and viewers in.
-  - **Cloud Functions** run the long jobs: copying picked media from Google Photos and resizing it.
+  - **Cloud Functions**, only if hosting shows they're needed: copying long videos from Google
+    Photos (see Imports).
 - The Google Cloud project created for the Photos Picker becomes the Firebase project, so the
   Picker's OAuth setup carries over.
 
@@ -33,8 +34,10 @@ Two services in total, both already used in the owner's other apps, at no cost a
 
 The merge runs once per import, not per view: its result, the journal, is stored in Firestore one
 document per day. A page view checks the viewer's access and reads that trip's journal documents.
-Photos and videos are served through **signed URLs** that the server issues per view and that expire
-within the hour; Storage itself is closed to direct reads.
+Photos and videos are served through the app's `/media/…` route, which checks the viewer's access to
+that trip on every request and supports range requests (seeking in a video); Storage itself is closed
+to direct reads **(agreed, Oct 2)**. Signed URLs can replace it at hosting if bandwidth through the
+app's functions costs too much.
 
 ### Sign-in and access
 
@@ -51,9 +54,18 @@ within the hour; Storage itself is closed to direct reads.
 - **Plan**: the Jarvis SQLite file is chosen in the browser and uploaded; the server reads the trip
   from it and stores the rows in Firestore.
 - **Timeline**: sliced in the browser to the trip's dates **(agreed)**; only the slice is uploaded.
-- **Photos and videos**: the editor picks them in the Google Photos Picker; a Cloud Function copies
-  each file from Google straight into Storage and writes the 2048px and 400px copies. A video's still
-  frame is taken in the browser at pick time. Uploads never pass through Netlify's short functions.
+- **Photos and videos**: the editor connects Google Photos (a separate, read-only consent for the
+  photos they pick; the access token lives about an hour in an encrypted HTTP-only cookie, and no
+  refresh token is asked for) and picks in the Google Photos Picker. The app copies the picked items
+  in small batches, a few per request so each fits a short function's time limit: originals are
+  downloaded from Google, photos are stored as 2048px and 400px copies (`sharp`, location removed),
+  videos as they are, with Google's own thumbnail as the still frame. The local time comes from the
+  photo's EXIF. Like every import, picked photos wait for review before they're applied **(agreed,
+  Oct 2)**.
+- **Cloud Functions, if needed**: copying lives in one module (`lib/media/`). If long videos turn out
+  to exceed the host's time limit, the same module moves into a Cloud Function driven by a job queue,
+  and how the function gets the Google token is decided then **(agreed, Oct 2: decided at hosting,
+  after measuring)**.
 
 ### Firestore layout (proposed, settled in Phase 2's data-model step)
 
@@ -83,11 +95,18 @@ Firebase is a proprietary stack, so moving away is real work. These rules keep i
 - **Sign-in in development**: the Auth emulator stands in for Google. `/api/auth/dev` signs a
   browser in as the mock owner (`owner@example.com` unless `OWNER_EMAIL` is set) or opens a fresh
   invite as a mock viewer; it exists only when the app runs on the emulators with a `demo-` project.
-  The app reads `FIRESTORE_EMULATOR_HOST` and `FIREBASE_AUTH_EMULATOR_HOST` at run time, and the
+  The app reads `FIRESTORE_EMULATOR_HOST`, `FIREBASE_AUTH_EMULATOR_HOST` and
+  `FIREBASE_STORAGE_EMULATOR_HOST` at run time, and the
   sign-in page needs `NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST` at build time.
+- **Photos in development**: on the emulators the import page offers "Use the mock photos", which
+  copies `data/mock/picker.json`'s items through the same path as a real pick. A real pick needs
+  `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` (the OAuth client from the Picker check, in
+  `.env.local`) and works locally, since its redirect is `localhost:3100`.
 - **Settings in production**: `OWNER_EMAIL` (the owner, who edits every trip and creates trips),
   `FIREBASE_PROJECT_ID`, and the web app's `NEXT_PUBLIC_FIREBASE_API_KEY`,
-  `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` and `NEXT_PUBLIC_FIREBASE_PROJECT_ID`.
+  `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` and `NEXT_PUBLIC_FIREBASE_PROJECT_ID`; for photos
+  `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `PHOTOS_TOKEN_KEY` (32 random bytes, base64: it seals
+  the Google token's cookie) and, if not the project's default, `FIREBASE_STORAGE_BUCKET`.
 - **Secrets** (the Admin SDK service account and the Picker's OAuth client secret) live in
   `.env.local` locally and in Netlify's environment settings, never in git.
 - **Blaze** needs a card, but usage stays inside the free allowance at this scale (Cloud Storage

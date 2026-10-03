@@ -9,6 +9,7 @@ import {
   type Trip,
 } from '../model.ts';
 import { localMidnightUtc } from '../import/timeline.ts';
+import { mediaUrl } from '../media/paths.ts';
 import type { Edit, JarvisRow, PlanSource, TimelineSegment, TripPhoto } from '../store/types.ts';
 
 /** Starting values from the design, to tune on real data. */
@@ -364,7 +365,7 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
       id: p.mediaId,
       photo_id: n + 1,
       entry_id: entry,
-      url: (p.kind === 'video' ? p.files.still : p.files.display) ?? '',
+      url: mediaUrl((p.kind === 'video' ? p.files.still : p.files.display) ?? ''),
       caption: typeof caption === 'string' ? caption : '',
       lat,
       lng,

@@ -153,4 +153,6 @@ export type Person = {
  *  replaces it. */
 export type Pending =
   | { importId: string; source: 'plan'; plan: PlanSource; at: string }
-  | { importId: string; source: 'timeline'; segments: TimelineSegment[]; at: string };
+  | { importId: string; source: 'timeline'; segments: TimelineSegment[]; at: string }
+  /** Picked photos, filled in batch by batch as they are copied; `sessionId` is the Picker's. */
+  | { importId: string; source: 'photos'; sessionId: string; photos: TripPhoto[]; at: string };

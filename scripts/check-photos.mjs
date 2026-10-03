@@ -1,0 +1,107 @@
+// Photos, end to end in a browser against the running app on the emulators: a new trip from the mock
+// Jarvis database, the mock pick copied in batches, the review, Apply, and the photos served through
+// /media only to people who may see the trip. Exits 1 on a failure.
+//   BASE_URL=http://localhost:3100 npm run check:photos
+import { chromium } from 'playwright';
+import { mkdtempSync, readFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+import { DatabaseSync } from 'node:sqlite';
+import { signIn } from './signed-in.mjs';
+
+const BASE = process.env.BASE_URL || 'http://localhost:3100';
+const TRIP = `photos-check-${Date.now()}`;
+const R = [];
+const ok = (name, cond, extra = '') =>
+  R.push(`${cond ? 'PASS' : 'FAIL'}  ${name}${extra ? ` (${extra})` : ''}`);
+
+const sample = JSON.parse(readFileSync('data/mock/expected.json', 'utf8')).trip;
+const jarvis = path.join(mkdtempSync(path.join(tmpdir(), 'check-photos-')), 'travel.sqlite');
+const db = new DatabaseSync(jarvis);
+db.exec(readFileSync('data/mock/jarvis.sql', 'utf8').replaceAll(`'${sample}'`, `'${TRIP}'`));
+db.close();
+
+const browser = await chromium.launch();
+const owner = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+await signIn(owner, BASE);
+const p = await owner.newPage();
+const errors = [];
+p.on('pageerror', (e) => errors.push(String(e)));
+
+await p.goto(`${BASE}/trips/new`);
+await p.setInputFiles('#jarvis-file', jarvis);
+await p.waitForSelector('.pick-trip');
+await p.check(`input[value="${TRIP}"]`);
+await p.getByRole('button', { name: 'Create the draft' }).click();
+await p.waitForURL(new RegExp(`/trips/${TRIP}/sources$`));
+ok(
+  'without a Google connection, the row offers to connect',
+  (await p.locator('text=Connect Google Photos').count()) === 1,
+);
+
+await p.getByRole('button', { name: 'Use the mock photos' }).click();
+await p.waitForSelector('.review', { timeout: 120_000 });
+const tally = await p.locator('.review h2').textContent();
+ok('every picked item is copied and waits for review', /79 photos/.test(tally), tally);
+ok('the review shows where the photos land', (await p.locator('.review-photos').count()) > 0);
+const thumb = await p.locator('.review-photos img').first().getAttribute('src');
+ok('review thumbnails come from /media', thumb?.startsWith(`/media/trips/${TRIP}/media/`), thumb);
+await p.waitForLoadState('networkidle');
+const shown = await p
+  .locator('.review-photos img')
+  .evaluateAll((els) => els.every((e) => e.complete && e.naturalWidth > 0));
+ok('and they display', shown);
+ok(
+  'nothing is in the trip before applying',
+  (await p.locator('.src-row').nth(2).textContent()).includes('Pick an album'),
+);
+
+await p.getByRole('button', { name: 'Apply', exact: true }).click();
+await p.waitForSelector('.review', { state: 'detached', timeout: 60_000 });
+ok(
+  'applying adds them',
+  (await p.locator('.src-row').nth(2).textContent()).includes('79 photos and videos'),
+);
+await p.goto(`${BASE}/trips/${TRIP}`);
+await p.waitForLoadState('networkidle');
+const imgs = await p
+  .locator('.left img')
+  .evaluateAll((els) =>
+    els.map((e) => ({ src: e.getAttribute('src'), ok: e.complete && e.naturalWidth > 0 })),
+  );
+ok(
+  'the journey shows the copied photos',
+  imgs.length > 0 && imgs.every((i) => i.src.startsWith('/media/') && i.ok),
+  `${imgs.filter((i) => !i.ok).length} broken of ${imgs.length}`,
+);
+
+// The files themselves.
+const media = await owner.request.get(BASE + thumb);
+ok(
+  'the owner gets the file, privately cached',
+  media.status() === 200 &&
+    media.headers()['content-type'] === 'image/jpeg' &&
+    media.headers()['cache-control'].startsWith('private'),
+);
+const videoPath = `/media/trips/${TRIP}/media/mock-media-video-1/video.mp4`;
+const part = await owner.request.get(BASE + videoPath, { headers: { Range: 'bytes=0-3' } });
+ok(
+  'a video can be read in parts (seeking)',
+  part.status() === 206 && part.headers()['content-range']?.startsWith('bytes 0-3/'),
+  part.status(),
+);
+const guest = await browser.newContext();
+await signIn(guest, BASE, 'guest');
+const denied = await guest.request.get(BASE + thumb);
+ok('someone without access gets nothing', denied.status() === 404, denied.status());
+const anon = await fetch(BASE + thumb);
+ok('and nor does anyone signed out', anon.status === 404, anon.status);
+const traversal = await owner.request.get(
+  `${BASE}/media/trips/${TRIP}/media/x/..%2F..%2F..%2Fsecret`,
+);
+ok('a path outside the media is refused', traversal.status() === 404, traversal.status());
+ok('no page errors', errors.length === 0, errors.join('; '));
+
+await browser.close();
+console.log(R.join('\n'));
+process.exit(R.some((l) => l.startsWith('FAIL')) ? 1 : 0);

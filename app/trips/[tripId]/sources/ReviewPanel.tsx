@@ -32,7 +32,7 @@ export function ReviewPanel({
   published,
 }: {
   tripId: string;
-  source: 'plan' | 'timeline';
+  source: 'plan' | 'timeline' | 'photos';
   review: Review;
   decisions: Record<string, 'add' | 'dismiss'>;
   published: boolean;
@@ -62,6 +62,7 @@ export function ReviewPanel({
     c.retitled + c.notes && `${c.retitled + c.notes} renamed or rewritten`,
     c.suggestion && `${c.suggestion} ${c.suggestion === 1 ? 'suggestion' : 'suggestions'}`,
     c.unvisited && `${c.unvisited} not visited`,
+    c.photos && `${c.photos} ${c.photos === 1 ? 'photo' : 'photos'}`,
   ].filter(Boolean);
 
   const line = (item: ReviewItem) => {
@@ -98,14 +99,34 @@ export function ReviewPanel({
   return (
     <section className="review" aria-labelledby="review-title">
       <h2 id="review-title">
-        What this {source === 'plan' ? 'plan update' : 'Timeline import'} changes{' '}
-        <span>{tally.join(' · ') || 'No changes to the journey'}</span>
+        What this{' '}
+        {source === 'plan'
+          ? 'plan update'
+          : source === 'timeline'
+            ? 'Timeline import'
+            : 'photo import'}{' '}
+        changes <span>{tally.join(' · ') || 'No changes to the journey'}</span>
       </h2>
       {review.days.map((d) => (
         <div className="review-day" key={d.date}>
           <b>{day(d.date)}</b>
           <div>
             {d.items.map((item, i) => {
+              if (item.kind === 'photos')
+                return (
+                  <div className="review-item review-photos" key={i}>
+                    <span>{item.where ?? 'Loose moments'}</span>
+                    <span>
+                      {item.thumbs.map((p) => (
+                        // eslint-disable-next-line @next/next/no-img-element -- stored media, served as is
+                        <img key={p.id} src={p.url} alt="" />
+                      ))}
+                      <b>
+                        {item.count} new {item.count === 1 ? 'photo' : 'photos'}
+                      </b>
+                    </span>
+                  </div>
+                );
               if (item.kind !== 'suggestion') {
                 const [title, what] = line(item)!;
                 return (

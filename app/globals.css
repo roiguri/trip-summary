@@ -2916,3 +2916,15 @@ button.pill-button {
     padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px));
   }
 }
+
+.review-photos span:last-child {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.review-photos img {
+  width: 34px;
+  height: 34px;
+  border-radius: 5px;
+  object-fit: cover;
+}
