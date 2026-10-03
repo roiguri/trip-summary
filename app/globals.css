@@ -228,7 +228,7 @@ button:disabled {
 .day-banner:focus-visible {
   outline: 2px solid #ac7658;
 }
-/* The node: a copper ring with a dot, centred on the rail. */
+/* The node: a copper ring, centred on the rail (no inner dot: user decision, Oct 3). */
 .entry-node {
   position: absolute;
   top: 13px;
@@ -247,16 +247,6 @@ button:disabled {
 .entry-left .entry-node {
   left: auto;
   right: -4.5px;
-}
-.entry:not(.type-transit) .entry-node::after {
-  content: '';
-  position: absolute;
-  top: 2.5px;
-  left: 2.5px;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: #b98468;
 }
 .entry-content {
   display: block;
@@ -765,7 +755,7 @@ button:disabled {
   --col-w: 424px;
   position: fixed;
   top: calc(78px + var(--bar));
-  right: max(40px, calc((100vw - 1370px) / 2 + 7px));
+  right: 16px;
   bottom: 13px;
   z-index: 3;
   display: flex;
@@ -1634,9 +1624,6 @@ button:disabled {
     left: -8.5px;
     right: auto;
   }
-  .entry:not(.type-transit) .entry-node::after {
-    display: none;
-  }
   .entry-content::before,
   .entry-left .entry-content::before {
     top: calc(var(--title) * 0.54 + 4.24px);
@@ -1695,11 +1682,10 @@ button:disabled {
   }
 }
 
-/* 900-1199px: the right column stays, 380px wide, 20px from the edge. */
+/* 900-1199px: the right column stays, 380px wide. */
 @media (min-width: 900px) and (max-width: 1199px) {
   .right {
     --col-w: 380px;
-    right: 20px;
   }
   .left {
     width: calc(100vw - 420px);
@@ -2978,13 +2964,41 @@ button.pill-button {
   font-size: 12px;
   color: #6b766f;
 }
-.right.edit-col {
+/* The map stays put, as in display mode; the editor takes the rest of the column and scrolls
+   inside (user decision, Oct 3). */
+.right.edit-col > .editor {
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
   overflow-y: auto;
-  pointer-events: auto;
-  scrollbar-width: thin;
+  overscroll-behavior: contain;
+}
+/* Its scrollbar in the card's style: thin, rounded, the card's soft green, clear of the corners. */
+.right.edit-col > .editor::-webkit-scrollbar {
+  width: 10px;
+}
+.right.edit-col > .editor::-webkit-scrollbar-track {
+  margin: 20px 0;
+  background: transparent;
+}
+.right.edit-col > .editor::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 10px;
+  background: #d5e0d3 padding-box;
+}
+.right.edit-col > .editor::-webkit-scrollbar-thumb:hover {
+  background: #b7c7b5 padding-box;
+}
+@supports not selector(::-webkit-scrollbar) {
+  .right.edit-col > .editor {
+    scrollbar-width: thin;
+    scrollbar-color: #d5e0d3 transparent;
+  }
 }
 .editor {
   display: grid;
+  /* One column as wide as the card: a wide row shrinks to fit instead of widening the card. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   padding: 18px;
   border: 1px solid #e3e8df;
@@ -3016,6 +3030,7 @@ button.pill-button {
 .ed-field input,
 .ed-field textarea,
 .ed-field select {
+  min-width: 0;
   padding: 8px 10px;
   border: 1px solid #d5e1d4;
   border-radius: 9px;
@@ -3371,9 +3386,6 @@ button.pill-button {
 .ghost-entry .entry-node {
   border-style: dashed;
   border-color: #c9b49f;
-}
-.ghost-entry .entry-node::after {
-  display: none;
 }
 .ghost-entry .entry-content::before {
   border-top-style: dashed;
