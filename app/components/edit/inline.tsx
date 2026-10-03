@@ -211,9 +211,7 @@ export function GhostCard({
     <span className={`ghost-card ${current ? 'current' : ''}`}>
       <small>
         NOT IN YOUR PLAN · {s.time} – {s.endTime}
-        {f.photos.length
-          ? ` · ${f.photos.length} ${f.photos.length === 1 ? 'PHOTO' : 'PHOTOS'}`
-          : ''}
+        {f.photoCount ? ` · ${f.photoCount} ${f.photoCount === 1 ? 'PHOTO' : 'PHOTOS'}` : ''}
       </small>
       <strong>{what}</strong>
       {f.photos.length > 0 && (

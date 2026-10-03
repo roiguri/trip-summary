@@ -31,7 +31,15 @@ export type Finding = (
       end: string;
     }
   | { kind: 'unvisited'; entryId: number; title: string; date: string; time: string }
-  | { kind: 'stop'; date: string; time: string; suggestion: Suggestion; photos: Photo[] }
+  | {
+      kind: 'stop';
+      date: string;
+      time: string;
+      suggestion: Suggestion;
+      /** The first few photos taken there (all a card shows), and how many there are. */
+      photos: Photo[];
+      photoCount: number;
+    }
   | { kind: 'hidden'; entryId: number; title: string; date: string; time: string }
 ) & { setAside?: SetAside };
 
@@ -50,6 +58,9 @@ export type EditData = {
   /** Entry ID → the suggestion an added stop came from (its edits are kept under that key). */
   added: Record<string, string>;
 };
+
+/** A stop's photos as sent to the page: a card shows at most six (one stop can have a hundred). */
+const firstPhotos = (all: Photo[]) => ({ photos: all.slice(0, 6), photoCount: all.length });
 
 const span = (e: { time: string; end_time: string | null }) =>
   e.end_time ? `${e.time} – ${e.end_time}` : e.time || 'no time';
@@ -100,7 +111,9 @@ export async function editView(
       date: s.date,
       time: s.time,
       suggestion: s,
-      photos: loose.filter((p) => p.date === s.date && p.time >= s.time && p.time <= s.endTime),
+      ...firstPhotos(
+        loose.filter((p) => p.date === s.date && p.time >= s.time && p.time <= s.endTime),
+      ),
       setAside,
     }));
   const hiddenEntries: Finding[] = plan.itinerary.flatMap((row): Finding[] => {
