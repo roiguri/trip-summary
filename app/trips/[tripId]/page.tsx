@@ -4,6 +4,7 @@ import { accessToTrip, currentAccount } from '../../../lib/auth/session';
 import { previewPending } from '../../../lib/import/stage';
 import { review } from '../../../lib/review';
 import { EditorBar, type SharedWith } from '../../components/EditorBar';
+import { editView } from '../../../lib/edit-view';
 import Client from '../../Client';
 
 const opened = (iso: string) =>
@@ -14,7 +15,7 @@ export default async function TripPage({
   searchParams,
 }: {
   params: Promise<{ tripId: string }>;
-  searchParams: Promise<{ view?: string }>;
+  searchParams: Promise<{ view?: string; edit?: string }>;
 }) {
   const { tripId } = await params;
   const account = await currentAccount();
@@ -27,7 +28,8 @@ export default async function TripPage({
   if (!journal) notFound();
   const name = account.name ?? account.email ?? 'Signed in';
   // An editor previewing sees exactly what a viewer does, with a way back.
-  const previewing = (await searchParams).view === 'viewer';
+  const query = await searchParams;
+  const previewing = query.view === 'viewer';
   if (access.access !== 'edit' || previewing)
     return (
       <>
@@ -42,6 +44,28 @@ export default async function TripPage({
         )}
       </>
     );
+
+  // Edit mode (DESIGN.md, "Edit mode"): the trip merged fresh, with what edit mode needs.
+  if (query.edit === '1') {
+    const view = await editView(store, tripId);
+    if (view)
+      return (
+        <Client
+          trip={view.trip}
+          account={name}
+          edit={view.edit}
+          bar={
+            <EditorBar
+              tripId={tripId}
+              status={access.trip.status}
+              waiting={null}
+              people={[]}
+              editing
+            />
+          }
+        />
+      );
+  }
 
   // A waiting import's count of changes, for "Review waiting" (a photo import counts its photos).
   const [people, waitingImports] = await Promise.all([

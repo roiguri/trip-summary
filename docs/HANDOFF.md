@@ -40,3 +40,13 @@ The architecture is decided: `docs/ARCHITECTURE.md` (Netlify + Firebase, invite 
 The steps are listed in `docs/ROADMAP.md` under Phase 2; steps 1–7 are done (the store, importers and merge, the
 agreed screens, sign-in and sharing, photos), and step 8 is trying it and tuning on the real trip. Thresholds and the proposed matching rules are tuned against the real trip in a private
 draft, never by committing it.
+
+## Phase 3: edit mode
+
+Edit mode is the journey page with `?edit=1` (editors only; **Edit** in the editors' bar, **Done**
+to leave). The right column becomes the edit panel (DESIGN.md, "Edit mode"): the inbox of what the
+Timeline found (M2), an entry's editor (E1, with photos P1), and an unplanned stop's card (S1, with
+"Open in Google Maps" until the Places API). Highlights show as a stamp beside the title (H5). On a
+phone the inbox opens from a button as a sheet. Every change is an edit (`lib/edits.ts`), saved as
+you go and undoable; `lib/edit-view.ts` merges fresh for the panel. Still to build: "Sort photos" on
+a day (P2), for bulk moves.

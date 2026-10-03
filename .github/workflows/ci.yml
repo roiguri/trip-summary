@@ -90,6 +90,20 @@ jobs:
         if: ${{ !inputs.update_baselines }}
         run: BASE_URL=http://localhost:3100 npm run visual
 
+      # Edit mode's states, on the mock trip seeded through the importers (it shows on the home page,
+      # so it comes after the other states).
+      - name: Seed the mock trip
+        if: ${{ !inputs.update_baselines }}
+        run: npm run seed -- --mocks
+        env:
+          FIRESTORE_EMULATOR_HOST: 127.0.0.1:8080
+          FIREBASE_AUTH_EMULATOR_HOST: 127.0.0.1:9099
+          FIREBASE_STORAGE_EMULATOR_HOST: 127.0.0.1:9199
+
+      - name: Visual regression tests, edit mode
+        if: ${{ !inputs.update_baselines }}
+        run: BASE_URL=http://localhost:3100 npm run visual:edit
+
       # Last: these create invites and trips, which the home page's cards show.
       - name: Sign-in and access checks
         if: ${{ !inputs.update_baselines }}
@@ -103,6 +117,10 @@ jobs:
         if: ${{ !inputs.update_baselines }}
         run: BASE_URL=http://localhost:3100 npm run check:photos
 
+      - name: Edit mode
+        if: ${{ !inputs.update_baselines }}
+        run: BASE_URL=http://localhost:3100 npm run check:edit
+
       - name: Visual differences (baseline | now | diff)
         if: failure()
         uses: actions/upload-artifact@v4
@@ -113,7 +131,14 @@ jobs:
 
       - name: Render new visual baselines
         if: ${{ inputs.update_baselines }}
-        run: BASE_URL=http://localhost:3100 npm run visual:update
+        run: |
+          BASE_URL=http://localhost:3100 npm run visual:update
+          npm run seed -- --mocks
+          BASE_URL=http://localhost:3100 npm run visual:edit:update
+        env:
+          FIRESTORE_EMULATOR_HOST: 127.0.0.1:8080
+          FIREBASE_AUTH_EMULATOR_HOST: 127.0.0.1:9099
+          FIREBASE_STORAGE_EMULATOR_HOST: 127.0.0.1:9199
 
       - name: New visual baselines
         if: ${{ inputs.update_baselines }}

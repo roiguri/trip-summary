@@ -22,7 +22,10 @@ BASE_URL=http://localhost:3100 npm run check:interactions   # 34 interaction che
 BASE_URL=http://localhost:3100 npm run check:access         # sign-in and access, end to end
 BASE_URL=http://localhost:3100 npm run check:import         # new trip, Timeline, review, apply, end to end
 BASE_URL=http://localhost:3100 npm run check:photos         # mock pick, copying, review, /media access
-BASE_URL=http://localhost:3100 npm run visual               # 36 screenshot states vs tests/visual/baseline
+BASE_URL=http://localhost:3100 npm run check:edit           # edit mode: inbox, editor, stops, photos, undo
+BASE_URL=http://localhost:3100 npm run visual               # 42 screenshot states vs tests/visual/baseline
+BASE_URL=http://localhost:3100 npm run visual:edit          # 5 edit-mode states, after `seed -- --mocks`
+                             # (the mock trip shows on the home page, so it is seeded after `visual`)
 npm run visual:update        # only for an intended visual change; it also rewrites unchanged baselines
                              # with anti-aliasing noise, so commit only the states that changed
 npm run check:styles         # computed-style diff between two builds (BASE_A, BASE_B), for refactors

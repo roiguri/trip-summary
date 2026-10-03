@@ -11,11 +11,14 @@ export function EditorBar({
   status,
   waiting,
   people,
+  editing = false,
 }: {
   tripId: string;
   status: 'draft' | 'published';
   waiting: number | null;
   people: SharedWith[];
+  /** In edit mode the bar says so and offers only the way out (DESIGN.md, "Edit mode"). */
+  editing?: boolean;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -55,6 +58,23 @@ export function EditorBar({
     }
   }
 
+  if (editing)
+    return (
+      <div className="editor-bar">
+        <span className="trip-status inline draft">EDITING</span>
+        <span className="bar-hint">
+          Changes are saved as you go
+          {status === 'published' ? ', and viewers see them at once' : ''}.
+        </span>
+        <span className="bar-space" />
+        <a className="pill-button small" href="?view=viewer">
+          Preview as a viewer
+        </a>
+        <a className="pill-button small primary" href={`/trips/${encodeURIComponent(tripId)}`}>
+          Done
+        </a>
+      </div>
+    );
   return (
     <div className="editor-bar">
       <span className={`trip-status inline ${status}`}>
@@ -70,6 +90,9 @@ export function EditorBar({
         </a>
       )}
       <span className="bar-space" />
+      <a className="pill-button small primary" href="?edit=1">
+        Edit
+      </a>
       <a className="pill-button small" href="?view=viewer">
         Preview as a viewer
       </a>

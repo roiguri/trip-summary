@@ -51,6 +51,8 @@ export type MatchedBy = 'id' | 'distance' | 'id+distance' | 'owner';
 export type Suggestion = {
   key: string;
   kind: 'visit' | 'activity';
+  /** Google's place ID for a visit: "Open in Google Maps" opens that very place. */
+  placeId: string | null;
   date: string;
   time: string;
   endTime: string;
@@ -64,6 +66,21 @@ export type MergeInput = {
   segments: TimelineSegment[];
   photos: TripPhoto[];
   edits: Edit[];
+};
+
+/** A visit or journey of the trip's days, for linking one to an entry by hand in edit mode. */
+export type SegmentView = {
+  key: string;
+  kind: 'visit' | 'activity';
+  date: string;
+  time: string;
+  endTime: string;
+  lat: number | null;
+  lng: number | null;
+  placeId: string | null;
+  mode: TransitMode | null;
+  /** The entry it is matched or linked to, if any. */
+  entryId: number | null;
 };
 
 /** What the Timeline found about a planned entry: its actual times, and for a leg how it was
@@ -87,6 +104,13 @@ export type MergeResult = {
   proposals: Proposal[];
   /** Planned stops with no visit in the Timeline, for edit mode (unless the owner said that's fine). */
   unvisited: number[];
+  /** Every visit and journey of the trip's days, with what it is matched to (edit mode's linking). */
+  segments: SegmentView[];
+  /** Stops and journeys the owner added from suggestions: their entry ID here, and the suggestion's
+   *  key, which is what their edits are kept under. */
+  added: { entryId: number; key: string }[];
+  /** The owner's hidden photos, with where they would be, for edit mode to show faded. */
+  hidden: { id: string; url: string; entryId: number | null; date: string; time: string }[];
   /** Edits whose target is no longer in any source: kept, and listed for the owner. */
   orphanEdits: Edit[];
 };
@@ -327,6 +351,7 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
     suggestions.push({
       key: s.key,
       kind: s.kind,
+      placeId: s.placeId,
       date: start.date,
       time: start.time,
       endTime: local(s.endUtc, s.endOffsetMin, timeZone).time,
@@ -417,8 +442,8 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
     (a, b) => a.takenUtc.localeCompare(b.takenUtc) || a.mediaId.localeCompare(b.mediaId),
   );
   const modelPhotos: ModelPhoto[] = [];
+  const hiddenPhotos: ModelPhoto[] = [];
   sorted.forEach((p, n) => {
-    if (use('photo', p.mediaId, 'hidden') === true) return;
     const t = Date.parse(p.takenUtc);
     const seg = segmentAt(t);
     const offset = p.offsetMin ?? seg?.startOffsetMin ?? null;
@@ -448,7 +473,8 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
       lng = seg.lng! + (seg.endLng! - seg.lng!) * f;
     }
     const caption = use('photo', p.mediaId, 'caption');
-    modelPhotos.push({
+    // A hidden photo is kept aside, so edit mode can show it faded and bring it back.
+    (use('photo', p.mediaId, 'hidden') === true ? hiddenPhotos : modelPhotos).push({
       id: p.mediaId,
       photo_id: n + 1,
       entry_id: entry,
@@ -529,5 +555,41 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
     suggestion: (k) => segments.some((s) => s.key === k),
   };
   const orphanEdits = edits.filter((e) => !exists[e.target](e.key));
-  return { trip, matches, suggestions: remaining, proposals: open, unvisited, orphanEdits };
+  const matchedTo = new Map(Object.entries(matches).map(([id, m]) => [m.segment, Number(id)]));
+  const views: SegmentView[] = segments.flatMap((s) => {
+    const a = local(s.startUtc, s.startOffsetMin, timeZone);
+    if (!inTrip(a.date)) return [];
+    return [
+      {
+        key: s.key,
+        kind: s.kind,
+        date: a.date,
+        time: a.time,
+        endTime: local(s.endUtc, s.endOffsetMin, timeZone).time,
+        lat: s.lat,
+        lng: s.lng,
+        placeId: s.placeId,
+        mode: s.kind === 'activity' && s.mode ? (MODES[s.mode] ?? null) : null,
+        entryId: matchedTo.get(s.key) ?? null,
+      },
+    ];
+  });
+  const hidden = hiddenPhotos.map((p) => ({
+    id: p.id!,
+    url: p.url,
+    entryId: p.entry_id,
+    date: p.date,
+    time: p.time,
+  }));
+  return {
+    trip,
+    matches,
+    suggestions: remaining,
+    proposals: open,
+    unvisited,
+    segments: views,
+    hidden,
+    added: approved.map((s, n) => ({ entryId: -(n + 1), key: s.key })),
+    orphanEdits,
+  };
 }

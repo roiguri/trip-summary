@@ -240,7 +240,12 @@ function TimelineEntry({
         className="entry-content"
         dir={entry.type === 'note' ? noteDir(entry.notes || entry.title) : undefined}
       >
-        {entry.title && <strong>{entry.title}</strong>}
+        {entry.title && (
+          <strong>
+            {entry.title}
+            {entry.highlighted && <span className="hl-stamp">HIGHLIGHT</span>}
+          </strong>
+        )}
         <small>{byline(entry)}</small>
         {entry.type === 'transit' && (
           <span className="transit-route">

@@ -2,6 +2,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Entry, Photo, Trip } from '../lib/data';
 import { DetailPanel } from './components/DetailPanel';
+import { EditPanel } from './components/edit/EditPanel';
+import type { EditData } from '../lib/edit-view';
 import { Header } from './components/Header';
 import { Lightbox } from './components/Lightbox';
 import { MapIcon } from './components/icons';
@@ -20,13 +22,19 @@ export default function Client({
   trip,
   account,
   bar,
+  edit,
 }: {
   trip: Trip;
   account: string;
   bar?: React.ReactNode;
+  /** Present in edit mode: the right column becomes the edit panel (DESIGN.md, "Edit mode"). */
+  edit?: EditData;
 }) {
   // Nothing is selected at first: the map fills the right column until an entry is chosen (user decision).
   const [selected, setSelected] = useState<Entry | null>(null);
+  // Edit mode: the unplanned stop opened from the inbox, and on a phone whether the inbox is open.
+  const [stopKey, setStopKey] = useState<string | null>(null);
+  const [inboxOpen, setInboxOpen] = useState(false);
   const [day, setDay] = useState(trip.days[0]?.date ?? '');
   const [album, setAlbum] = useState<string | null>(null);
   const [photoPage, setPhotoPage] = useState(0);
@@ -159,9 +167,34 @@ export default function Client({
     return () => observer.disconnect();
   }, []);
 
+  // After an edit the page re-renders from the server: the editor shows the entry as it is now,
+  // not the copy taken when it was clicked.
+  const current = selected ? (entriesById.get(selected.id) ?? selected) : null;
+  const editPanel = edit && (
+    <EditPanel
+      edit={edit}
+      days={days}
+      selected={current}
+      stopKey={stopKey}
+      onOpenEntry={(id) => {
+        const e = entriesById.get(`i${id}`);
+        setStopKey(null);
+        if (e) choose(e);
+      }}
+      onOpenStop={(key) => {
+        setSelected(null);
+        setStopKey(key);
+      }}
+      onClose={() => {
+        setSelected(null);
+        setStopKey(null);
+      }}
+    />
+  );
+
   return (
     <main
-      className={`shell ${collapsed ? 'collapsed' : ''} ${bar ? 'with-bar' : ''}`}
+      className={`shell ${collapsed && !edit ? 'collapsed' : ''} ${bar ? 'with-bar' : ''} ${edit ? 'editing' : ''}`}
       style={
         {
           // An absolute length (a share of the right column, which spans the viewport minus 91px and
@@ -188,83 +221,114 @@ export default function Client({
           onShowAlbum={showAlbum}
         />
       </section>
-      {isPhone ? (
+      {edit ? (
+        isPhone ? (
+          <>
+            {!(inboxOpen || selected || stopKey) && (
+              <button className="map-fab" onClick={() => setInboxOpen(true)}>
+                Inbox · {edit.findings.length}
+              </button>
+            )}
+            {(inboxOpen || selected || stopKey) && (
+              <PhoneSheet
+                title="Edit"
+                closing={false}
+                onClose={() => {
+                  setInboxOpen(false);
+                  setSelected(null);
+                  setStopKey(null);
+                }}
+              >
+                {editPanel}
+              </PhoneSheet>
+            )}
+          </>
+        ) : (
+          <aside className="right edit-col">{editPanel}</aside>
+        )
+      ) : (
         <>
-          {!phoneMap && (
-            <button className="map-fab" onClick={() => setPhoneMap(true)}>
-              <MapIcon /> Map
-            </button>
-          )}
-          {phoneMap && (
-            <PhoneMap
-              trip={trip}
-              day={day}
-              onDay={setDay}
-              selected={selected}
-              focused={focus}
-              peek={peek}
-              onPeek={(e) => {
-                setPeek(e);
-                setDay(e.day);
-              }}
-              onDetails={choose}
-              onClose={closePhoneMap}
-            />
-          )}
-          {detailsOpen && (
-            <PhoneSheet
-              key={album || selected?.id}
-              title={
-                album ? (days.find((d) => d.date === album)?.title ?? '') : (selected?.title ?? '')
-              }
-              closing={panelClosing}
-              onClose={closeDetails}
-            >
-              <DetailPanel
+          {isPhone ? (
+            <>
+              {!phoneMap && (
+                <button className="map-fab" onClick={() => setPhoneMap(true)}>
+                  <MapIcon /> Map
+                </button>
+              )}
+              {phoneMap && (
+                <PhoneMap
+                  trip={trip}
+                  day={day}
+                  onDay={setDay}
+                  selected={selected}
+                  focused={focus}
+                  peek={peek}
+                  onPeek={(e) => {
+                    setPeek(e);
+                    setDay(e.day);
+                  }}
+                  onDetails={choose}
+                  onClose={closePhoneMap}
+                />
+              )}
+              {detailsOpen && (
+                <PhoneSheet
+                  key={album || selected?.id}
+                  title={
+                    album
+                      ? (days.find((d) => d.date === album)?.title ?? '')
+                      : (selected?.title ?? '')
+                  }
+                  closing={panelClosing}
+                  onClose={closeDetails}
+                >
+                  <DetailPanel
+                    selected={selected}
+                    album={album}
+                    days={days}
+                    photos={photos}
+                    page={photoPage}
+                    onPage={setPhotoPage}
+                    activePhoto={activePhoto}
+                    onPickPhoto={pickPhoto}
+                    closing={panelClosing}
+                    fromCorner={panelCorner.current}
+                    onClose={closeDetails}
+                  />
+                </PhoneSheet>
+              )}
+            </>
+          ) : (
+            <aside className="right">
+              <MapCard
+                trip={trip}
+                open={mapOpen}
+                collapsed={collapsed}
+                onOpen={setMapOpen}
                 selected={selected}
-                album={album}
-                days={days}
-                photos={photos}
-                page={photoPage}
-                onPage={setPhotoPage}
-                activePhoto={activePhoto}
-                onPickPhoto={pickPhoto}
-                closing={panelClosing}
-                fromCorner={panelCorner.current}
-                onClose={closeDetails}
+                focused={focus}
+                day={day}
+                onSelect={choose}
+                onWholeTrip={() => setDay('')}
               />
-            </PhoneSheet>
+              {detailsOpen && (
+                <DetailPanel
+                  selected={selected}
+                  album={album}
+                  days={days}
+                  photos={photos}
+                  page={photoPage}
+                  onPage={setPhotoPage}
+                  activePhoto={activePhoto}
+                  onPickPhoto={pickPhoto}
+                  closing={panelClosing}
+                  fromCorner={panelCorner.current}
+                  onClose={closeDetails}
+                />
+              )}
+            </aside>
           )}
         </>
-      ) : (
-        <aside className="right">
-          <MapCard
-            trip={trip}
-            open={mapOpen}
-            collapsed={collapsed}
-            onOpen={setMapOpen}
-            selected={selected}
-            focused={focus}
-            day={day}
-            onSelect={choose}
-            onWholeTrip={() => setDay('')}
-          />
-          {detailsOpen && (
-            <DetailPanel
-              selected={selected}
-              album={album}
-              days={days}
-              photos={photos}
-              page={photoPage}
-              onPage={setPhotoPage}
-              activePhoto={activePhoto}
-              onPickPhoto={pickPhoto}
-              closing={panelClosing}
-              fromCorner={panelCorner.current}
-              onClose={closeDetails}
-            />
-          )}
-        </aside>
       )}
       {full && (
         <Lightbox photo={full} set={photos} onChange={setFull} onClose={() => setFull(null)} />
