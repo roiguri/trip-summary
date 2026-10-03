@@ -1,6 +1,6 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 
 export type EditChange = {
   target: string;
@@ -9,10 +9,14 @@ export type EditChange = {
   value?: string | boolean | null;
 };
 
-/** Saves edits (a value of `undefined` undoes one), then re-renders the page from the server. */
+/** Saves edits (a value of `undefined` undoes one), then re-renders the page from the server.
+ *  `busy` lasts until the page shows the change, not only until it is saved, so nothing looks
+ *  unchanged and clickable in between. */
 export function useSave(tripId: string) {
   const router = useRouter();
-  const [busy, setBusy] = useState(false);
+  const [saving, setBusy] = useState(false);
+  const [refreshing, startRefresh] = useTransition();
+  const busy = saving || refreshing;
   const [error, setError] = useState<string | null>(null);
   async function save(edits: EditChange[]) {
     if (!edits.length) return true;
@@ -28,7 +32,7 @@ export function useSave(tripId: string) {
       setError(r ? await r.text() : 'Not saved: check the connection and try again.');
       return false;
     }
-    router.refresh();
+    startRefresh(() => router.refresh());
     return true;
   }
   return { save, busy, error };

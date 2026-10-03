@@ -37,7 +37,14 @@ function bringBack(f: Finding): EditChange[] {
   return [{ target: 'entry', key, field: 'proposal', value: undefined }];
 }
 
-type Act = { save: (e: EditChange[]) => void; busy: boolean };
+/** Something just resolved, shown on its entry with a way back (so a change never passes unseen). */
+export type Done = { key: string; entryId: number; label: string; undo: EditChange[] };
+type Act = {
+  save: (e: EditChange[], done?: Done[]) => void;
+  busy: boolean;
+  /** The finding being saved, shown as "Saving…" until the page has the change. */
+  pending: string | null;
+};
 
 /** A finding about a planned entry, drawn under it on the timeline (DESIGN.md, "Edit mode, round
  *  2", T1): a proposed time or mode, or "no visit found"; set aside, faded with a way back (R1). */
@@ -46,13 +53,27 @@ export function FindingChip({
   act,
   current,
   onLink,
+  undoUse,
 }: {
   f: Finding;
   act: Act;
   current: boolean;
   onLink: () => void;
+  /** What "Undo" after "Use" writes back: the entry's times (and mode) before. */
+  undoUse: EditChange[];
 }) {
   const { save, busy } = act;
+  const key = findingKey(f);
+  const entryKey = 'entryId' in f ? String(f.entryId) : '';
+  const done = (label: string, undo: EditChange[]): Done[] => [
+    { key, entryId: Number(entryKey), label, undo },
+  ];
+  if (act.pending === key)
+    return (
+      <span className="fnd saving" data-finding={key}>
+        Saving…
+      </span>
+    );
   if (f.setAside)
     return (
       <span className={`fnd set-aside ${current ? 'current' : ''}`} data-finding={findingKey(f)}>
@@ -86,7 +107,17 @@ export function FindingChip({
           <button
             className="pill-button small primary"
             disabled={busy}
-            onClick={() => save(accept(f))}
+            onClick={() =>
+              save(
+                accept(f),
+                done(
+                  f.kind === 'mode'
+                    ? 'Using the Timeline’s mode and times'
+                    : 'Using the Timeline’s times',
+                  undoUse,
+                ),
+              )
+            }
           >
             Use
           </button>
@@ -94,9 +125,12 @@ export function FindingChip({
             className="pill-button small"
             disabled={busy}
             onClick={() =>
-              save([
-                { target: 'entry', key: String(f.entryId), field: 'proposal', value: 'ignored' },
-              ])
+              save(
+                [{ target: 'entry', key: entryKey, field: 'proposal', value: 'ignored' }],
+                done('Ignored the Timeline’s times', [
+                  { target: 'entry', key: entryKey, field: 'proposal', value: undefined },
+                ]),
+              )
             }
           >
             Ignore
@@ -112,7 +146,12 @@ export function FindingChip({
             className="pill-button small"
             disabled={busy}
             onClick={() =>
-              save([{ target: 'entry', key: String(f.entryId), field: 'noVisit', value: true }])
+              save(
+                [{ target: 'entry', key: entryKey, field: 'noVisit', value: true }],
+                done('Fine without a visit', [
+                  { target: 'entry', key: entryKey, field: 'noVisit', value: undefined },
+                ]),
+              )
             }
           >
             Fine as it is
@@ -209,6 +248,18 @@ export function GhostCard({
           </a>
         )}
       </span>
+    </span>
+  );
+}
+
+/** A finding just resolved, on its entry: what was done, and Undo. */
+export function DoneChip({ d, act }: { d: Done; act: Act }) {
+  return (
+    <span className="fnd done">
+      ✓ {d.label} ·{' '}
+      <button className="link-button" disabled={act.busy} onClick={() => act.save(d.undo)}>
+        Undo
+      </button>
     </span>
   );
 }

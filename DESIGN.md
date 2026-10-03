@@ -156,6 +156,10 @@ From the first build; same preview page. These replace M2's inbox and refine H5.
 - In edit mode the right column doesn't scroll: the map stays fixed as in display mode, and the
   editor below it scrolls inside its own card, never sideways, with a thin rounded scrollbar in the
   card's soft green.
+- The timeline's area runs from the left edge to 16px short of the right column, and the timeline is
+  centred in it, so its scrollbar sits beside the cards; it is styled like the editor card's.
+- An answer in edit mode (Use, Ignore, Fine as it is, Accept the day's) shows "Saving…" until the
+  page has the change, then a ✓ chip on the entry saying what was done, with Undo, while editing.
 
 ## Exact sampled backgrounds and remaining gaps
 
