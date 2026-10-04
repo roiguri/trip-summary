@@ -6,3 +6,6 @@
 
 [build.environment]
   NODE_VERSION = "22.23.3"
+  # The server functions run on their own Node; ask for 22. (firebase-admin's jwks-rsa is also pinned
+  # to 3.x in package.json, so it never needs require() of an ES module, whatever the runtime.)
+  AWS_LAMBDA_JS_RUNTIME = "nodejs22.x"
