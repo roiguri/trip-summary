@@ -19,7 +19,8 @@ export type PickedItem = {
 };
 
 export type Picker = {
-  createSession(): Promise<{ id: string; pickerUri: string }>;
+  /** `expireTime`: when Google stops waiting for the pick (ISO time), if it says. */
+  createSession(): Promise<{ id: string; pickerUri: string; expireTime: string | null }>;
   isDone(sessionId: string): Promise<boolean>;
   listItems(sessionId: string): Promise<PickedItem[]>;
   /** A file's bytes: `=d` the original photo, `=dv` the video, `=w…-h…` an image (a video's still). */
@@ -41,8 +42,9 @@ export function googlePicker(token: string): Picker {
       const s = (await (await call(`${API}/sessions`, { method: 'POST', body: '{}' })).json()) as {
         id: string;
         pickerUri: string;
+        expireTime?: string;
       };
-      return { id: s.id, pickerUri: s.pickerUri };
+      return { id: s.id, pickerUri: s.pickerUri, expireTime: s.expireTime ?? null };
     },
     async isDone(id) {
       return !!(
@@ -85,7 +87,7 @@ export function mockPicker(root = process.cwd()): Picker {
     >;
   return {
     async createSession() {
-      return { id: 'mock', pickerUri: '' };
+      return { id: 'mock', pickerUri: '', expireTime: null };
     },
     async isDone() {
       return true;

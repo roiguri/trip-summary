@@ -11,7 +11,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ tripId:
   if (!picker) return new Response('Connect Google Photos first', { status: 401 });
   try {
     const s = await picker.createSession();
-    return Response.json({ sessionId: s.id, pickerUri: s.pickerUri });
+    return Response.json({ sessionId: s.id, pickerUri: s.pickerUri, expireTime: s.expireTime });
   } catch (e) {
     return new Response(e instanceof Error ? e.message : 'Google Photos did not answer', {
       status: 502,
