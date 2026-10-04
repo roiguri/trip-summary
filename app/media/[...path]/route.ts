@@ -5,7 +5,10 @@ import { bucket } from '../../../lib/media/storage';
 
 // A trip's stored photo or video, for someone who may see that trip (docs/ARCHITECTURE.md): Storage
 // is closed to browsers, so every file comes through here. Supports range requests, so a video can
-// be seeked without downloading all of it.
+// be seeked without downloading all of it. A range is served at most CHUNK bytes at a time: hosts cap
+// one response (Netlify at about 6 MB), and a video player asks again for the rest.
+const CHUNK = 4 * 1024 * 1024;
+
 export async function GET(req: Request, { params }: { params: Promise<{ path: string[] }> }) {
   const path = (await params).path.map(decodeURIComponent).join('/');
   const tripId = tripOfPath(path);
@@ -26,7 +29,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ path: st
   const range = req.headers.get('range')?.match(/^bytes=(\d*)-(\d*)$/);
   if (range && (range[1] || range[2])) {
     const start = range[1] ? Number(range[1]) : Math.max(0, size - Number(range[2]));
-    const end = range[1] && range[2] ? Math.min(Number(range[2]), size - 1) : size - 1;
+    const last = range[1] && range[2] ? Math.min(Number(range[2]), size - 1) : size - 1;
+    const end = Math.min(last, start + CHUNK - 1);
     if (start > end || start >= size)
       return new Response(null, { status: 416, headers: { 'Content-Range': `bytes */${size}` } });
     const body = Readable.toWeb(file.createReadStream({ start, end })) as ReadableStream;
