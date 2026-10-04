@@ -77,6 +77,41 @@ app's functions costs too much.
 (one merged document per day). `invites/{token}` maps an invite link to a trip and a viewer. The
 logical model is the one in `docs/DATA-DESIGN.md`; only its storage changes from tables to documents.
 
+## Production (Oct 4)
+
+Netlify serves the app from `main` only (deploy previews off: the repository is public, so a pull
+request never runs with production secrets). Firebase runs in `us-east1` (Firestore and Storage),
+where Storage's free allowance applies, near Netlify's functions. The project is on Blaze with a
+budget alert.
+
+The server signs in to Firebase as its own service account, with only: Cloud Datastore User, Storage
+Object Admin, and Firebase Authentication Admin. Its key is not stored anywhere but Netlify's
+secret variables.
+
+Netlify environment variables (values live only in Netlify and the providers' consoles; rediscover
+them in the Firebase console's project settings, the service account's key, and the Google Cloud
+console's OAuth client):
+
+| Variable                                   | What                                                                                   | Secret          |
+| ------------------------------------------ | -------------------------------------------------------------------------------------- | --------------- |
+| `FIREBASE_PROJECT_ID`                      | The Firebase project's ID                                                              | no              |
+| `FIREBASE_STORAGE_BUCKET`                  | The default bucket, `‹project›.firebasestorage.app`                                    | no              |
+| `FIREBASE_CLIENT_EMAIL`                    | The service account's email                                                            | yes             |
+| `FIREBASE_PRIVATE_KEY`                     | The service account's private key (with `\n` for newlines)                             | yes             |
+| `NEXT_PUBLIC_FIREBASE_API_KEY`             | The web app's API key (public by design; rules deny all direct access)                 | no              |
+| `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`         | `‹project›.firebaseapp.com`                                                            | no              |
+| `NEXT_PUBLIC_FIREBASE_PROJECT_ID`          | The project's ID                                                                       | no              |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | The OAuth client for the Photos Picker                                                 | the secret: yes |
+| `PHOTOS_TOKEN_KEY`                         | 32 random bytes, base64, sealing the Photos token cookie                               | yes             |
+| `OWNER_EMAIL`                              | The owner's Google account                                                             | no              |
+| `COPY_AT_ONCE`                             | Optional: photos copied per request (default 8), lower if requests near the time limit | no              |
+
+Hosting limits the code respects: one Netlify response is at most about 6 MB, so `/media` serves a
+range at most 4 MB at a time (video players ask again); a request stops after 10 seconds, so a
+photo-copy request copies a few items at a time. Security headers (HSTS, no framing, referrer and
+permissions policies) are set in `next.config.ts`. The development sign-in route answers only on the
+emulators with the demo project.
+
 ## Rules that keep it portable
 
 Firebase is a proprietary stack, so moving away is real work. These rules keep it bounded:

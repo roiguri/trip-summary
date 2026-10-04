@@ -1,0 +1,8 @@
+# Netlify builds and serves the app with its Next.js support; nothing in the app is Netlify-specific
+# (docs/ARCHITECTURE.md, "Rules that keep it portable"). Secrets are set in Netlify's site settings,
+# never here.
+[build]
+  command = "npm run build"
+
+[build.environment]
+  NODE_VERSION = "22.23.3"

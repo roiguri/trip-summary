@@ -106,7 +106,7 @@ export async function beginPhotos(
 }
 
 /** How many picked items to copy at once: enough to finish a large pick within Google's hour. */
-export const COPY_AT_ONCE = 8;
+export const COPY_AT_ONCE = Number(process.env.COPY_AT_ONCE) || 8;
 
 /** Copies the next few picked items, in parallel, into storage and the waiting photo import. An item
  *  that fails is counted and skipped, so one bad file can't stall the job. */
