@@ -239,6 +239,18 @@ export default function Client({
     ];
   };
 
+  // Each day's first loose moment, where that day's new loose photos are shown.
+  const firstLoose = useMemo(
+    () =>
+      new Set(
+        days.flatMap((d) => {
+          const e = d.entries.find((x) => x.type === 'photo' || x.type === 'cluster');
+          return e ? [e.id] : [];
+        }),
+      ),
+    [days],
+  );
+
   // The findings drawn on the timeline (DESIGN.md, "Edit mode, round 2", T1 and R1).
   const shownFindings = useMemo(
     () => (edit ? [...edit.findings, ...(showSetAside ? edit.setAside : [])] : []),
@@ -248,9 +260,16 @@ export default function Client({
     onEdit: (e) => choose(e),
     under: (e) => {
       const id = Number(e.id.slice(1));
-      const done = recent.filter((d) => d.entryId === id && /^i\d+$/.test(e.id));
+      const planned = /^i\d+$/.test(e.id);
+      // A day's new loose photos are one finding, drawn under its first loose moment.
+      const dayLoose = firstLoose.has(e.id);
+      const done = recent.filter(
+        (d) => (planned && d.entryId === id) || (dayLoose && d.day === e.day),
+      );
       const mine = shownFindings.filter(
-        (f) => f.kind !== 'stop' && f.kind !== 'hidden' && f.entryId === id && /^i\d+$/.test(e.id),
+        (f) =>
+          (planned && f.kind !== 'stop' && f.kind !== 'hidden' && f.entryId === id) ||
+          (dayLoose && f.kind === 'photos' && f.entryId === null && f.date === e.day),
       );
       return mine.length || done.length ? (
         <span className="fnd-row">

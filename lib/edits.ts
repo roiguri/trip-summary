@@ -15,6 +15,7 @@ const oneOf =
   (v) =>
     typeof v === 'string' && values.includes(v);
 const key: Rule = (v) => typeof v === 'string' && v.length > 0 && v.length <= 300;
+const isoTime: Rule = (v) => typeof v === 'string' && /^\d{4}-\d\d-\d\dT[\d:.]+Z$/.test(v);
 
 const FIELDS: Record<EditTarget, Record<string, Rule>> = {
   entry: {
@@ -29,6 +30,8 @@ const FIELDS: Record<EditTarget, Record<string, Rule>> = {
     visit: key,
     proposal: oneOf('ignored'),
     noVisit: bool,
+    /** When the owner last kept this entry's new photos (edit mode stops marking them new). */
+    photosSeen: isoTime,
     /** The photos shown on the journey, in order: up to three media IDs, comma-separated. */
     photos: (v) =>
       typeof v === 'string' &&
@@ -41,7 +44,7 @@ const FIELDS: Record<EditTarget, Record<string, Rule>> = {
     caption: text(500),
     highlighted: bool,
   },
-  day: { title: text(120) },
+  day: { title: text(120), photosSeen: isoTime },
   trip: { title: text(200), subtitle: text(300), cover: key },
   suggestion: {
     approved: bool,

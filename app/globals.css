@@ -3551,6 +3551,20 @@ button.pill-button {
 }
 
 /* The editor's photo grid: the journey's photos numbered, highlights starred (MP1, PH1). */
+.ed-photo em.new {
+  left: auto;
+  right: 5px;
+  bottom: 5px;
+  background: #b0734f;
+}
+.ed-photo:has(.pstar) em.new {
+  bottom: 5px;
+}
+.fnd.new-photos {
+  border-color: #c9dcc6;
+  background: #f3f8f0;
+  color: #3f5c4b;
+}
 .ed-photo .num {
   position: absolute;
   top: 5px;

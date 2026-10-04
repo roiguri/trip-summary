@@ -14,7 +14,11 @@ const MODE: Record<string, string> = {
 
 /** A finding's stable key: its suggestion's, or its kind and entry. */
 export const findingKey = (f: Finding) =>
-  f.kind === 'stop' ? f.suggestion.key : `${f.kind}-${f.entryId}`;
+  f.kind === 'stop'
+    ? f.suggestion.key
+    : f.kind === 'photos' && f.entryId === null
+      ? `photos-day-${f.date}`
+      : `${f.kind}-${f.entryId}`;
 
 /** What accepting a finding sets: the Timeline's times, and for a leg its mode. */
 export function accept(f: Finding): EditChange[] {
@@ -38,7 +42,14 @@ function bringBack(f: Finding): EditChange[] {
 }
 
 /** Something just resolved, shown on its entry with a way back (so a change never passes unseen). */
-export type Done = { key: string; entryId: number; label: string; undo: EditChange[] };
+export type Done = {
+  key: string;
+  /** Its entry, or null with `day` for a day's loose moments. */
+  entryId: number | null;
+  day?: string;
+  label: string;
+  undo: EditChange[];
+};
 type Act = {
   save: (e: EditChange[], done?: Done[]) => void;
   busy: boolean;
@@ -64,10 +75,50 @@ export function FindingChip({
 }) {
   const { save, busy } = act;
   const key = findingKey(f);
-  const entryKey = 'entryId' in f ? String(f.entryId) : '';
+  const entryKey = 'entryId' in f && f.entryId !== null ? String(f.entryId) : '';
   const done = (label: string, undo: EditChange[]): Done[] => [
-    { key, entryId: Number(entryKey), label, undo },
+    {
+      key,
+      entryId: entryKey ? Number(entryKey) : null,
+      day: f.kind === 'photos' && f.entryId === null ? f.date : undefined,
+      label,
+      undo,
+    },
   ];
+  if (f.kind === 'photos') {
+    // Keep: they're no longer new; Undo puts back the last keep (or none).
+    const target = f.entryId === null ? 'day' : 'entry';
+    const where = f.entryId === null ? f.date : entryKey;
+    const n = `${f.count} new ${f.count === 1 ? 'photo' : 'photos'}`;
+    if (act.pending === key)
+      return (
+        <span className="fnd saving" data-finding={key}>
+          Saving…
+        </span>
+      );
+    return (
+      <span className={`fnd new-photos ${current ? 'current' : ''}`} data-finding={key}>
+        <b>{n}</b>
+        <button
+          className="pill-button small primary"
+          disabled={busy}
+          onClick={() =>
+            save(
+              [{ target, key: where, field: 'photosSeen', value: new Date().toISOString() }],
+              done(`Kept ${n}`, [
+                { target, key: where, field: 'photosSeen', value: f.seen ?? undefined },
+              ]),
+            )
+          }
+        >
+          Keep
+        </button>
+        <button className="pill-button small" disabled={busy} onClick={onLink}>
+          Review
+        </button>
+      </span>
+    );
+  }
   if (act.pending === key)
     return (
       <span className="fnd saving" data-finding={key}>

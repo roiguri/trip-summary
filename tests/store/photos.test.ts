@@ -54,18 +54,19 @@ test('a video is stored as it is, with a still and a thumbnail', async () => {
   for (const f of [p.files.video, p.files.still, p.files.thumb]) assert.ok(await exists(f!));
 });
 
-test('a copy job works through the picked items a batch at a time, then waits for review', async () => {
+test('a copy job works through the picked items a batch at a time, then joins the trip', async () => {
   const picked = (await items()).slice(0, 20);
   await beginPhotos(store, TRIP, 'mock', picked, 'e');
   let p = await copyNextPhotos(store, TRIP, picker, 8);
   assert.deepEqual([p.done, p.remaining], [8, 12]);
+  assert.equal((await store.listPhotos(TRIP)).length, 0, 'nothing in the trip while copying');
   while (p.remaining) p = await copyNextPhotos(store, TRIP, picker, 8);
   assert.equal(p.done, 20);
-  assert.equal((await store.listPhotos(TRIP)).length, 0, 'nothing in the trip before applying');
-  const preview = await previewPending(store, TRIP, 'photos');
-  assert.equal(review(preview!.before, preview!.after).counts.photos, 20);
-  await applyPending(store, TRIP, 'photos');
-  assert.equal((await store.listPhotos(TRIP)).length, 20);
+  // No review (decided Oct 4): once all are copied they are in the trip, stamped as added.
+  assert.equal(await store.getPending(TRIP, 'photos'), null);
+  const inTrip = await store.listPhotos(TRIP);
+  assert.equal(inTrip.length, 20);
+  assert.ok(inTrip.every((x) => x.addedAt && !Number.isNaN(Date.parse(x.addedAt))));
   const urls = (await store.getJournal(TRIP))!.trip.days.flatMap((d) =>
     d.entries.flatMap((e) => e.photos.map((x) => x.url)),
   );
@@ -82,15 +83,13 @@ test('overlapping copy requests (a page reloaded mid-request) still count every 
   };
   const [a, b] = await Promise.all([loop(), loop()]);
   for (const p of [a, b]) assert.equal(p.remaining, 0);
-  const pending = await store.getPending(TRIP, 'photos');
-  assert.deepEqual([pending?.done, pending?.failed], [24, 0]);
-  await discardPending(store, TRIP, 'photos');
+  assert.equal((await store.listPhotos(TRIP)).length, 44, 'all 24 joined the trip, once each');
 });
 
 test('a re-pick skips photos already in the trip; applying before copying ends is refused', async () => {
   const all = await items();
-  const { pending } = await beginPhotos(store, TRIP, 'mock', all.slice(15, 30), 'e');
-  assert.equal(pending.source === 'photos' && pending.total, 10);
+  const { pending } = await beginPhotos(store, TRIP, 'mock', all.slice(40, 50), 'e');
+  assert.equal(pending.source === 'photos' && pending.total, 6, '40-43 are in the trip already');
   await assert.rejects(applyPending(store, TRIP, 'photos'), /still copying/);
   await discardPending(store, TRIP, 'photos');
 });
@@ -99,12 +98,12 @@ test('an item that fails is counted and skipped; an expired connection stops the
   const broken: Picker = {
     ...picker,
     fetchFile: async (item, s) =>
-      item.id === 'mock-media-031'
+      item.id === 'mock-media-051'
         ? Promise.reject(new Error('Google Photos answered 500'))
         : picker.fetchFile(item, s),
   };
   const all = await items();
-  await beginPhotos(store, TRIP, 'mock', all.slice(30, 33), 'e');
+  await beginPhotos(store, TRIP, 'mock', all.slice(50, 53), 'e');
   const p = await copyNextPhotos(store, TRIP, broken, 8);
   assert.deepEqual([p.done, p.failed, p.remaining], [2, 1, 0]);
   await discardPending(store, TRIP, 'photos');
@@ -113,7 +112,7 @@ test('an item that fails is counted and skipped; an expired connection stops the
     ...picker,
     fetchFile: async () => Promise.reject(new Error('Google Photos answered 403')),
   };
-  await beginPhotos(store, TRIP, 'mock', all.slice(33, 35), 'e');
+  await beginPhotos(store, TRIP, 'mock', all.slice(53, 55), 'e');
   await assert.rejects(
     copyNextPhotos(store, TRIP, expired, 8),
     (e) => e instanceof StageError && /expired/.test(e.message),
@@ -130,11 +129,42 @@ test('an item that fails is counted and skipped; an expired connection stops the
 test('discarding a photo import removes its copied files, but not those already in the trip', async () => {
   const all = await items();
   const kept = (await store.listPhotos(TRIP))[0];
-  await beginPhotos(store, TRIP, 'mock', all.slice(40, 41), 'e');
-  await copyNextPhotos(store, TRIP, picker);
+  // Discarded while still copying (once all are copied, they're in the trip).
+  await beginPhotos(store, TRIP, 'mock', all.slice(60, 70), 'e');
+  await copyNextPhotos(store, TRIP, picker, 8);
   const fresh = (await store.listPendingPhotos(TRIP))[0];
   await discardPending(store, TRIP, 'photos');
   assert.equal(await exists(fresh.files.display!), false);
   assert.equal(await exists(kept.files.display!), true);
   assert.equal((await store.listPendingPhotos(TRIP)).length, 0);
+});
+
+test('edit mode marks photos added since an entry was last kept as new', async () => {
+  const { editView } = await import('../../lib/edit-view.ts');
+  const { rebuildJournal } = await import('../../lib/journal.ts');
+  const before = (await editView(store, TRIP))!.edit;
+  const news = before.findings.filter((f) => f.kind === 'photos');
+  const count = news.reduce((n, f) => n + (f.kind === 'photos' ? f.count : 0), 0);
+  assert.ok(news.length > 0, 'new-photo findings');
+  assert.equal(count, before.newPhotoIds.length, 'each new photo counted once');
+  // Without a Timeline every photo is a loose moment: the day's finding (an entry's otherwise).
+  const one = news[0];
+  assert.ok(one.kind === 'photos');
+  await store.setEdit(TRIP, {
+    target: one.entryId === null ? 'day' : 'entry',
+    key: one.entryId === null ? one.date : String(one.entryId),
+    field: 'photosSeen',
+    value: new Date().toISOString(),
+    by: 'e',
+  });
+  await rebuildJournal(store, TRIP);
+  const after = (await editView(store, TRIP))!.edit;
+  assert.equal(
+    after.findings.some(
+      (f) => f.kind === 'photos' && f.entryId === one.entryId && f.date === one.date,
+    ),
+    false,
+    'kept: no longer new',
+  );
+  assert.equal(after.newPhotoIds.length, before.newPhotoIds.length - one.count);
 });

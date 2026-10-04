@@ -80,6 +80,10 @@ export async function beginPhotos(
   by: string,
 ) {
   if (!(await store.getTrip(tripId))) throw new StageError(`No trip "${tripId}"`);
+  // A photo import waiting is replaced; and copies a late request wrote after its job finished
+  // (overlapping requests) are cleared, so they can't join this import.
+  await discardPending(store, tripId, 'photos');
+  await store.deletePending(tripId, 'photos');
   const inTrip = new Set((await store.listPhotos(tripId)).map((p) => p.mediaId));
   const fresh = items.filter((i) => !inTrip.has(i.id));
   const result = await stage(
@@ -128,16 +132,36 @@ export async function copyNextPhotos(
   );
   if (expired && !copied.length)
     throw new StageError('The Google Photos connection expired: connect again to continue');
-  if (copied.length) await store.putPendingPhotos(tripId, copied);
-  await store.markPicked(
-    tripId,
-    copied.map((p) => p.mediaId),
-    expired ? [] : failed,
-  );
-  const { done, failed: failedTotal, remaining } = await store.countPicked(tripId);
-  await store.updatePending(tripId, 'photos', { done, failed: failedTotal });
-  if (!remaining) await picker.deleteSession(pending.sessionId);
-  return { total: pending.total, done, failed: failedTotal, remaining };
+  // Another request (a page reloaded mid-copy) may have copied these same items and finished the
+  // job meanwhile: its photos are in the trip, so these copies are not needed.
+  const finished = { total: pending.total, done: pending.total, failed: 0, remaining: 0 };
+  const still = await store.getPending(tripId, 'photos');
+  if (!still || still.importId !== pending.importId) return finished;
+  try {
+    if (copied.length) await store.putPendingPhotos(tripId, copied);
+    await store.markPicked(
+      tripId,
+      copied.map((p) => p.mediaId),
+      expired ? [] : failed,
+    );
+    const { done, failed: failedTotal, remaining } = await store.countPicked(tripId);
+    await store.updatePending(tripId, 'photos', { done, failed: failedTotal });
+    if (!remaining) {
+      await picker.deleteSession(pending.sessionId);
+      // No review for photos (decided Oct 4): once all are copied they join the trip, and edit
+      // mode marks them as new.
+      await applyPending(store, tripId, 'photos');
+    }
+    return { total: pending.total, done, failed: failedTotal, remaining };
+  } catch (e) {
+    // The job was finished (or discarded) by another request during these writes: its items or
+    // its record are gone ("not found"), or it was applied just before this request's turn.
+    const gone =
+      (e as { code?: number }).code === 5 ||
+      (e instanceof StageError && /no import waiting/.test(e.message));
+    if (gone) return finished;
+    throw e;
+  }
 }
 
 /** A discarded photo import's copied files go too, except those of photos already in the trip. */
@@ -194,7 +218,8 @@ export async function previewPending(
   return { pending, before, after };
 }
 
-/** Applies one waiting import: it replaces (or adds to) its source, and the journal is rebuilt. */
+/** Applies one waiting import: it replaces (or adds to) its source, and the journal is rebuilt.
+ *  Photos are applied by themselves once copied; the others when the owner says so. */
 export async function applyPending(store: Store, tripId: string, source: Source) {
   const pending = await store.getPending(tripId, source);
   if (!pending) throw new StageError('There is no import waiting');
@@ -214,7 +239,12 @@ export async function applyPending(store: Store, tripId: string, source: Source)
   else {
     if (pending.done + pending.failed < pending.total)
       throw new StageError('The photos are still copying');
-    await store.upsertPhotos(tripId, await store.listPendingPhotos(tripId));
+    const addedAt = new Date().toISOString();
+    const copied = await store.listPendingPhotos(tripId);
+    await store.upsertPhotos(
+      tripId,
+      copied.map((p) => ({ ...p, addedAt })),
+    );
   }
   await store.deletePending(tripId, source);
   await store.setImportState(tripId, pending.importId, 'applied');
