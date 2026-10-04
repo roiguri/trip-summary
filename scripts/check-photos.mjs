@@ -56,31 +56,40 @@ await p.waitForFunction(
   { timeout: 60_000 },
 );
 await p.reload();
-await p.waitForSelector('.copy-panel >> text=are copied', { timeout: 180_000 });
+await p.waitForSelector('.copy-panel >> text=are in the trip', { timeout: 180_000 });
 ok('it finishes after a page load, and says so', true);
-await p.locator('.copy-panel').getByRole('link', { name: 'Review them' }).click();
-await p.waitForURL(new RegExp(`/trips/${TRIP}/sources`));
-await p.waitForSelector('.review');
-const tally = await p.locator('.review h2').textContent();
-ok('every picked item is copied and waits for review', /79 photos/.test(tally), tally);
-ok('the review shows where the photos land', (await p.locator('.review-photos').count()) > 0);
-const thumb = await p.locator('.review-photos img').first().getAttribute('src');
-ok('review thumbnails come from /media', thumb?.startsWith(`/media/trips/${TRIP}/media/`), thumb);
-await p.waitForLoadState('networkidle');
-const shown = await p
-  .locator('.review-photos img')
-  .evaluateAll((els) => els.every((e) => e.complete && e.naturalWidth > 0));
-ok('and they display', shown);
+// No review step (decided Oct 4): the copied photos are in the trip, marked new in edit mode.
+await p.locator('.copy-panel').getByRole('link', { name: 'See them in edit mode' }).click();
+await p.waitForURL(new RegExp(`/trips/${TRIP}\\?edit=1`));
+await p.waitForSelector('.left .fnd.new-photos');
+const chips = await p.locator('.left .fnd.new-photos').allTextContents();
+const total = chips.reduce((n, t) => n + Number(t.match(/(\d+) new/)?.[1] ?? 0), 0);
+ok('edit mode marks every copied photo as new', total === 79, `${total} in ${chips.length} chips`);
+const firstNew = p.locator('.left .fnd.new-photos').first();
+const label = await firstNew.locator('b').textContent();
+await firstNew.getByRole('button', { name: 'Keep' }).click();
 ok(
-  'nothing is in the trip before applying',
-  (await p.locator('.src-row').nth(2).textContent()).includes('Pick an album'),
+  'Keep stops marking them, and says so',
+  await p
+    .waitForFunction(
+      (l) =>
+        [...document.querySelectorAll('.left .fnd.done')].some((e) =>
+          e.textContent.includes(`Kept ${l}`),
+        ),
+      label,
+      { timeout: 15_000 },
+    )
+    .then(
+      () => true,
+      () => false,
+    ),
+  label,
 );
-
-await p.getByRole('button', { name: 'Apply', exact: true }).click();
-await p.waitForSelector('.review', { state: 'detached', timeout: 60_000 });
+await p.goto(`${BASE}/trips/${TRIP}/sources`);
 ok(
-  'applying adds them',
-  (await p.locator('.src-row').nth(2).textContent()).includes('79 photos and videos'),
+  'the sources page counts them, with no review to do',
+  (await p.locator('.src-row').nth(2).textContent()).includes('79 photos and videos') &&
+    (await p.locator('.review').count()) === 0,
 );
 await p.goto(`${BASE}/trips/${TRIP}`);
 await p.waitForLoadState('networkidle');
@@ -90,10 +99,11 @@ const imgs = await p
     els.map((e) => ({ src: e.getAttribute('src'), ok: e.complete && e.naturalWidth > 0 })),
   );
 ok(
-  'the journey shows the copied photos',
-  imgs.length > 0 && imgs.every((i) => i.src.startsWith('/media/') && i.ok),
+  'the journey shows the copied photos, from /media',
+  imgs.length > 0 && imgs.every((i) => i.src.startsWith(`/media/trips/${TRIP}/media/`) && i.ok),
   `${imgs.filter((i) => !i.ok).length} broken of ${imgs.length}`,
 );
+const thumb = imgs[0].src;
 
 // The files themselves.
 const media = await owner.request.get(BASE + thumb);

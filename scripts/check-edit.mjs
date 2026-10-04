@@ -48,13 +48,20 @@ await p
   .click();
 await p.waitForSelector('#review-timeline', { state: 'detached' });
 await p.getByRole('button', { name: 'Use the mock photos' }).click();
-await p.waitForSelector('.copy-panel >> text=are copied', { timeout: 180_000 });
-await p.goto(`${journey}/sources`);
-await p
-  .locator('section[aria-labelledby="review-photos"]')
-  .getByRole('button', { name: 'Apply', exact: true })
-  .click();
-await p.waitForSelector('#review-photos', { state: 'detached', timeout: 60_000 });
+await p.waitForSelector('.copy-panel >> text=are in the trip', { timeout: 180_000 });
+// The new photos' findings are kept, so the rest of the check sees only the Timeline's.
+await p.goto(editing);
+await p.waitForSelector('.review-step');
+for (let n = 0; n < 30; n++) {
+  const left = await p.locator('.left .fnd.new-photos').count();
+  if (!left) break;
+  await p.locator('.left .fnd.new-photos').first().getByRole('button', { name: 'Keep' }).click();
+  await p.waitForFunction(
+    (c) => document.querySelectorAll('.left .fnd.new-photos').length < c,
+    left,
+    { timeout: 15_000 },
+  );
+}
 
 // Edit mode: the findings drawn on the timeline (DESIGN.md, "Edit mode, round 2", T1).
 const until = (fn, arg) =>

@@ -41,6 +41,17 @@ export type Finding = (
       photoCount: number;
     }
   | { kind: 'hidden'; entryId: number; title: string; date: string; time: string }
+  /** Photos added since the owner last kept this entry's (or, for loose moments, this day's)
+   *  photos (DESIGN.md, "Photos without review"). `entryId` null: the day's loose moments. */
+  | {
+      kind: 'photos';
+      entryId: number | null;
+      date: string;
+      time: string;
+      count: number;
+      /** When the owner last kept them, for Undo. */
+      seen: string | null;
+    }
 ) & { setAside?: SetAside };
 
 export type EditData = {
@@ -53,6 +64,8 @@ export type EditData = {
   /** Entry ID → the fields the owner has changed, for "Undo my edits". */
   edited: Record<string, string[]>;
   hidden: { id: string; url: string; entryId: number | null; date: string; time: string }[];
+  /** Photos added since last kept: shown with a NEW tag in the editor. */
+  newPhotoIds: string[];
   /** The media ID of the owner's chosen cover, if any. */
   cover: string | null;
   /** Entry ID → the suggestion an added stop came from (its edits are kept under that key). */
@@ -141,7 +154,55 @@ export async function editView(
     f.kind === 'times' ? f.start : f.kind === 'stop' ? f.time : f.time;
   const ordered = (list: Finding[]) =>
     list.sort((a, b) => a.date.localeCompare(b.date) || timeOf(a).localeCompare(timeOf(b)));
+  // New photos: added after the entry's (or the day's, for loose moments) last "Keep".
+  const addedAt = new Map(photos.map((p) => [p.mediaId, p.addedAt ?? '']));
+  const seenOf = (target: 'entry' | 'day', key: string) => {
+    const v = edits.find(
+      (e) => e.target === target && e.key === key && e.field === 'photosSeen',
+    )?.value;
+    return typeof v === 'string' ? v : null;
+  };
+  const newPhotoIds: string[] = [];
+  const photoFindings: Finding[] = [];
+  for (const d of r.trip.days) {
+    const looseNew: string[] = [];
+    let looseTime = '';
+    for (const e of d.entries) {
+      if (e.stay?.role === 'checkout') continue;
+      const looseEntry = e.type === 'photo' || e.type === 'cluster';
+      if (!looseEntry && !/^i\d+$/.test(e.id)) continue;
+      const seen = looseEntry ? seenOf('day', d.date) : seenOf('entry', e.id.slice(1));
+      const fresh = e.photos.filter((p) => {
+        const at = addedAt.get(p.id);
+        return !!at && (!seen || at > seen);
+      });
+      if (!fresh.length) continue;
+      newPhotoIds.push(...fresh.map((p) => p.id));
+      if (looseEntry) {
+        looseNew.push(...fresh.map((p) => p.id));
+        looseTime ||= e.time;
+      } else
+        photoFindings.push({
+          kind: 'photos',
+          entryId: Number(e.id.slice(1)),
+          date: d.date,
+          time: e.time,
+          count: fresh.length,
+          seen,
+        });
+    }
+    if (looseNew.length)
+      photoFindings.push({
+        kind: 'photos',
+        entryId: null,
+        date: d.date,
+        time: looseTime,
+        count: looseNew.length,
+        seen: seenOf('day', d.date),
+      });
+  }
   const findings = ordered([
+    ...photoFindings,
     ...fromProposals(r.proposals),
     ...fromUnvisited(r.unvisited),
     ...fromSuggestions(r.suggestions),
@@ -164,6 +225,7 @@ export async function editView(
       tripId,
       findings,
       setAside,
+      newPhotoIds,
       segments: r.segments,
       edited,
       hidden: r.hidden,

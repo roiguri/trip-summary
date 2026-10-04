@@ -1,7 +1,7 @@
 import { notFound, redirect } from 'next/navigation';
 import { getStore } from '../../../../lib/store';
 import { accessToTrip, currentAccount } from '../../../../lib/auth/session';
-import { previewPending } from '../../../../lib/import/stage';
+import { applyPending, previewPending } from '../../../../lib/import/stage';
 import { review } from '../../../../lib/review';
 import { tripDates } from '../../../../lib/trip-labels';
 import { TripHeader } from '../../../components/TripHeader';
@@ -31,6 +31,11 @@ export default async function Sources({ params }: { params: Promise<{ tripId: st
   if (access?.access !== 'edit') notFound();
   const { trip } = access;
   const store = getStore();
+  // A photo import copied in full but still waiting (from before photos joined the trip by
+  // themselves) joins it now.
+  for (const p of await store.listPending(tripId))
+    if (p.source === 'photos' && p.done + p.failed >= p.total)
+      await applyPending(store, tripId, 'photos');
   const [plan, segments, photos, imports, waiting] = await Promise.all([
     store.getPlan(tripId),
     store.listTimeline(tripId),
@@ -41,7 +46,7 @@ export default async function Sources({ params }: { params: Promise<{ tripId: st
   const copying = waiting.find((p) => p.source === 'photos' && p.done + p.failed < p.total);
   const reviews = await Promise.all(
     waiting
-      .filter((p) => p !== copying)
+      .filter((p) => p.source !== 'photos')
       .map(async (p) => ({
         source: p.source,
         preview: await previewPending(store, tripId, p.source),
@@ -99,8 +104,8 @@ export default async function Sources({ params }: { params: Promise<{ tripId: st
         </div>
         {copying?.source === 'photos' && (
           <p className="src-run quiet" id="review-title">
-            Copying photos: {copying.done} of {copying.total}. Their review appears here when
-            they’re all in; meanwhile you can review the other sources.
+            Copying photos: {copying.done} of {copying.total}. They join the trip when they’re all
+            in; edit mode then marks them as new.
           </p>
         )}
         {reviews.map(
@@ -115,7 +120,7 @@ export default async function Sources({ params }: { params: Promise<{ tripId: st
               />
             ),
         )}
-        {!waiting.length && (
+        {!waiting.some((p) => p.source !== 'photos') && !copying && (
           <p className="src-run quiet" id="review-title">
             Nothing to review. After an import, its changes appear here, under the sources.
           </p>

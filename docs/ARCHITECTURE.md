@@ -63,8 +63,8 @@ app's functions costs too much.
   location included, removed; videos are kept as they are, with Google's thumbnail as the still.
   The copying runs in the owner's browser in the background **(decided Oct 3)**: it carries on
   across the app's pages and resumes after a reload, with its progress shown on every page; two
-  tabs never copy the same job. Like every import, picked photos wait for review before they're
-  applied **(agreed, Oct 2)**.
+  tabs never copy the same job. Once all are copied they join the trip by themselves, and edit mode marks them as new
+  **(decided Oct 4; until then they waited for review)**.
 - **Cloud Functions, if needed**: copying lives in one module (`lib/media/`). If long videos turn out
   to exceed the host's time limit, the same module moves into a Cloud Function driven by a job queue,
   and how the function gets the Google token is decided then **(agreed, Oct 2: decided at hosting,

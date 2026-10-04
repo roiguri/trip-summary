@@ -324,6 +324,7 @@ export function EntryEditor({
                     ★
                   </b>
                 )}
+                {edit.newPhotoIds.includes(p.id) && !p.hidden && <em className="new">NEW</em>}
                 {edit.cover === p.id && <em>COVER</em>}
                 {p.hidden && <em>HIDDEN</em>}
               </button>

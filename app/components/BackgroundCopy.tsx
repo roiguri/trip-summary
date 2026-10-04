@@ -170,7 +170,7 @@ export function BackgroundCopy() {
   if (!job && (state.kind === 'idle' || state.kind === 'copying' || state.kind === 'paused'))
     return null;
   const title = job?.title ?? 'your trip';
-  const sources = job ? `/trips/${encodeURIComponent(job.tripId)}/sources` : '/';
+  const journey = job ? `/trips/${encodeURIComponent(job.tripId)}` : '/';
   const setPaused = (paused: boolean) => {
     if (!job) return;
     const next = { ...job, paused };
@@ -184,15 +184,15 @@ export function BackgroundCopy() {
       {state.kind === 'done' ? (
         <>
           <span>
-            Photos for <b>{title}</b> are copied
+            {state.total - state.failed} photos for <b>{title}</b> are in the trip
             {state.failed ? ` (${state.failed} couldn’t be copied)` : ''}.
           </span>
           <a
             className="pill-button small primary"
-            href={sources + '#review-title'}
+            href={journey + '?edit=1'}
             onClick={() => setState({ kind: 'idle' })}
           >
-            Review them
+            See them in edit mode
           </a>
         </>
       ) : state.kind === 'expired' ? (

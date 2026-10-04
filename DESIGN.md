@@ -161,6 +161,16 @@ From the first build; same preview page. These replace M2's inbox and refine H5.
 - An answer in edit mode (Use, Ignore, Fine as it is, Accept the day's) shows "Saving…" until the
   page has the change, then a ✓ chip on the entry saying what was done, with Undo, while editing.
 
+## Photos without review (user decision, Oct 4)
+
+- Picked photos join the trip as soon as all are copied: no review step, no Apply. On a published
+  trip viewers see them at once (the owner may revisit this).
+- Edit mode marks them: an entry that received photos gets "N new photos · Keep · Review" on the
+  timeline (a day's loose moments get one, under the first of them), counted in "to review" and
+  reached with Next. Keep stops marking them (with Undo); Review opens the entry's editor, where new
+  photos carry a NEW tag. A photo is new if it was added after the entry's (or the day's) last Keep.
+- The plan import keeps its review; the Timeline's findings stay in edit mode, as before.
+
 ## Name and top bar (user decisions, Oct 4)
 
 Options: https://claude.ai/artifact/Ww8XTreh6aejD3rgKScwMv (names), https://claude.ai/artifact/VC4o2EyeK4k1Xh4fkjxwPQ (bar).

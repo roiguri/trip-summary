@@ -85,6 +85,9 @@ export type TripPhoto = {
   filename: string;
   /** Storage paths of the stored copies. */
   files: { display?: string; thumb?: string; video?: string; still?: string };
+  /** When it joined the trip (ISO): edit mode marks photos added since the owner last kept an
+   *  entry's photos as new (DESIGN.md, "Photos without review"). Absent on older photos. */
+  addedAt?: string;
 };
 
 export type EditTarget = 'trip' | 'day' | 'entry' | 'place' | 'photo' | 'suggestion';
