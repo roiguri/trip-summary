@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Brand } from './Brand';
 
 /** A page with one message under the dashed rail drawing (an entry still to come): sign-in, invite
  *  problems and empty states (DESIGN.md, "Home, adding a trip and imports"). */
@@ -15,9 +16,7 @@ export function Notice({
     <div className="notice-page">
       {header ?? (
         <header className="header notice-header">
-          <div className="brand">
-            <span className="brand-mark">✳</span> WAYFARER
-          </div>
+          <Brand />
         </header>
       )}
       <main className="notice">

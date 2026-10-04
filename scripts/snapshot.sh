@@ -11,7 +11,7 @@ cp public/photos/*.jpg "$OUT/photos/"
 # The preview host reserves paths starting with "_" and needs relative URLs.
 curl -s "$BASE" \
   | sed -e 's#/_next/#assets/#g; s#"/photos/#"photos/#g; s#\\"/photos/#\\"photos/#g' \
-        -e 's#<head>#<head><title>Wayfarer Preview</title>#' \
+        -e 's#<head>#<head><title>Afterglow Preview</title>#' \
         -e 's#<script[^>]*polyfills[^>]*></script>##' > "$OUT/index.html"
 sed -i 's#p="/_next/"#p="assets/"#' "$OUT"/assets/static/chunks/webpack-*.js
 rm -f "$OUT"/assets/static/chunks/polyfills-*.js

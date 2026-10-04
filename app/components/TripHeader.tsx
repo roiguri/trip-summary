@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Brand } from './Brand';
 
 /** The bar above a trip's pages for editors: the mark, where you are, and the trip's status. */
 export function TripHeader({
@@ -13,9 +14,7 @@ export function TripHeader({
   return (
     <header className="header trip-header">
       <div className="trip-header-left">
-        <a className="brand" href="/">
-          <span className="brand-mark">✳</span> WAYFARER
-        </a>
+        <Brand href="/" />
         <nav className="crumbs" aria-label="Where you are">
           {crumbs.map((c, i) =>
             c.href ? (
