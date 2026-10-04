@@ -3,6 +3,7 @@
 // over all of it. Pure and free of Firebase, so it is tested on its own (docs/ARCHITECTURE.md).
 import {
   buildTrip,
+  legMode,
   type ModelItem,
   type ModelPhoto,
   type TransitMode,
@@ -426,7 +427,8 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
       !!item &&
       (p.start !== item.start_time ||
         p.end !== item.end_time ||
-        (p.mode !== null && p.mode !== item.mode))
+        // A leg's mode as drawn (its own, else from its title), so "Use" settles it.
+        (p.mode !== null && item.item_type === 'transit' && p.mode !== legMode(item)))
     );
   };
   const isIgnored = (p: Proposal) => use('entry', String(p.entryId), 'proposal') === 'ignored';

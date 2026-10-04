@@ -77,6 +77,10 @@ export type Trip = {
 /** How a leg was travelled, guessed from its title when no Timeline activity says (anything
  *  unrecognised is a car). */
 
+/** A leg's travel mode as drawn: its own, else read from its title. */
+export const legMode = (i: Pick<ModelItem, 'mode' | 'title' | 'place_title'>): TransitMode =>
+  i.mode ?? transitModeFromTitle(i.title ?? i.place_title ?? '');
+
 export function transitModeFromTitle(title: string): TransitMode {
   if (/\b(train|rail|shinkansen|metro|subway|tram)/i.test(title)) return 'train';
   if (/\b(flight|fly|plane|airport)/i.test(title)) return 'flight';
@@ -236,10 +240,7 @@ export function buildTrip({
           : null,
         stay: i.item_type === 'lodging' ? { role: 'checkin', stayId: `i${i.entry_id}` } : null,
         ...(i.highlighted ? { highlighted: true as const } : {}),
-        mode:
-          i.item_type === 'transit'
-            ? (i.mode ?? transitModeFromTitle(i.title ?? i.place_title ?? ''))
-            : null,
+        mode: i.item_type === 'transit' ? legMode(i) : null,
       }));
 
     // A stay also appears on its last day as a check-out entry at the check-out time.
