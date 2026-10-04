@@ -111,6 +111,7 @@ export function BackgroundCopy() {
     let stop = false;
     (async () => {
       const started = Date.now();
+      let failures = 0;
       let first: number | null = null;
       for (;;) {
         if (stop || read<Job>(JOB)?.paused) break;
@@ -134,10 +135,22 @@ export function BackgroundCopy() {
           break;
         }
         if (!r.ok) {
-          setState({ kind: 'error', message: await r.text() });
-          write(JOB, null);
+          const message = await r.text();
+          // A server error or a request cut off at the host's time limit: try again, with a growing
+          // pause; the job is never forgotten, so it can always carry on (Continue, Try again).
+          if (r.status >= 500 && ++failures <= 5) {
+            await new Promise((res) => setTimeout(res, Math.min(30, 2 ** failures) * 1000));
+            continue;
+          }
+          setState({ kind: 'error', message });
+          if (r.status === 409) {
+            // Replaced or discarded meanwhile: nothing to carry on.
+            write(JOB, null);
+            setJob(null);
+          }
           break;
         }
+        failures = 0;
         const p = (await r.json()) as {
           total: number;
           done: number;
@@ -208,6 +221,17 @@ export function BackgroundCopy() {
       ) : state.kind === 'error' ? (
         <>
           <span>Copying stopped: {state.message}</span>
+          {job && (
+            <button
+              className="pill-button small primary"
+              onClick={() => {
+                setState({ kind: 'idle' });
+                retry((n) => n + 1);
+              }}
+            >
+              Try again
+            </button>
+          )}
           <button className="link-button" onClick={() => setState({ kind: 'idle' })}>
             Close
           </button>

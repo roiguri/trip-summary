@@ -55,6 +55,16 @@ await p.waitForFunction(
   null,
   { timeout: 60_000 },
 );
+// A copy this browser stopped driving (an error, another browser): the sources page carries it on.
+await p.evaluate(() => {
+  localStorage.removeItem('ts_copy_job');
+  localStorage.removeItem('ts_copy_lease');
+});
+await p.goto(`${BASE}/trips/${TRIP}/sources`);
+const cont = p.getByRole('button', { name: 'Continue copying' });
+ok('an unfinished copy offers to continue', (await cont.count()) === 1);
+await cont.click();
+await p.waitForSelector('.copy-panel');
 await p.reload();
 await p.waitForSelector('.copy-panel >> text=are in the trip', { timeout: 180_000 });
 ok('it finishes after a page load, and says so', true);

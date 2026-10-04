@@ -8,6 +8,7 @@ import { TripHeader } from '../../../components/TripHeader';
 import { PlanRow } from './PlanRow';
 import { TimelineRow } from './TimelineRow';
 import { ReviewPanel } from './ReviewPanel';
+import { ContinueCopy } from './ContinueCopy';
 import { PhotosRow } from './PhotosRow';
 import { photosConnected } from '../../../../lib/google/choose';
 import { emulated } from '../../../../lib/firebase-admin';
@@ -104,8 +105,10 @@ export default async function Sources({ params }: { params: Promise<{ tripId: st
         </div>
         {copying?.source === 'photos' && (
           <p className="src-run quiet" id="review-title">
-            Copying photos: {copying.done} of {copying.total}. They join the trip when they’re all
-            in; edit mode then marks them as new.
+            Copying photos: {copying.done} of {copying.total}
+            {copying.failed ? ` (${copying.failed} couldn’t be copied)` : ''}. They join the trip
+            when they’re all in; edit mode then marks them as new. If copying stopped, it carries on
+            from here: <ContinueCopy tripId={tripId} title={trip.title} />
           </p>
         )}
         {reviews.map(
