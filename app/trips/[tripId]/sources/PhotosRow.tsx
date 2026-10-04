@@ -1,6 +1,6 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { startBackgroundCopy } from '../../../components/BackgroundCopy';
 
 /** Picking photos in Google Photos (DESIGN.md, "Adding (A3)"): connect once an hour, pick in Google's
@@ -23,6 +23,8 @@ export function PhotosRow({
   const router = useRouter();
   const [stage, setStage] = useState<'idle' | 'picking' | 'starting'>('idle');
   const [error, setError] = useState<string | null>(null);
+  // Set by Cancel while waiting for the picker.
+  const cancelled = useRef(false);
   const api = `/api/trips/${encodeURIComponent(tripId)}/photos`;
   const post = async (path: string, body: object) => {
     const r = await fetch(api + path, {
@@ -45,10 +47,22 @@ export function PhotosRow({
       };
       if (tab) {
         setStage('picking');
+        cancelled.current = false;
         tab.location.href = pickerUri;
+        const done = async () => ((await post('/poll', { sessionId })) as { done: boolean }).done;
         for (;;) {
           await new Promise((r) => setTimeout(r, 3000));
-          if (((await post('/poll', { sessionId })) as { done: boolean }).done) break;
+          if (cancelled.current) {
+            tab.close();
+            setStage('idle');
+            return;
+          }
+          // The tab closed: picked just before closing, or closed without picking.
+          if (tab.closed) {
+            if (await done()) break;
+            throw new Error('The Google Photos tab was closed before any photos were picked.');
+          }
+          if (await done()) break;
         }
       }
       setStage('starting');
@@ -87,9 +101,20 @@ export function PhotosRow({
           </button>
         )}
         {connected ? (
-          <button className="pill-button small copper" disabled={busy} onClick={() => pick(false)}>
-            {stage === 'picking' ? 'Waiting…' : copying ? 'Copying…' : 'Open Google Photos'}
-          </button>
+          <>
+            {stage === 'picking' && (
+              <button className="link-button" onClick={() => (cancelled.current = true)}>
+                Cancel
+              </button>
+            )}
+            <button
+              className="pill-button small copper"
+              disabled={busy}
+              onClick={() => pick(false)}
+            >
+              {stage === 'picking' ? 'Waiting…' : copying ? 'Copying…' : 'Open Google Photos'}
+            </button>
+          </>
         ) : (
           <a
             className="pill-button small copper"
