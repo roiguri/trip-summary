@@ -68,11 +68,18 @@ test('a leg gets its mode and actual times as a proposal, read at each end’s o
     FLYING: 'flight',
   };
   for (const [key, mode] of Object.entries(expected.transitModes) as [string, string][])
-    assert.equal(proposal(key)?.mode, modes[mode], key);
-  assert.deepEqual(
-    [proposal('flight-home')?.start, proposal('flight-home')?.end],
-    ['12:30', '15:55'],
-  );
+    // Proposed, unless the leg is already drawn that way at those times.
+    assert.equal(proposal(key)?.mode ?? entry(key).mode, modes[mode], key);
+  // Planned at the Timeline's times, the flight needs no proposal; given other times, the proposal
+  // reads each end at its own offset.
+  const flight = String(ids['flight-home']);
+  const moved = merge(
+    input([
+      edit({ target: 'entry', key: flight, field: 'start_time', value: '00:01' }),
+      edit({ target: 'entry', key: flight, field: 'end_time', value: '00:02' }),
+    ]),
+  ).proposals.find((p) => p.entryId === ids['flight-home']);
+  assert.deepEqual([moved?.start, moved?.end], ['12:30', '15:55']);
 });
 
 test('suggestions are exactly the unmatched stops and long journeys, without the noise', () => {
@@ -337,4 +344,30 @@ test('an entry’s chosen photos come first, in order; a highlighted photo is ma
   );
   assert.equal(ordered.find((x) => x.id === b)?.highlighted, true);
   assert.equal(ordered.find((x) => x.id === a)?.highlighted, undefined, 'only where marked');
+});
+
+test('a leg’s proposal settles once its times are used, its mode read from the title as drawn', () => {
+  // A leg with no mode of its own, drawn by its title as the Timeline's mode, given other times.
+  const key = Object.keys(expected.transitModes).find(
+    (k) => plan.itinerary.find((r) => Number(r.entry_id) === ids[k])?.mode == null,
+  )!;
+  assert.ok(key, 'the mocks have such a leg');
+  const id = String(ids[key]);
+  const off = [
+    edit({ target: 'entry', key: id, field: 'start_time', value: '00:01' }),
+    edit({ target: 'entry', key: id, field: 'end_time', value: '00:02' }),
+  ];
+  const p = merge(input(off)).proposals.find((x) => x.entryId === ids[key])!;
+  assert.ok(p, 'other times are proposed');
+  const used = merge(
+    input([
+      edit({ target: 'entry', key: id, field: 'start_time', value: p.start }),
+      edit({ target: 'entry', key: id, field: 'end_time', value: p.end }),
+    ]),
+  );
+  assert.equal(
+    used.proposals.some((x) => x.entryId === ids[key]),
+    false,
+    'and settled by using them',
+  );
 });
