@@ -41,15 +41,16 @@ export function PhotosRow({
     // Opened at once, while the click still counts, so the browser doesn't block it as a pop-up.
     const tab = useMock ? null : window.open('', '_blank');
     try {
-      const { sessionId, pickerUri } = (await post('/session', { mock: useMock })) as {
-        sessionId: string;
-        pickerUri: string;
-      };
+      const { sessionId, pickerUri, expireTime } = (await post('/session', {
+        mock: useMock,
+      })) as { sessionId: string; pickerUri: string; expireTime: string | null };
       if (tab) {
         setStage('picking');
         cancelled.current = false;
         tab.location.href = pickerUri;
-        const done = async () => ((await post('/poll', { sessionId })) as { done: boolean }).done;
+        // Whether the picker's tab is still open can't be told: Google's page cuts the link back to
+        // this one. So waiting ends when photos are picked, on Cancel, or when Google's session ends.
+        const until = expireTime ? Date.parse(expireTime) : Infinity;
         for (;;) {
           await new Promise((r) => setTimeout(r, 3000));
           if (cancelled.current) {
@@ -57,12 +58,9 @@ export function PhotosRow({
             setStage('idle');
             return;
           }
-          // The tab closed: picked just before closing, or closed without picking.
-          if (tab.closed) {
-            if (await done()) break;
-            throw new Error('The Google Photos tab was closed before any photos were picked.');
-          }
-          if (await done()) break;
+          if (((await post('/poll', { sessionId })) as { done: boolean }).done) break;
+          if (Date.now() > until)
+            throw new Error('The Google Photos picker timed out without a pick. Open it again.');
         }
       }
       setStage('starting');
@@ -86,7 +84,7 @@ export function PhotosRow({
       </div>
       <small>
         {stage === 'picking'
-          ? 'Pick photos in the Google Photos tab, then press Done there.'
+          ? 'In the Google Photos tab, pick photos (for an album, search its name: albums aren’t listed), then press Done there. Closed it without picking? Cancel.'
           : stage === 'starting'
             ? 'Getting the list of picked photos…'
             : copying
