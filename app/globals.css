@@ -1,4 +1,4 @@
-/* WAYFARER journey page. Sections follow the page: base, header, timeline (rail, entries by type,
+/* Afterglow journey page. Sections follow the page: base, header, timeline (rail, entries by type,
    notes, multi-day spans, stays), right column (map card, map markers, detail card, gallery),
    photo viewer, reduced motion. Measurements come from the locked mocks in docs/reference at
    1440x900; "user decision" marks choices agreed during Phase 0 (see docs/VERIFICATION.md). */
@@ -49,45 +49,48 @@ button:disabled {
 /* ---------------------------------------------------------------------------------------------
    Header: 65px tall, nav centred at 680px.
    --------------------------------------------------------------------------------------------- */
+/* The top bar (DESIGN.md, "Name and top bar", B): the timeline's rail green, the name in cream
+   beside the sun on the horizon, the account on the right. */
 .header {
   position: relative;
-  z-index: 4;
+  /* Above the editors' bar (5), so the phone menu opens over it. */
+  z-index: 6;
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: 65px;
   padding: 0 35px;
-  border-bottom: 1px solid #e0e6dd;
-  background: #fafaf7;
+  background: #3f5c4b;
+  color: #fbf6ec;
 }
 .brand {
-  font-size: 15px;
-  font-weight: 800;
-  letter-spacing: 0.07em;
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  color: inherit;
+  text-decoration: none;
 }
 .brand-mark {
-  margin-right: 8px;
-  color: #426451;
-  font-size: 14px;
-  letter-spacing: 0;
+  flex: none;
 }
-.nav {
-  position: absolute;
-  left: calc(50% - 40px);
-  transform: translateX(-50%);
-  display: flex;
-  gap: 28px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0;
-  color: #7f9383;
-}
-.nav-active {
-  color: #2d3a33;
+.brand-name {
+  font-family: var(--font-wordmark), Georgia, serif;
+  font-size: 25px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.02em;
 }
 .status {
-  font-size: 11px;
-  color: #7d8a80;
+  font-size: 12px;
+  color: #cfe0d2;
+}
+.header .link-button {
+  color: #fbf6ec;
+}
+.header .link-button:focus-visible,
+.header .brand:focus-visible {
+  outline: 2px solid #f2c9a5;
+  outline-offset: 3px;
 }
 
 /* ---------------------------------------------------------------------------------------------
@@ -1730,10 +1733,13 @@ button:disabled {
     height: 50px;
     padding: 0 12px 0 18px;
   }
-  .brand {
-    font-size: 14px;
+  .brand-name {
+    font-size: 22px;
   }
-  .nav,
+  .brand-mark {
+    width: 30px;
+    height: 21px;
+  }
   .status {
     display: none;
   }
@@ -1751,7 +1757,7 @@ button:disabled {
     display: block;
     width: 18px;
     height: 2px;
-    background: #3f5c4b;
+    background: #fbf6ec;
   }
   .phone-menu {
     position: absolute;
@@ -1770,6 +1776,9 @@ button:disabled {
     color: #7f9383;
     font-size: 12px;
     font-weight: 700;
+  }
+  .phone-menu .link-button {
+    color: #3f5c4b;
   }
   .phone-menu small {
     padding-top: 12px;
@@ -2234,7 +2243,18 @@ button:disabled {
 }
 .home-account {
   font-size: 12px;
-  color: #7d8a80;
+  color: #cfe0d2;
+}
+/* On the green bar the main action is cream, its border the bar's own green. */
+.header .pill-button.primary {
+  border-color: #fbf6ec;
+  background: #fbf6ec;
+  color: #2f4a3a;
+}
+.header .pill-button:not(.primary) {
+  border-color: #6f8f7c;
+  background: transparent;
+  color: #fbf6ec;
 }
 .pill-button {
   display: inline-flex;
@@ -2428,10 +2448,6 @@ a.notice-button {
   gap: 36px;
   min-width: 0;
 }
-.trip-header .brand {
-  color: inherit;
-  text-decoration: none;
-}
 .crumbs {
   display: flex;
   gap: 18px;
@@ -2443,14 +2459,14 @@ a.notice-button {
   white-space: nowrap;
 }
 .crumbs a {
-  color: #6e8779;
+  color: #cfe0d2;
   text-decoration: none;
 }
 .crumbs a:hover {
   text-decoration: underline;
 }
 .crumbs [aria-current] {
-  color: #26382e;
+  color: #fbf6ec;
 }
 .trip-status.inline {
   position: static;

@@ -270,8 +270,8 @@ const BASE = process.env.BASE_URL || 'http://localhost:3000';
   await ph.waitForTimeout(600);
   await ph.click('.menu-button');
   ok(
-    'phone: the menu holds the nav',
-    ((await ph.textContent('.phone-menu')) || '').includes('WISHLIST'),
+    'phone: the menu holds the account and sign-out',
+    ((await ph.textContent('.phone-menu')) || '').includes('Sign out'),
   );
 
   for (const e of errs) R.push('FAIL  console error: ' + e);

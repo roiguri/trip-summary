@@ -1,4 +1,4 @@
-# WAYFARER roadmap
+# Afterglow roadmap
 
 Starting point: the reconstructed prototype from the design handoff (Next.js 15 + React 19 + MapLibre, SQLite via `node:sqlite`, fictional Carmel/Monterey sample). The journey view is visually locked (see `DESIGN.md`, `docs/FIDELITY-CHECKLIST.md`, and the screenshots in `docs/reference/`). Everything below is proposed; each round is approved before it lands, per `DESIGN.md`.
 

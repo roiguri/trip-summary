@@ -1,4 +1,4 @@
-# WAYFARER trip journal
+# Afterglow trip journal
 
 A trip journal: a timeline of each day (places, stays, transit, notes, photos) beside a map and a
 detail card, with a phone layout. Next.js 16 (app router), React 19, MapLibre (OpenFreeMap tiles),

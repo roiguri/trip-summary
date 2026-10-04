@@ -1,4 +1,4 @@
-# WAYFARER: trip summary prototype
+# Afterglow: trip summary prototype
 
 A Next.js trip journal on Firebase, with a fictional three-day Carmel/Monterey itinerary. The original Vite/localStorage proof of concept is archived in `legacy-vite/` for reference. No user's photos, location history, or travel details are stored in this repository.
 

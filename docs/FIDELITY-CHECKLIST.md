@@ -1,8 +1,8 @@
-# WAYFARER fidelity checklist
+# Afterglow fidelity checklist
 
 Compared with locked geometry, real-map whole/day, place-panel, large-ratio, and photo-sequence reference captures at 1440 x 900. The fictional sample differs in names, times and images.
 
-- PASS: left WAYFARER wordmark, centered journey nav, right status, fixed 62px header.
+- PASS: left Afterglow wordmark, centered journey nav, right status, fixed 62px header.
 - PASS: trip heading stays left when panel is collapsed; rail begins at the Day 1 banner.
 - PASS: fixed right column with floating round map/detail cards, large map at 40% of column; current day emphasis and Whole trip map button.
 - PASS: solid green centered rail with a parallel track of small round dots (not plus marks), alternating plain-title entries, quiet category/time bylines, no underlines, shared copper dot and arm for place, lodging, single photo and cluster.

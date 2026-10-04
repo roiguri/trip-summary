@@ -1,10 +1,10 @@
-# WAYFARER trip journal: design decisions
+# Afterglow trip journal: design decisions
 
 This document records the agreed visual direction for the local trip-summary prototype. It is not a claim that every reference pixel has been matched. Review screenshots against the reference before changing a locked choice.
 
 ## Identity and layout
 
-- Keep the WAYFARER wordmark and mark at the left of the header, journey navigation in the header, and compact status at the right. Do not change the header when the right column collapses.
+- Keep the Afterglow wordmark and mark at the left of the header, journey navigation in the header, and compact status at the right. Do not change the header when the right column collapses.
 - The page stays inside the viewport. The timeline alone scrolls; the right column and its detail card do not scroll. Show the first day's banner at the rail's start. Center the timeline when the right column is collapsed; use a round reopening control.
 - The timeline has a vertical green rail, day banners, alternating entries, small uppercase type/time labels, and tilted overlapping photo stacks. Timeline entry titles are plain text with no underline, including hover. Place, lodging, single-photo, and photo-cluster entries use one dot-and-horizontal-line connector geometry. Transit stops keep their text 26px from the rail (clear of any running multi-day lanes), the disc centred on a fixed teal segment, with line icons per mode and a time-zone label on each end when they differ. Loose photos are titled by their caption, and have no title when there is none; a photo cluster is a small spread deck of up to three cards; photo bylines show only the time. The node and connector (and the transit disc) are centred on the title's first line, not its baseline or the title + byline block (user decision). A place's note appears in full under its photos, clamped to two lines (notes: four) with a "See more" toggle. Note cards have a small translucent tape strip on their top edge, and are anchored in time with a rail node and arm level with their title. Place captions use the same paper, as a small slip with tape under the photos (user decision). Note direction and alignment follow the language of its text: English LTR/left, Hebrew RTL/right.
 - Transit is a compact rail stop, not a place entry: a small round mode icon sits over the rail, with three small text lines beside it (title; start time → end time with time zone; origin → destination). No horizontal place connector. The short transit leg is a teal-blue dotted line behind the icon, distinct from the solid green rail elsewhere. Transit title is bold ink; time/time-zone and origin → destination are small teal text.
@@ -160,6 +160,17 @@ From the first build; same preview page. These replace M2's inbox and refine H5.
   centred in it, so its scrollbar sits beside the cards; it is styled like the editor card's.
 - An answer in edit mode (Use, Ignore, Fine as it is, Accept the day's) shows "Saving…" until the
   page has the change, then a ✓ chip on the entry saying what was done, with Undo, while editing.
+
+## Name and top bar (user decisions, Oct 4)
+
+Options: https://claude.ai/artifact/Ww8XTreh6aejD3rgKScwMv (names), https://claude.ai/artifact/VC4o2EyeK4k1Xh4fkjxwPQ (bar).
+
+- The app is called **Afterglow** (the code and repository keep the generic name trip-summary). Its
+  mark is a sun on the horizon: a peach arc, a copper half-sun, a pale green horizon line.
+- The top bar (B) is the timeline's rail green, with the mark and the name in cream, set in Fraunces
+  (the name only; the app keeps its own type). The account and sign-out sit on the right; on a phone
+  they move into the menu. There are no Wishlist or Places links until those pages exist.
+- The browser tab shows "Afterglow" and the sun as its icon.
 
 ## Exact sampled backgrounds and remaining gaps
 
