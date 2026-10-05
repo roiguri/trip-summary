@@ -1,6 +1,8 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import { useState, useTransition } from 'react';
+import { createContext, useContext, useState, useTransition } from 'react';
+import type { Day, Trip } from '../../../lib/data';
+import type { EditData } from '../../../lib/edit-view';
 
 export type EditChange = {
   target: string;
@@ -9,11 +11,25 @@ export type EditChange = {
   value?: string | boolean | null;
 };
 
-/** Saves edits (a value of `undefined` undoes one), then re-renders the page from the server.
- *  `busy` lasts until the page shows the change, not only until it is saved, so nothing looks
- *  unchanged and clickable in between. */
-export function useSave(tripId: string) {
+/** A save's answer: what changed, from the merge the save ran (the edits route). */
+export type Saved = {
+  builtAt: string;
+  meta: Omit<Trip, 'days'>;
+  dates: string[];
+  days: Day[];
+  edit: EditData;
+};
+/** Applies a save's answer to the page in place; false when it can't (then the page reloads). */
+export type ApplySaved = (saved: Saved) => boolean;
+export const SavedContext = createContext<ApplySaved | null>(null);
+
+/** Saves edits (a value of `undefined` undoes one), then updates the page in place from the answer
+ *  (or, failing that, re-renders it from the server). `busy` lasts until the page shows the
+ *  change, so nothing looks unchanged and clickable in between. */
+export function useSave(tripId: string, applyHere?: ApplySaved | null) {
   const router = useRouter();
+  const fromContext = useContext(SavedContext);
+  const apply = applyHere ?? fromContext;
   const [saving, setBusy] = useState(false);
   const [refreshing, startRefresh] = useTransition();
   const busy = saving || refreshing;
@@ -32,7 +48,10 @@ export function useSave(tripId: string) {
       setError(r ? await r.text() : 'Not saved: check the connection and try again.');
       return false;
     }
-    startRefresh(() => router.refresh());
+    const saved = (await r.json().catch(() => null)) as Saved | null;
+    startRefresh(() => {
+      if (!saved || !apply?.(saved)) router.refresh();
+    });
     return true;
   }
   return { save, busy, error };

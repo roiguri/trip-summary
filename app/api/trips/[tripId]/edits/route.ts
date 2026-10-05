@@ -39,7 +39,20 @@ export async function POST(req: Request, { params }: { params: Promise<{ tripId:
     })),
   );
   t.mark('save');
-  await rebuildJournal(store, tripId);
+  const built = await rebuildJournal(store, tripId);
   t.mark('rebuild');
-  return new Response(null, { status: 204, headers: { 'Server-Timing': t.header() } });
+  // What the page needs to update in place (no reload): the days that changed, the day order, the
+  // trip's own fields, and edit mode's data, all from this one merge.
+  const { days, ...meta } = built.trip;
+  const changed = new Set(built.changed);
+  return Response.json(
+    {
+      builtAt: built.builtAt,
+      meta,
+      dates: days.map((d) => d.date),
+      days: days.filter((d) => changed.has(d.date)),
+      edit: built.edit,
+    },
+    { headers: { 'Server-Timing': t.header() } },
+  );
 }

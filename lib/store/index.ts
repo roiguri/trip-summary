@@ -267,8 +267,9 @@ export function createStore(db: Firestore) {
 
     /** Replaces the trip's journal; days no longer in it are removed. Only what changed is written:
      *  each day's content hash is kept in the meta, and a day whose hash is the same isn't rewritten
-     *  (an edit that changes no day, like keeping new photos, writes just the meta). */
-    async putJournal(tripId: string, j: Journal) {
+     *  (an edit that changes no day, like keeping new photos, writes just the meta). Returns the
+     *  dates of the days written. */
+    async putJournal(tripId: string, j: Journal): Promise<string[]> {
       const col = sub(tripId, 'journal');
       const { days, ...meta } = j.trip;
       const before = (await col.doc('meta').get()).data() as
@@ -282,13 +283,12 @@ export function createStore(db: Firestore) {
       };
       const reviewHash = contentHash(review);
       const dates = new Set(days.map((d) => d.date));
+      const changed = days.filter((d) => before?.hashes?.[d.date] !== hashes[d.date]);
       await writeAll([
         ...(before?.dates ?? [])
           .filter((d) => !dates.has(d))
           .map((d) => [col.doc(docId(`day-${d}`)), null] as [DocumentReference, null]),
-        ...days
-          .filter((d) => before?.hashes?.[d.date] !== hashes[d.date])
-          .map((d) => [col.doc(docId(`day-${d.date}`)), d] as [DocumentReference, object]),
+        ...changed.map((d) => [col.doc(docId(`day-${d.date}`)), d] as [DocumentReference, object]),
         ...(before?.reviewHash === reviewHash
           ? []
           : [[col.doc('review'), review] as [DocumentReference, object]]),
@@ -305,6 +305,7 @@ export function createStore(db: Firestore) {
           },
         ],
       ]);
+      return changed.map((d) => d.date);
     },
     /** What edit mode needs, as computed by the save that built the journal `builtAt` (a separate
      *  document, so viewers never read it). Too large to store: removed, and edit mode merges fresh. */
