@@ -409,7 +409,9 @@ button:disabled {
   position: absolute;
   top: calc(14.5px + 16px - 55px);
   left: -4px;
-  z-index: 3;
+  /* Above the rail and the lanes, below the day's banner and its tags (z-index 2): a leg that
+     opens the day starts below them. */
+  z-index: 1;
   width: 4px;
   height: 110px;
   background: #63a39b;
