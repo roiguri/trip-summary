@@ -98,8 +98,9 @@ export type Proposal = {
   start: string;
   end: string;
   mode: TransitMode | null;
-  /** A stay's actual check-in (`start`) and check-out (`end`, on `outDate`): which the Timeline knows. */
-  stay?: { checkIn: boolean; checkOut: boolean; outDate: string };
+  /** A stay's actual check-in (`start`, on `inDate`: the next day when arriving after midnight) and
+   *  check-out (`end`, on `outDate`): which the Timeline knows. */
+  stay?: { checkIn: boolean; checkOut: boolean; inDate: string; outDate: string };
 };
 
 export type MergeResult = {
@@ -334,7 +335,12 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
       start: checkIn ? startOf(checkIn).time : '',
       end: checkOut ? endOf(checkOut).time : '',
       mode: null,
-      stay: { checkIn: !!checkIn, checkOut: !!checkOut, outDate: last },
+      stay: {
+        checkIn: !!checkIn,
+        checkOut: !!checkOut,
+        inDate: checkIn ? startOf(checkIn).date : st.start_date,
+        outDate: last,
+      },
     });
   }
 
@@ -463,6 +469,9 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
       const v = use('entry', key, field);
       if (typeof v === 'string') item[field] = field.endsWith('_time') && v === '' ? null : v;
     }
+    // Moved to another day (a stay checked into after midnight), never past its own end.
+    const day = use('entry', key, 'start_date');
+    if (typeof day === 'string' && (!item.end_date || day <= item.end_date)) item.start_date = day;
     const mode = use('entry', key, 'mode');
     if (item.item_type === 'transit' && typeof mode === 'string' && TRANSIT_MODES.has(mode))
       item.mode = mode as TransitMode;
@@ -478,7 +487,8 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
     return (
       !!item &&
       // A side the Timeline doesn't know (a stay's check-in or check-out) isn't compared.
-      ((p.stay?.checkIn !== false && p.start !== item.start_time) ||
+      ((p.stay?.checkIn !== false &&
+        (p.start !== item.start_time || (!!p.stay && p.stay.inDate !== item.start_date))) ||
         (p.stay?.checkOut !== false && p.end !== item.end_time) ||
         // A leg's mode as drawn (its own, else from its title), so "Use" settles it.
         (p.mode !== null && item.item_type === 'transit' && p.mode !== legMode(item)))

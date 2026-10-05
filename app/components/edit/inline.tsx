@@ -27,6 +27,10 @@ export function accept(f: Finding): EditChange[] {
     const key = String(f.entryId);
     return [
       ...(f.checkIn ? [{ target: 'entry', key, field: 'start_time', value: f.checkIn }] : []),
+      // Arrived after midnight: the stay starts the next day.
+      ...(f.checkIn && f.inDate !== f.date
+        ? [{ target: 'entry', key, field: 'start_date', value: f.inDate }]
+        : []),
       ...(f.checkOut ? [{ target: 'entry', key, field: 'end_time', value: f.checkOut }] : []),
     ];
   }
@@ -331,7 +335,7 @@ const weekday = (date: string) =>
 /** "Checked in 16:42 · checked out Thu 10:05", with only the sides the Timeline knows. */
 function stayText(f: Extract<Finding, { kind: 'stay' }>) {
   return [
-    f.checkIn && `Checked in ${f.checkIn}`,
+    f.checkIn && `Checked in ${f.inDate !== f.date ? `${weekday(f.inDate)} ` : ''}${f.checkIn}`,
     f.checkOut && `${f.checkIn ? 'checked' : 'Checked'} out ${weekday(f.outDate)} ${f.checkOut}`,
   ]
     .filter(Boolean)

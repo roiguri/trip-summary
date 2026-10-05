@@ -262,6 +262,8 @@ export default function Client({
     return [
       back('start_time', e.time),
       back('end_time', end),
+      // A stay Use may have moved to the next day (checked in after midnight).
+      ...(e.type === 'lodging' ? [back('start_date', e.day)] : []),
       ...(mode && e.mode ? [back('mode', e.mode)] : []),
     ];
   };

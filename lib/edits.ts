@@ -22,6 +22,8 @@ const FIELDS: Record<EditTarget, Record<string, Rule>> = {
     title: text(200),
     notes: text(5000),
     start_time: time,
+    /** The day an entry starts, when the owner moves it (a stay checked into after midnight). */
+    start_date: (v) => typeof v === 'string' && /^\d{4}-\d\d-\d\d$/.test(v),
     end_time: time,
     hidden: bool,
     highlighted: bool,
