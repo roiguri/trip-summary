@@ -10,9 +10,9 @@ import { fixtureTrip } from './data.ts';
 import type { Store } from './store/index.ts';
 import { summarize } from './summary.ts';
 
-/** The journal's format. Raise it when what a journal holds changes (2: photos carry thumbnails):
- *  an older journal is rebuilt the next time it's read. */
-export const JOURNAL_VERSION = 2;
+/** The journal's format. Raise it when what a journal holds changes (2: photos carry thumbnails;
+ *  3: stays' actual times and hotel photos): an older journal is rebuilt the next time it's read. */
+export const JOURNAL_VERSION = 3;
 
 /** Merges the trip's stored sources and edits and stores the result: the journal (written day by
  *  day, only where something changed) and, from the same merge, what edit mode needs. */
