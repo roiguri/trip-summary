@@ -177,8 +177,9 @@ export function Timeline({
             </span>
             {d.tags.length > 0 && <small>{d.tags.join(' · ')}</small>}
           </button>
-          {edit?.day(d.date)}
           <div className="entries" style={{ '--day-lanes': dayLanes(d) } as React.CSSProperties}>
+            {/* Inside the day's entries, so the rail (their border) runs past it. */}
+            {edit?.day(d.date)}
             {d.continuing.map((s) => (
               <button
                 className={`multi-day-chip ${laneClass(s.lane)} ${spanFocus(s.id)}`}

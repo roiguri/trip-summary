@@ -16,8 +16,8 @@ const MODE: Record<string, string> = {
 export const findingKey = (f: Finding) =>
   f.kind === 'stop'
     ? f.suggestion.key
-    : f.kind === 'photos' && f.entryId === null
-      ? `photos-day-${f.date}`
+    : f.kind === 'photos'
+      ? `photos-${f.entryKey}`
       : `${f.kind}-${f.entryId}`;
 
 /** What accepting a finding sets: the Timeline's times, and for a leg its mode. */
@@ -44,9 +44,9 @@ function bringBack(f: Finding): EditChange[] {
 /** Something just resolved, shown on its entry with a way back (so a change never passes unseen). */
 export type Done = {
   key: string;
-  /** Its entry, or null with `day` for a day's loose moments. */
+  /** Its planned entry, or null with `entryKey` for a loose moment. */
   entryId: number | null;
-  day?: string;
+  entryKey?: string;
   label: string;
   undo: EditChange[];
 };
@@ -80,15 +80,15 @@ export function FindingChip({
     {
       key,
       entryId: entryKey ? Number(entryKey) : null,
-      day: f.kind === 'photos' && f.entryId === null ? f.date : undefined,
+      entryKey: f.kind === 'photos' ? f.entryKey : undefined,
       label,
       undo,
     },
   ];
   if (f.kind === 'photos') {
-    // Keep: they're no longer new; Undo puts back the last keep (or none).
-    const target = f.entryId === null ? 'day' : 'entry';
-    const where = f.entryId === null ? f.date : entryKey;
+    // Keep: these very photos are no longer new; Undo marks them new again.
+    const mark = (value: true | undefined): EditChange[] =>
+      f.photoIds.map((id) => ({ target: 'photo', key: id, field: 'seen', value }));
     const n = `${f.count} new ${f.count === 1 ? 'photo' : 'photos'}`;
     if (act.pending === key)
       return (
@@ -102,14 +102,7 @@ export function FindingChip({
         <button
           className="pill-button small primary"
           disabled={busy}
-          onClick={() =>
-            save(
-              [{ target, key: where, field: 'photosSeen', value: new Date().toISOString() }],
-              done(`Kept ${n}`, [
-                { target, key: where, field: 'photosSeen', value: f.seen ?? undefined },
-              ]),
-            )
-          }
+          onClick={() => save(mark(true), done(`Kept ${n}`, mark(undefined)))}
         >
           Keep
         </button>

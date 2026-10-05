@@ -147,22 +147,16 @@ test('edit mode marks photos added since an entry was last kept as new', async (
   const count = news.reduce((n, f) => n + (f.kind === 'photos' ? f.count : 0), 0);
   assert.ok(news.length > 0, 'new-photo findings');
   assert.equal(count, before.newPhotoIds.length, 'each new photo counted once');
-  // Without a Timeline every photo is a loose moment: the day's finding (an entry's otherwise).
+  // Keep marks that chip's own photos (a loose moment's, or an entry's) as seen.
   const one = news[0];
   assert.ok(one.kind === 'photos');
-  await store.setEdit(TRIP, {
-    target: one.entryId === null ? 'day' : 'entry',
-    key: one.entryId === null ? one.date : String(one.entryId),
-    field: 'photosSeen',
-    value: new Date().toISOString(),
-    by: 'e',
-  });
+  assert.equal(one.count, one.photoIds.length);
+  for (const id of one.photoIds)
+    await store.setEdit(TRIP, { target: 'photo', key: id, field: 'seen', value: true, by: 'e' });
   await rebuildJournal(store, TRIP);
   const after = (await editView(store, TRIP))!.edit;
   assert.equal(
-    after.findings.some(
-      (f) => f.kind === 'photos' && f.entryId === one.entryId && f.date === one.date,
-    ),
+    after.findings.some((f) => f.kind === 'photos' && f.entryKey === one.entryKey),
     false,
     'kept: no longer new',
   );

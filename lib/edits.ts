@@ -43,6 +43,8 @@ const FIELDS: Record<EditTarget, Record<string, Rule>> = {
     hidden: bool,
     caption: text(500),
     highlighted: bool,
+    /** Kept: no longer marked new in edit mode. */
+    seen: bool,
   },
   day: { title: text(120), photosSeen: isoTime },
   trip: { title: text(200), subtitle: text(300), cover: key },
