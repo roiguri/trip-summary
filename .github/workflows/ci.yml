@@ -121,6 +121,10 @@ jobs:
         if: ${{ !inputs.update_baselines }}
         run: BASE_URL=http://localhost:3100 npm run check:edit
 
+      - name: Photo review
+        if: ${{ !inputs.update_baselines }}
+        run: BASE_URL=http://localhost:3100 npm run check:review
+
       - name: Visual differences (baseline | now | diff)
         if: failure()
         uses: actions/upload-artifact@v4
