@@ -52,12 +52,18 @@ await p.waitForSelector('.copy-panel >> text=are in the trip', { timeout: 180_00
 // The new photos' findings are kept, so the rest of the check sees only the Timeline's.
 await p.goto(editing);
 await p.waitForSelector('.review-step');
+// Count only once nothing is saving (a chip being saved shows "Saving…" instead).
+const settled = () =>
+  p.waitForFunction(() => !document.querySelector('.fnd.saving'), null, { timeout: 15_000 });
 for (let n = 0; n < 30; n++) {
+  await settled();
   const left = await p.locator('.left .fnd.new-photos').count();
   if (!left) break;
   await p.locator('.left .fnd.new-photos').first().getByRole('button', { name: 'Keep' }).click();
   await p.waitForFunction(
-    (c) => document.querySelectorAll('.left .fnd.new-photos').length < c,
+    (c) =>
+      !document.querySelector('.fnd.saving') &&
+      document.querySelectorAll('.left .fnd.new-photos').length < c,
     left,
     { timeout: 15_000 },
   );
@@ -96,7 +102,12 @@ ok(
   (await p.locator('.review-step').textContent()).includes(`1 of ${before}`),
 );
 
-// An answer shows Saving… until the page has it, then a ✓ with Undo on the entry.
+// An answer shows Saving… until the page has it, then a ✓ with Undo on the entry. The page updates
+// in place from the save's answer: no page request (reload or refresh) follows.
+const pageLoads = [];
+const countLoads = (r) =>
+  r.url().includes(`/trips/${TRIP}`) && !r.url().includes('/api/') && pageLoads.push(r.url());
+p.on('request', countLoads);
 await entry('Carmel Beach').locator('.fnd').getByRole('button', { name: 'Use' }).click();
 ok(
   'Use shows Saving… at once',
@@ -115,6 +126,8 @@ ok(
     ),
   ),
 );
+p.off('request', countLoads);
+ok('the page updates in place, without reloading', pageLoads.length === 0, pageLoads.join(' '));
 await entry('Carmel Beach').locator('.fnd.done').getByRole('button', { name: 'Undo' }).click();
 ok(
   'Undo puts the planned time back and the finding waits again',
@@ -319,6 +332,30 @@ ok(
       e.textContent.includes('Cypress & Salt'),
     ),
   ),
+);
+
+// After all those changes made in place, a fresh page from the server reads the same: nothing drifted.
+// The ✓ chips of this session's answers are the page's own, and go with a reload by design.
+const railText = () =>
+  p.evaluate(() => {
+    const rail = document.querySelector('.left .rail').cloneNode(true);
+    rail.querySelectorAll('.fnd.done').forEach((e) => e.remove());
+    document.body.append(rail);
+    const text = rail.innerText;
+    rail.remove();
+    return text;
+  });
+const shown = await railText();
+await p.reload();
+await p.waitForSelector('.review-step');
+const reloaded = await railText();
+const firstDiff = [...shown].findIndex((c, i) => c !== reloaded[i]);
+ok(
+  'after the changes, a reload shows the same journey',
+  shown === reloaded,
+  firstDiff >= 0
+    ? `differs at: ${JSON.stringify(shown.slice(firstDiff - 60, firstDiff + 60))} vs ${JSON.stringify(reloaded.slice(firstDiff - 60, firstDiff + 60))}`
+    : '',
 );
 
 // Done: the journey keeps the edits, without the edit tools.

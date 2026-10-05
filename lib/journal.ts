@@ -26,7 +26,7 @@ export async function rebuildJournal(store: Store, tripId: string) {
   const edit = await editDataFrom(store, tripId, inputs, r, configuredLookup(), t);
   const builtAt = new Date().toISOString();
   const { trip, suggestions, proposals, unvisited, orphanEdits } = r;
-  await store.putJournal(tripId, {
+  const changed = await store.putJournal(tripId, {
     trip,
     suggestions,
     proposals,
@@ -44,7 +44,7 @@ export async function rebuildJournal(store: Store, tripId: string) {
     }),
   );
   t.mark('write');
-  return { trip, edit, builtAt, timing: t.header() };
+  return { trip, edit, builtAt, changed, timing: t.header() };
 }
 
 /** The trip's journal, rebuilt first if it's from an older format (and the trip has a plan). */

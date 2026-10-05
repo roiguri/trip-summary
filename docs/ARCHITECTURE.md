@@ -107,6 +107,13 @@ console's OAuth client):
 | `GOOGLE_PLACES_KEY`                        | A server-only key limited to Places API (New), with a daily cap: names for the Timeline's unplanned stops, looked up once per place and cached in `placeNames/` | yes             |
 | `COPY_AT_ONCE`                             | Optional: photos copied per request (default 8), lower if requests near the time limit                                                                          | no              |
 
+How a save stays fast (Oct 5): the edits are written in one batch; the trip is merged once, and from
+that merge come the journal (only days whose content hash changed are written), edit mode's data
+(stored with the build's stamp; edit mode merges fresh when the stamp doesn't match), and the answer
+to the page, which updates in place with the changed days and findings. Photos on cards and grids are
+400px thumbnails, loaded lazily. Saves and copies send `Server-Timing`. A GitHub Actions job keeps the
+server warm (repository variable `SITE_URL`).
+
 Hosting limits the code respects: one Netlify response is at most about 6 MB, so `/media` serves a
 range at most 4 MB at a time (video players ask again); a request stops after 10 seconds, so a
 photo-copy request copies a few items at a time. Security headers (HSTS, no framing, referrer and

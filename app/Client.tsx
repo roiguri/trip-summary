@@ -12,7 +12,7 @@ import {
   GhostCard,
   type Done,
 } from './components/edit/inline';
-import type { EditChange } from './components/edit/useSave';
+import { SavedContext, type EditChange, type Saved } from './components/edit/useSave';
 import { useSave } from './components/edit/useSave';
 import type { EditData, Finding } from '../lib/edit-view';
 import { Header } from './components/Header';
@@ -30,10 +30,10 @@ import { useIsPhone } from './lib/useIsPhone';
  * photo viewer. This component holds the state they share; each part lives in `components/`.
  */
 export default function Client({
-  trip,
+  trip: initialTrip,
   account,
   bar,
-  edit,
+  edit: initialEdit,
   status = 'draft',
 }: {
   trip: Trip;
@@ -45,6 +45,31 @@ export default function Client({
   /** The trip's status, for the edit-mode bar. */
   status?: 'draft' | 'published';
 }) {
+  // The trip and edit mode's data as shown: from the server, then updated in place by each save's
+  // answer (the changed days and the new findings), and replaced whenever the server sends a fresh
+  // page (a reload, Done, or a fallback).
+  const [live, setLive] = useState({ trip: initialTrip, edit: initialEdit });
+  const [fromServer, setFromServer] = useState({ trip: initialTrip, edit: initialEdit });
+  if (fromServer.trip !== initialTrip || fromServer.edit !== initialEdit) {
+    setFromServer({ trip: initialTrip, edit: initialEdit });
+    setLive({ trip: initialTrip, edit: initialEdit });
+  }
+  const trip = live.trip;
+  const edit = live.edit;
+  // The latest shown state, so two saves answered close together build on each other.
+  const liveRef = useRef(live);
+  liveRef.current = live;
+  const applySaved = (saved: Saved) => {
+    const byDate = new Map(liveRef.current.trip.days.map((d) => [d.date, d]));
+    for (const d of saved.days) byDate.set(d.date, d);
+    const days = saved.dates.map((d) => byDate.get(d));
+    // Every day must be known: otherwise this page has drifted, and reloads instead.
+    if (days.some((d) => !d)) return false;
+    const next = { trip: { ...saved.meta, days: days as Trip['days'] }, edit: saved.edit };
+    liveRef.current = next;
+    setLive(next);
+    return true;
+  };
   // Nothing is selected at first: the map fills the right column until an entry is chosen (user decision).
   const [selected, setSelected] = useState<Entry | null>(null);
   // Edit mode: the unplanned stop opened, whether set-aside findings are drawn, and the finding
@@ -52,7 +77,7 @@ export default function Client({
   const [stopKey, setStopKey] = useState<string | null>(null);
   const [showSetAside, setShowSetAside] = useState(false);
   const [stepKey, setStepKey] = useState<string | null>(null);
-  const { save, busy } = useSave(edit?.tripId ?? '');
+  const { save, busy } = useSave(edit?.tripId ?? '', applySaved);
   // The finding being saved ("Saving…" until the page shows it), and what was just resolved: each
   // stays on its entry with Undo while editing.
   const [pendingKey, setPendingKey] = useState<string | null>(null);
@@ -369,98 +394,52 @@ export default function Client({
   }
 
   return (
-    <main
-      data-timing={edit?.timing}
-      className={`shell ${collapsed && !edit ? 'collapsed' : ''} ${bar || edit ? 'with-bar' : ''} ${edit ? 'editing' : ''}`}
-      style={
-        {
-          // An absolute length (a share of the right column, which spans the viewport minus 91px and
-          // an editor's bar), so the folding map card can keep its content at full size inside.
-          '--map-height': 'calc((100dvh - 91px - var(--bar)) * 0.4)',
-        } as React.CSSProperties
-      }
-    >
-      <Header account={account} />
-      {edit ? (
-        <EditModeBar
-          tripId={edit.tripId}
-          status={status}
-          open={edit.findings.length}
-          setAside={edit.setAside.length}
-          position={position}
-          onStep={step}
-          showSetAside={showSetAside}
-          onShowSetAside={setShowSetAside}
-        />
-      ) : (
-        bar
-      )}
-      <section className="left" ref={scroller}>
-        <div className="intro">
-          <div className="kicker">03 / THE JOURNEY</div>
-          <h1>{trip.title}</h1>
-          <p>{[trip.subtitle, trip.timezone].filter(Boolean).join(' · ')}</p>
-        </div>
-        <Timeline
-          days={days}
-          railRef={rail}
-          selected={selected}
-          album={album}
-          entriesById={entriesById}
-          onChoose={choose}
-          onShowAlbum={showAlbum}
-          edit={timelineEdit}
-        />
-      </section>
-      {edit ? (
-        isPhone ? (
-          <>
-            {!phoneMap && (
-              <button className="map-fab" onClick={() => setPhoneMap(true)}>
-                <MapIcon /> Map
-              </button>
-            )}
-            {phoneMap && (
-              <PhoneMap
-                trip={trip}
-                day={day}
-                onDay={setDay}
-                selected={selected}
-                focused={focus}
-                peek={peek}
-                onPeek={(e) => {
-                  setPeek(e);
-                  setDay(e.day);
-                }}
-                onDetails={choose}
-                onClose={closePhoneMap}
-              />
-            )}
-            {(selected || stopKey) && (
-              <PhoneSheet title="Edit" closing={false} onClose={closeEditor}>
-                {editPanel}
-              </PhoneSheet>
-            )}
-          </>
+    <SavedContext.Provider value={applySaved}>
+      <main
+        data-timing={edit?.timing}
+        className={`shell ${collapsed && !edit ? 'collapsed' : ''} ${bar || edit ? 'with-bar' : ''} ${edit ? 'editing' : ''}`}
+        style={
+          {
+            // An absolute length (a share of the right column, which spans the viewport minus 91px and
+            // an editor's bar), so the folding map card can keep its content at full size inside.
+            '--map-height': 'calc((100dvh - 91px - var(--bar)) * 0.4)',
+          } as React.CSSProperties
+        }
+      >
+        <Header account={account} />
+        {edit ? (
+          <EditModeBar
+            tripId={edit.tripId}
+            status={status}
+            open={edit.findings.length}
+            setAside={edit.setAside.length}
+            position={position}
+            onStep={step}
+            showSetAside={showSetAside}
+            onShowSetAside={setShowSetAside}
+          />
         ) : (
-          <aside className="right edit-col">
-            <MapCard
-              trip={trip}
-              open={mapOpen}
-              collapsed={false}
-              onOpen={setMapOpen}
-              selected={selected}
-              focused={focus}
-              day={day}
-              onSelect={choose}
-              onWholeTrip={() => setDay('')}
-            />
-            {editPanel}
-          </aside>
-        )
-      ) : (
-        <>
-          {isPhone ? (
+          bar
+        )}
+        <section className="left" ref={scroller}>
+          <div className="intro">
+            <div className="kicker">03 / THE JOURNEY</div>
+            <h1>{trip.title}</h1>
+            <p>{[trip.subtitle, trip.timezone].filter(Boolean).join(' · ')}</p>
+          </div>
+          <Timeline
+            days={days}
+            railRef={rail}
+            selected={selected}
+            album={album}
+            entriesById={entriesById}
+            onChoose={choose}
+            onShowAlbum={showAlbum}
+            edit={timelineEdit}
+          />
+        </section>
+        {edit ? (
+          isPhone ? (
             <>
               {!phoneMap && (
                 <button className="map-fab" onClick={() => setPhoneMap(true)}>
@@ -483,17 +462,94 @@ export default function Client({
                   onClose={closePhoneMap}
                 />
               )}
-              {detailsOpen && (
-                <PhoneSheet
-                  key={album || selected?.id}
-                  title={
-                    album
-                      ? (days.find((d) => d.date === album)?.title ?? '')
-                      : (selected?.title ?? '')
-                  }
-                  closing={panelClosing}
-                  onClose={closeDetails}
-                >
+              {(selected || stopKey) && (
+                <PhoneSheet title="Edit" closing={false} onClose={closeEditor}>
+                  {editPanel}
+                </PhoneSheet>
+              )}
+            </>
+          ) : (
+            <aside className="right edit-col">
+              <MapCard
+                trip={trip}
+                open={mapOpen}
+                collapsed={false}
+                onOpen={setMapOpen}
+                selected={selected}
+                focused={focus}
+                day={day}
+                onSelect={choose}
+                onWholeTrip={() => setDay('')}
+              />
+              {editPanel}
+            </aside>
+          )
+        ) : (
+          <>
+            {isPhone ? (
+              <>
+                {!phoneMap && (
+                  <button className="map-fab" onClick={() => setPhoneMap(true)}>
+                    <MapIcon /> Map
+                  </button>
+                )}
+                {phoneMap && (
+                  <PhoneMap
+                    trip={trip}
+                    day={day}
+                    onDay={setDay}
+                    selected={selected}
+                    focused={focus}
+                    peek={peek}
+                    onPeek={(e) => {
+                      setPeek(e);
+                      setDay(e.day);
+                    }}
+                    onDetails={choose}
+                    onClose={closePhoneMap}
+                  />
+                )}
+                {detailsOpen && (
+                  <PhoneSheet
+                    key={album || selected?.id}
+                    title={
+                      album
+                        ? (days.find((d) => d.date === album)?.title ?? '')
+                        : (selected?.title ?? '')
+                    }
+                    closing={panelClosing}
+                    onClose={closeDetails}
+                  >
+                    <DetailPanel
+                      selected={selected}
+                      album={album}
+                      days={days}
+                      photos={photos}
+                      page={photoPage}
+                      onPage={setPhotoPage}
+                      activePhoto={activePhoto}
+                      onPickPhoto={pickPhoto}
+                      closing={panelClosing}
+                      fromCorner={panelCorner.current}
+                      onClose={closeDetails}
+                    />
+                  </PhoneSheet>
+                )}
+              </>
+            ) : (
+              <aside className="right">
+                <MapCard
+                  trip={trip}
+                  open={mapOpen}
+                  collapsed={collapsed}
+                  onOpen={setMapOpen}
+                  selected={selected}
+                  focused={focus}
+                  day={day}
+                  onSelect={choose}
+                  onWholeTrip={() => setDay('')}
+                />
+                {detailsOpen && (
                   <DetailPanel
                     selected={selected}
                     album={album}
@@ -507,44 +563,15 @@ export default function Client({
                     fromCorner={panelCorner.current}
                     onClose={closeDetails}
                   />
-                </PhoneSheet>
-              )}
-            </>
-          ) : (
-            <aside className="right">
-              <MapCard
-                trip={trip}
-                open={mapOpen}
-                collapsed={collapsed}
-                onOpen={setMapOpen}
-                selected={selected}
-                focused={focus}
-                day={day}
-                onSelect={choose}
-                onWholeTrip={() => setDay('')}
-              />
-              {detailsOpen && (
-                <DetailPanel
-                  selected={selected}
-                  album={album}
-                  days={days}
-                  photos={photos}
-                  page={photoPage}
-                  onPage={setPhotoPage}
-                  activePhoto={activePhoto}
-                  onPickPhoto={pickPhoto}
-                  closing={panelClosing}
-                  fromCorner={panelCorner.current}
-                  onClose={closeDetails}
-                />
-              )}
-            </aside>
-          )}
-        </>
-      )}
-      {full && (
-        <Lightbox photo={full} set={photos} onChange={setFull} onClose={() => setFull(null)} />
-      )}
-    </main>
+                )}
+              </aside>
+            )}
+          </>
+        )}
+        {full && (
+          <Lightbox photo={full} set={photos} onChange={setFull} onClose={() => setFull(null)} />
+        )}
+      </main>
+    </SavedContext.Provider>
   );
 }
