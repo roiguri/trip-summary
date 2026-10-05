@@ -116,6 +116,7 @@ export function PhotoReview({
     Math.max(0, scope.start ? photos.findIndex((p) => p.id === scope.start) : 0),
   );
   const current = shown[Math.min(index, shown.length - 1)];
+  const pages = Math.max(1, Math.ceil(shown.length / 9));
   const [selected, setSelected] = useState<Set<string>>(new Set(scope.selected ?? []));
   const anchor = useRef<number | null>(null);
   const [staged, setStaged] = useState<Map<string, Staged>>(new Map());
@@ -126,6 +127,10 @@ export function PhotoReview({
   const [ranging, setRanging] = useState(false);
   // A sideways swipe moves through the photos in the one-photo view.
   const swipe = useRef<{ x: number; y: number } | null>(null);
+  // The full photo shown, once loaded (until then its thumbnail is), and the grid's page of nine.
+  const [loaded, setLoaded] = useState<string | null>(null);
+  const PAGE = 9;
+  const [page, setPage] = useState(0);
   const box = useRef<HTMLDivElement>(null);
 
   // What the photo will be once saved: its own state with the staged decisions on top.
@@ -254,6 +259,21 @@ export function PhotoReview({
     box.current?.focus();
   }, []);
 
+  // The neighbours' full photos load ahead, so a swipe shows the next one at once.
+  useEffect(() => {
+    if (view !== 'one' || !shown.length) return;
+    const i = Math.min(index, shown.length - 1);
+    for (const by of [1, -1, 2, -2]) {
+      const p = shown[(i + by + shown.length) % shown.length];
+      if (p) new Image().src = p.full;
+    }
+  }, [view, index, shown]);
+
+  // The grid opens on the page of the photo being shown.
+  const toGrid = () => {
+    setPage(Math.floor(Math.min(index, Math.max(0, shown.length - 1)) / 9));
+    setView('grid');
+  };
   const step = (by: number) => {
     if (!shown.length) return;
     setIndex((i) => (Math.min(i, shown.length - 1) + by + shown.length) % shown.length);
@@ -279,11 +299,15 @@ export function PhotoReview({
     if (k === 'escape') return moving ? setMoving(false) : leaving ? setLeaving(false) : close();
     if (view === 'one' && k === 'arrowright') step(1);
     else if (view === 'one' && k === 'arrowleft') step(-1);
+    else if (view === 'grid' && (k === 'arrowright' || k === 'pagedown'))
+      setPage((n) => Math.min(pages - 1, n + 1));
+    else if (view === 'grid' && (k === 'arrowleft' || k === 'pageup'))
+      setPage((n) => Math.max(0, n - 1));
     else if (k === 's') toggle('star');
     else if (k === 'h') toggle('hidden');
     else if (k === 'k') keep();
     else if (k === 'm') setMoving((m) => !m);
-    else if (k === 'g') setView((v) => (v === 'one' ? 'grid' : 'one'));
+    else if (k === 'g') view === 'one' ? toGrid() : setView('one');
     else if (k === 'a' && view === 'grid') setSelected(new Set(shown.map((p) => p.id)));
     else if (k === ' ' && view === 'one' && current) {
       e.preventDefault();
@@ -343,7 +367,7 @@ export function PhotoReview({
           <button
             className={view === 'grid' ? 'on' : ''}
             aria-pressed={view === 'grid'}
-            onClick={() => setView('grid')}
+            onClick={toGrid}
           >
             Grid
           </button>
@@ -370,9 +394,21 @@ export function PhotoReview({
             ‹
           </button>
           <figure className={will(current).hidden ? 'faded' : ''}>
-            {/* eslint-disable-next-line @next/next/no-img-element -- stored media, served as is */}
-            <img src={current.full} alt="" />
-            {marks(current)}
+            {/* A fixed stage: the thumbnail (already loaded) shows at once, the full photo replaces it
+                when it arrives, and nothing around it moves meanwhile. */}
+            <div className="rv-stage">
+              {/* eslint-disable-next-line @next/next/no-img-element -- stored media, served as is */}
+              <img className="rv-low" src={current.thumb} alt="" />
+              {/* eslint-disable-next-line @next/next/no-img-element -- stored media, served as is */}
+              <img
+                key={current.id}
+                className={`rv-full ${loaded === current.id ? 'in' : ''}`}
+                src={current.full}
+                alt=""
+                onLoad={() => setLoaded(current.id)}
+              />
+              {marks(current)}
+            </div>
             <figcaption>
               <label className="rv-pick">
                 <input
@@ -401,6 +437,22 @@ export function PhotoReview({
             >
               Select all
             </button>
+            {pages > 1 && (
+              <button
+                className="link-button"
+                onClick={() =>
+                  setSelected(
+                    (s) =>
+                      new Set([
+                        ...s,
+                        ...shown.slice(page * PAGE, page * PAGE + PAGE).map((p) => p.id),
+                      ]),
+                  )
+                }
+              >
+                Select page
+              </button>
+            )}
             <button className="link-button" onClick={() => setSelected(new Set())}>
               Select none
             </button>
@@ -417,7 +469,10 @@ export function PhotoReview({
                 <input
                   type="checkbox"
                   checked={onlyNew}
-                  onChange={(e) => setOnlyNew(e.target.checked)}
+                  onChange={(e) => {
+                    setOnlyNew(e.target.checked);
+                    setPage(0);
+                  }}
                 />{' '}
                 Only new
               </label>
@@ -425,26 +480,46 @@ export function PhotoReview({
             <span>{what}</span>
           </div>
           <div className="rv-grid">
-            {shown.map((p, n) => (
-              <button
-                key={p.id}
-                className={`rv-tile ${selected.has(p.id) ? 'on' : ''} ${will(p).hidden ? 'faded' : ''}`}
-                aria-pressed={selected.has(p.id)}
-                onClick={(e) => {
-                  select(p, n, e.shiftKey || ranging);
-                  setRanging(false);
-                }}
-                onDoubleClick={() => {
-                  setIndex(n);
-                  setView('one');
-                }}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element -- stored media, served as is */}
-                <img src={p.thumb} alt="" loading="lazy" />
-                {marks(p)}
-              </button>
-            ))}
+            {shown.slice(page * PAGE, page * PAGE + PAGE).map((p, k) => {
+              const n = page * PAGE + k;
+              return (
+                <button
+                  key={p.id}
+                  className={`rv-tile ${selected.has(p.id) ? 'on' : ''} ${will(p).hidden ? 'faded' : ''}`}
+                  aria-pressed={selected.has(p.id)}
+                  onClick={(e) => {
+                    select(p, n, e.shiftKey || ranging);
+                    setRanging(false);
+                  }}
+                  onDoubleClick={() => {
+                    setIndex(n);
+                    setView('one');
+                  }}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element -- stored media, served as is */}
+                  <img src={p.thumb} alt="" />
+                  {marks(p)}
+                </button>
+              );
+            })}
           </div>
+          {pages > 1 && (
+            <div className="rv-pages">
+              <button className="rv-act" disabled={page === 0} onClick={() => setPage(page - 1)}>
+                ‹ Previous
+              </button>
+              <span>
+                Page {page + 1} of {pages}
+              </span>
+              <button
+                className="rv-act"
+                disabled={page >= pages - 1}
+                onClick={() => setPage(page + 1)}
+              >
+                Next ›
+              </button>
+            </div>
+          )}
         </div>
       )}
 
