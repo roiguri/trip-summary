@@ -23,7 +23,7 @@ const entry = (title) => p.locator('.left .entry', { hasText: title }).first();
 await entry('Carmel Beach').locator('.pencil:visible').click();
 await p.getByRole('button', { name: 'Full screen' }).click();
 await p.waitForSelector('.photo-review');
-ok('an entry’s photos open full screen', (await p.locator('.rv-one img').count()) === 1);
+ok('an entry’s photos open full screen', (await p.locator('.rv-stage .rv-full').count()) === 1);
 
 // One photo at a time: S highlights, H hides (staged, not saved).
 await p.keyboard.press('s');
@@ -34,6 +34,25 @@ ok(
   saves.length === 0 && (await p.locator('.rv-commit').textContent()).includes('2 changes'),
   await p.locator('.rv-commit').textContent(),
 );
+
+// The one-photo view shows the thumbnail at once, the full photo over it once loaded.
+ok(
+  'the photo shows at once from its thumbnail',
+  ((await p.locator('.rv-stage .rv-low').getAttribute('src')) ?? '').endsWith('/thumb.jpg') ||
+    (await p.locator('.rv-stage .rv-low').count()) === 1,
+);
+
+// The grid: pages of nine.
+await p.getByRole('button', { name: 'Grid', exact: true }).click();
+ok(
+  'the grid shows nine at a time, in pages',
+  (await p.locator('.rv-tile').count()) === 9 &&
+    (await p.locator('.rv-pages').textContent()).includes('Page 1 of 2'),
+);
+await p.getByRole('button', { name: 'Next ›' }).click();
+ok('the next page has the rest', (await p.locator('.rv-tile').count()) === 7);
+await p.getByRole('button', { name: '‹ Previous' }).click();
+await p.getByRole('button', { name: 'One photo', exact: true }).click();
 
 // The grid: select a range, move them.
 await p.getByRole('button', { name: 'Grid', exact: true }).click();

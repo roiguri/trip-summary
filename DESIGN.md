@@ -172,6 +172,9 @@ From the first build; same preview page. These replace M2's inbox and refine H5.
   a mark on the photo; a bar counts them ("23 changes · 12 hidden · 5 highlighted · 6 moved") with
   Discard and Save all, which saves them together as one save. Leaving with unsaved decisions asks
   first (Save all and close, Discard and close, Stay); so does leaving the page.
+- The grid shows nine at a time (three by three), in pages: Previous / Next, ←/→ or Page Up/Down,
+  and Select page. In the one-photo view the thumbnail shows at once and the full photo replaces it
+  when loaded; the neighbours' full photos load ahead (Oct 5).
 - Keys on a computer: ←/→, S highlight, H hide, M move, K keep, G grid, A select all, Space select.
 
 ## Installable app (user decision, Oct 5)
