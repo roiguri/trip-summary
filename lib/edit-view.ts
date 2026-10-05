@@ -40,6 +40,16 @@ export type Finding = (
       end: string;
     }
   | { kind: 'unvisited'; entryId: number; title: string; date: string; time: string }
+  /** A stay's actual check-in and check-out from the Timeline (rule 8); null where it can't tell. */
+  | {
+      kind: 'stay';
+      entryId: number;
+      title: string;
+      date: string;
+      checkIn: string | null;
+      checkOut: string | null;
+      outDate: string;
+    }
   | {
       kind: 'stop';
       date: string;
@@ -130,6 +140,19 @@ export async function editDataFrom(
     list.flatMap((p): Finding[] => {
       const e = entries.get(p.entryId);
       if (!e) return [];
+      if (p.stay)
+        return [
+          {
+            kind: 'stay',
+            entryId: p.entryId,
+            title: e.title,
+            date: e.day,
+            checkIn: p.stay.checkIn ? p.start : null,
+            checkOut: p.stay.checkOut ? p.end : null,
+            outDate: p.stay.outDate,
+            setAside,
+          },
+        ];
       const base = { entryId: p.entryId, title: e.title, date: e.day, start: p.start, end: p.end };
       return [
         p.mode && p.mode !== e.mode
@@ -187,7 +210,7 @@ export async function editDataFrom(
     ];
   });
   const timeOf = (f: Finding) =>
-    f.kind === 'times' ? f.start : f.kind === 'stop' ? f.time : f.time;
+    f.kind === 'times' ? f.start : f.kind === 'stay' ? (f.checkIn ?? '') : f.time;
   const ordered = (list: Finding[]) =>
     list.sort((a, b) => a.date.localeCompare(b.date) || timeOf(a).localeCompare(timeOf(b)));
   // New photos: added to the trip and not kept since: by the photo itself ("Keep" marks each), or

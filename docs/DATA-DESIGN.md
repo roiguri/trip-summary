@@ -108,9 +108,13 @@ These replace the prototype `days` and `photos` tables.
    neither has no position and is shown without a pin **(proposed)**.
 7. **Precedence**: edits, then the plan (names, notes, categories), then the Timeline (times, mode),
    then photos (attached to whatever the first three produce).
-8. **Stays**: a stay keeps its booked check-in and check-out rather than the Timeline's times
-   **(open: the owner isn't sure this is right; to discuss before edit mode)**. Coming back to the
-   lodging on any day of the stay is part of the stay, never a suggestion **(proposed)**.
+8. **Stays** **(decided Oct 5)**: the Timeline's visits to the lodging during the stay (near its pin,
+   with its place ID, or near a visit the owner linked to it) give its actual check-in (the first
+   arrival on the check-in day, or before noon the next day) and check-out (the last departure on the
+   check-out day). Like other actual times, they're offered in edit mode as one finding ("Checked in
+   16:42 · checked out Thu 10:05 · Use · Ignore"); the booked times stay until the owner uses them.
+   Photos taken at the lodging on any night of the stay are the stay's. Coming back to the lodging
+   on any day of the stay is part of the stay, never a suggestion.
 
 Distances and times above are starting values to tune on real data. On the owner's real trip,
 150 m matched about two in five planned places, and 45 more had a visit the same day 150–500 m away;

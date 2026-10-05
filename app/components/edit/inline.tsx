@@ -20,8 +20,16 @@ export const findingKey = (f: Finding) =>
       ? `photos-${f.entryKey}`
       : `${f.kind}-${f.entryId}`;
 
-/** What accepting a finding sets: the Timeline's times, and for a leg its mode. */
+/** What accepting a finding sets: the Timeline's times, for a leg its mode, for a stay the actual
+ *  check-in and check-out it knows. */
 export function accept(f: Finding): EditChange[] {
+  if (f.kind === 'stay') {
+    const key = String(f.entryId);
+    return [
+      ...(f.checkIn ? [{ target: 'entry', key, field: 'start_time', value: f.checkIn }] : []),
+      ...(f.checkOut ? [{ target: 'entry', key, field: 'end_time', value: f.checkOut }] : []),
+    ];
+  }
   if (f.kind !== 'times' && f.kind !== 'mode') return [];
   const key = String(f.entryId);
   return [
@@ -132,6 +140,11 @@ export function FindingChip({
           </>
         )}
         {f.kind === 'unvisited' && <>No visit: fine as it is</>}
+        {f.kind === 'stay' && (
+          <>
+            Ignored: <s>{stayText(f)}</s>
+          </>
+        )}
         <button className="link-button" disabled={busy} onClick={() => save(bringBack(f))}>
           Bring back
         </button>
@@ -146,7 +159,8 @@ export function FindingChip({
         </b>
       )}
       {f.kind === 'unvisited' && <b>No visit found</b>}
-      {(f.kind === 'times' || f.kind === 'mode') && (
+      {f.kind === 'stay' && <b>{stayText(f)}</b>}
+      {(f.kind === 'times' || f.kind === 'mode' || f.kind === 'stay') && (
         <>
           <button
             className="pill-button small primary"
@@ -157,7 +171,9 @@ export function FindingChip({
                 done(
                   f.kind === 'mode'
                     ? 'Using the Timeline’s mode and times'
-                    : 'Using the Timeline’s times',
+                    : f.kind === 'stay'
+                      ? 'Using the actual check-in and check-out'
+                      : 'Using the Timeline’s times',
                   undoUse,
                 ),
               )
@@ -307,4 +323,17 @@ export function DoneChip({ d, act }: { d: Done; act: Act }) {
       </button>
     </span>
   );
+}
+
+const weekday = (date: string) =>
+  new Date(`${date}T12:00:00Z`).toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' });
+
+/** "Checked in 16:42 · checked out Thu 10:05", with only the sides the Timeline knows. */
+function stayText(f: Extract<Finding, { kind: 'stay' }>) {
+  return [
+    f.checkIn && `Checked in ${f.checkIn}`,
+    f.checkOut && `${f.checkIn ? 'checked' : 'Checked'} out ${weekday(f.outDate)} ${f.checkOut}`,
+  ]
+    .filter(Boolean)
+    .join(' · ');
 }
