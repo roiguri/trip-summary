@@ -323,7 +323,14 @@ function TimelineEntry({
             style={{ '--n': Math.min(entry.photos.length, 3) } as React.CSSProperties}
           >
             {entry.photos.slice(0, entry.type === 'photo' ? 1 : 3).map((p, i) => (
-              <img key={p.id} src={p.url} alt="" style={{ '--i': i } as React.CSSProperties} />
+              <img
+                key={p.id}
+                src={p.thumb ?? p.url}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                style={{ '--i': i } as React.CSSProperties}
+              />
             ))}
             {entry.photos.slice(0, entry.type === 'photo' ? 1 : 3).map(
               (p, i) =>

@@ -265,7 +265,7 @@ export function GhostCard({
         <span className="loose">
           {f.photos.slice(0, 4).map((p) => (
             // eslint-disable-next-line @next/next/no-img-element -- stored media, served as is
-            <img key={p.id} src={p.url} alt="" loading="lazy" />
+            <img key={p.id} src={p.thumb ?? p.url} alt="" loading="lazy" />
           ))}
         </span>
       )}

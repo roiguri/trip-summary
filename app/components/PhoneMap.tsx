@@ -73,7 +73,7 @@ export function PhoneMap({
       </div>
       {peek && (
         <button className="pin-card" onClick={() => onDetails(peek)}>
-          {photo && <img src={photo.url} alt="" />}
+          {photo && <img src={photo.thumb ?? photo.url} alt="" />}
           <span>
             <small>
               {KICKERS[peek.type]}

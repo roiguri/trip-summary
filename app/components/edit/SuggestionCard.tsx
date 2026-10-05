@@ -126,7 +126,7 @@ export function SuggestionCard({
         <div className="ed-grid">
           {finding.photos.slice(0, 6).map((p) => (
             // eslint-disable-next-line @next/next/no-img-element -- stored media, served as is
-            <img key={p.id} src={p.url} alt="" className="ed-photo-img" loading="lazy" />
+            <img key={p.id} src={p.thumb ?? p.url} alt="" className="ed-photo-img" loading="lazy" />
           ))}
         </div>
       )}

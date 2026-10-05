@@ -5,6 +5,7 @@ import { merge, type SegmentView, type Suggestion } from './merge/index.ts';
 import type { Entry, Photo, TransitMode, Trip } from './model.ts';
 import type { Store } from './store/index.ts';
 import { configuredLookup, placeNames, type NameLookup } from './google/places.ts';
+import { timer } from './timing.ts';
 
 /** A finding the owner set aside (DESIGN.md, "Edit mode, round 2", R1): shown only with "Show
  *  resolved", and each can be brought back. */
@@ -69,6 +70,8 @@ export type EditData = {
   hidden: { id: string; url: string; entryId: number | null; date: string; time: string }[];
   /** Photos added since last kept: shown with a NEW tag in the editor. */
   newPhotoIds: string[];
+  /** How long building this took, step by step (Server-Timing format), for finding what's slow. */
+  timing: string;
   /** The media ID of the owner's chosen cover, if any. */
   cover: string | null;
   /** Entry ID → the suggestion an added stop came from (its edits are kept under that key). */
@@ -87,6 +90,7 @@ export async function editView(
   tripId: string,
   lookup: NameLookup | null = configuredLookup(),
 ): Promise<{ trip: Trip; edit: EditData } | null> {
+  const t = timer();
   const [plan, segments, photos, edits] = await Promise.all([
     store.getPlan(tripId),
     store.listTimeline(tripId),
@@ -94,7 +98,9 @@ export async function editView(
     store.listEdits(tripId),
   ]);
   if (!plan) return null;
+  t.mark('read');
   const r = merge({ plan, segments, photos, edits });
+  t.mark('merge');
   const entries = new Map<number, Entry>();
   for (const d of r.trip.days)
     for (const e of d.entries)
@@ -130,6 +136,7 @@ export async function editView(
     ),
     lookup,
   );
+  t.mark('names');
   const fromSuggestions = (list: Suggestion[], setAside?: SetAside): Finding[] =>
     list.map((s) => ({
       placeName: s.placeId ? (names.get(s.placeId) ?? null) : null,
@@ -231,6 +238,7 @@ export async function editView(
       findings,
       setAside,
       newPhotoIds,
+      timing: t.header(),
       segments: r.segments,
       edited,
       hidden: r.hidden,

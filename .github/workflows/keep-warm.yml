@@ -1,0 +1,18 @@
+# Keeps the live site's server warm (docs/ARCHITECTURE.md, "Production"): Netlify's functions sleep
+# after a few idle minutes, and the next visit then waits seconds while one starts. A light request
+# every 10 minutes keeps one awake. The site's address is the repository variable SITE_URL (set in
+# the repository's settings, never in the code); without it, this does nothing.
+name: keep-warm
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+permissions: {}
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Ping the sign-in page
+        if: ${{ vars.SITE_URL != '' }}
+        run: curl -s -o /dev/null -w '%{http_code} %{time_total}s\n' --max-time 30 "${{ vars.SITE_URL }}/sign-in"

@@ -2,6 +2,7 @@ import { getStore } from '../../../../../../lib/store';
 import { editorOnly, editorReads } from '../../../../../../lib/auth/guard';
 import { pickerFor } from '../../../../../../lib/google/choose';
 import { copyNextPhotos, StageError } from '../../../../../../lib/import/stage';
+import { timer } from '../../../../../../lib/timing';
 
 // Where the copying stands, without copying: 404 when no photo import is copying (it was applied,
 // discarded, or the data is gone), so a browser forgets a job it remembers.
@@ -30,7 +31,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ tripId:
       status: 401,
     });
   try {
-    return Response.json(await copyNextPhotos(store, tripId, picker));
+    const t = timer();
+    const result = await copyNextPhotos(store, tripId, picker);
+    t.mark('copy');
+    return Response.json(result, { headers: { 'Server-Timing': t.header() } });
   } catch (e) {
     if (e instanceof StageError)
       return new Response(e.message, /expired/.test(e.message) ? { status: 401 } : { status: 409 });
