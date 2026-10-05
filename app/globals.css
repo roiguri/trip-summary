@@ -1729,6 +1729,11 @@ button:disabled {
 
 /* Phone. */
 @media (max-width: 899px) {
+  /* The desktop map and details column never shows on a phone, not even before the page knows it's
+     on one (the layout switches after loading): the phone has its own map and sheet. */
+  .right {
+    display: none;
+  }
   .header {
     height: 50px;
     padding: 0 12px 0 18px;
