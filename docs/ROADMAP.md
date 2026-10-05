@@ -78,7 +78,7 @@ Designed with mock options and agreed (`docs/VERIFICATION.md`, "Mobile"): a one-
 
 ## Enhancements (after the phases above)
 
-- **Google Places API** (next): place names for the Timeline's stops (instead of "a stop near …"), and searching for a different place for a suggestion. Until then, places are checked with "Open in Google Maps" (owner's decision, Oct 3). Needs an API key and billing on the Google Cloud project, within Google's free monthly allowance at this scale.
+- **Google Places API**: place names for unplanned stops, by the Timeline's place ID, are done (Oct 5; looked up once per place and cached). Still to come: searching for a different place for a suggestion. Until then, places are checked with "Open in Google Maps" (owner's decision, Oct 3). Needs an API key and billing on the Google Cloud project, within Google's free monthly allowance at this scale.
 - **A map of all trips**: a map view of every trip, as a second way to browse the home page (user decision, Oct 2: nice to have, at the end of the plan).
 
 ## Immediate next step

@@ -243,7 +243,10 @@ export function GhostCard({
   const s = f.suggestion;
   const maps = mapsLink(s);
   const what =
-    s.kind === 'visit' ? 'A stop you didn’t plan' : `A journey by ${MODE[s.mode ?? ''] ?? 'road'}`;
+    f.placeName ??
+    (s.kind === 'visit'
+      ? 'A stop you didn’t plan'
+      : `A journey by ${MODE[s.mode ?? ''] ?? 'road'}`);
   if (f.setAside)
     return (
       <span className={`ghost-card set-aside ${current ? 'current' : ''}`}>

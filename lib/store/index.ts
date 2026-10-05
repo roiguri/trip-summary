@@ -56,6 +56,31 @@ export function createStore(db: Firestore) {
       const snap = await db.collection('trips').orderBy('startDate', 'desc').get();
       return snap.docs.map((d) => d.data() as Trip);
     },
+    /** Cached place names by Google place ID (null: Google has none). Not trip data: shared. */
+    async getPlaceNames(ids: string[]): Promise<Map<string, string | null>> {
+      const out = new Map<string, string | null>();
+      for (let i = 0; i < ids.length; i += 100) {
+        const refs = ids.slice(i, i + 100).map((id) => db.collection('placeNames').doc(docId(id)));
+        if (!refs.length) continue;
+        const snaps = await db.getAll(...refs);
+        snaps.forEach((s, n) => {
+          if (s.exists) out.set(ids[i + n], (s.data()!.name as string | null) ?? null);
+        });
+      }
+      return out;
+    },
+    async putPlaceNames(names: Map<string, string | null>) {
+      const at = now();
+      await writeAll(
+        [...names].map(
+          ([id, name]) =>
+            [db.collection('placeNames').doc(docId(id)), { name, at }] as [
+              DocumentReference,
+              object,
+            ],
+        ),
+      );
+    },
     async getTrip(tripId: string): Promise<Trip | null> {
       return ((await trip(tripId).get()).data() as Trip | undefined) ?? null;
     },

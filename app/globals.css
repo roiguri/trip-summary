@@ -3249,6 +3249,11 @@ button.pill-button {
   background: #fffdfa;
   box-shadow: none;
 }
+.sg-name {
+  margin: 0;
+  font-size: 19px;
+  letter-spacing: -0.02em;
+}
 .sg-meta {
   margin: 0;
   font-size: 13px;
