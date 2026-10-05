@@ -174,10 +174,10 @@ From the first build; same preview page. These replace M2's inbox and refine H5.
 
 - Picked photos join the trip as soon as all are copied: no review step, no Apply. On a published
   trip viewers see them at once (the owner may revisit this).
-- Edit mode marks them: an entry that received photos gets "N new photos · Keep · Review" on the
-  timeline (a day's loose moments get one, under the first of them), counted in "to review" and
-  reached with Next. Keep stops marking them (with Undo); Review opens the entry's editor, where new
-  photos carry a NEW tag. A photo is new if it was added after the entry's (or the day's) last Keep.
+- Edit mode marks them: each entry or loose moment that received photos gets "N new photos · Keep
+  · Review" on the timeline, counting its own photos; counted in "to review" and reached with Next.
+  Keep marks those very photos as seen (with Undo); Review opens the editor, where new photos carry
+  a NEW tag. (Changed Oct 5: one chip per day for loose moments counted photos not shown beside it.)
 - The plan import keeps its review; the Timeline's findings stay in edit mode, as before.
 
 ## Name and top bar (user decisions, Oct 4)

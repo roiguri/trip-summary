@@ -44,16 +44,16 @@ export type Finding = (
       placeName: string | null;
     }
   | { kind: 'hidden'; entryId: number; title: string; date: string; time: string }
-  /** Photos added since the owner last kept this entry's (or, for loose moments, this day's)
-   *  photos (DESIGN.md, "Photos without review"). `entryId` null: the day's loose moments. */
+  /** Photos added and not yet kept, on one entry or loose moment (DESIGN.md, "Photos without
+   *  review"). `entryKey`: the drawn entry's ID; `entryId`: a planned entry's, else null. */
   | {
       kind: 'photos';
       entryId: number | null;
+      entryKey: string;
       date: string;
       time: string;
       count: number;
-      /** When the owner last kept them, for Undo. */
-      seen: string | null;
+      photoIds: string[];
     }
 ) & { setAside?: SetAside };
 
@@ -167,9 +167,15 @@ export async function editView(
     f.kind === 'times' ? f.start : f.kind === 'stop' ? f.time : f.time;
   const ordered = (list: Finding[]) =>
     list.sort((a, b) => a.date.localeCompare(b.date) || timeOf(a).localeCompare(timeOf(b)));
-  // New photos: added after the entry's (or the day's, for loose moments) last "Keep".
+  // New photos: added to the trip and not kept since: by the photo itself ("Keep" marks each), or
+  // by an older keep of its whole entry or day.
   const addedAt = new Map(photos.map((p) => [p.mediaId, p.addedAt ?? '']));
-  const seenOf = (target: 'entry' | 'day', key: string) => {
+  const keptPhotos = new Set(
+    edits
+      .filter((e) => e.target === 'photo' && e.field === 'seen' && e.value === true)
+      .map((e) => e.key),
+  );
+  const keptAt = (target: 'entry' | 'day', key: string) => {
     const v = edits.find(
       (e) => e.target === target && e.key === key && e.field === 'photosSeen',
     )?.value;
@@ -177,43 +183,29 @@ export async function editView(
   };
   const newPhotoIds: string[] = [];
   const photoFindings: Finding[] = [];
-  for (const d of r.trip.days) {
-    const looseNew: string[] = [];
-    let looseTime = '';
+  for (const d of r.trip.days)
     for (const e of d.entries) {
       if (e.stay?.role === 'checkout') continue;
-      const looseEntry = e.type === 'photo' || e.type === 'cluster';
-      if (!looseEntry && !/^i\d+$/.test(e.id)) continue;
-      const seen = looseEntry ? seenOf('day', d.date) : seenOf('entry', e.id.slice(1));
+      const loose = e.type === 'photo' || e.type === 'cluster';
+      const planned = /^i\d+$/.test(e.id);
+      if (!loose && !planned) continue;
+      const whole = loose ? keptAt('day', d.date) : keptAt('entry', e.id.slice(1));
       const fresh = e.photos.filter((p) => {
         const at = addedAt.get(p.id);
-        return !!at && (!seen || at > seen);
+        return !!at && !keptPhotos.has(p.id) && (!whole || at > whole);
       });
       if (!fresh.length) continue;
       newPhotoIds.push(...fresh.map((p) => p.id));
-      if (looseEntry) {
-        looseNew.push(...fresh.map((p) => p.id));
-        looseTime ||= e.time;
-      } else
-        photoFindings.push({
-          kind: 'photos',
-          entryId: Number(e.id.slice(1)),
-          date: d.date,
-          time: e.time,
-          count: fresh.length,
-          seen,
-        });
-    }
-    if (looseNew.length)
       photoFindings.push({
         kind: 'photos',
-        entryId: null,
+        entryId: planned ? Number(e.id.slice(1)) : null,
+        entryKey: e.id,
         date: d.date,
-        time: looseTime,
-        count: looseNew.length,
-        seen: seenOf('day', d.date),
+        time: e.time,
+        count: fresh.length,
+        photoIds: fresh.map((p) => p.id),
       });
-  }
+    }
   const findings = ordered([
     ...photoFindings,
     ...fromProposals(r.proposals),
