@@ -161,6 +161,19 @@ From the first build; same preview page. These replace M2's inbox and refine H5.
 - An answer in edit mode (Use, Ignore, Fine as it is, Accept the day's) shows "Saving…" until the
   page has the change, then a ✓ chip on the entry saying what was done, with Undo, while editing.
 
+## Photo review (user decisions, Oct 5)
+
+- Photos open full screen in edit mode: from an entry's photo grid (Full screen), a "N new photos"
+  chip's Review, or "Review new photos" in the edit-mode bar. Two views in the same window: one photo
+  (arrows, swipe) and a grid of large thumbnails to select many (click, shift-click a range, select
+  all, only new).
+- Every decision is staged, not saved: ★ Highlight, Hide or Show again, Move to… (the day's entries,
+  loose moments, another day), Show on the journey, Keep (new photos), Mark all as seen. Each shows as
+  a mark on the photo; a bar counts them ("23 changes · 12 hidden · 5 highlighted · 6 moved") with
+  Discard and Save all, which saves them together as one save. Leaving with unsaved decisions asks
+  first (Save all and close, Discard and close, Stay); so does leaving the page.
+- Keys on a computer: ←/→, S highlight, H hide, M move, K keep, G grid, A select all, Space select.
+
 ## Installable app (user decision, Oct 5)
 
 - Afterglow can be installed from the browser (Add to Home Screen on phones, Install on desktop): it

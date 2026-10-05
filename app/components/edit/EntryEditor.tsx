@@ -1,5 +1,6 @@
 'use client';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
+import { ReviewContext } from './PhotoReview';
 import type { Day, Entry, TransitMode } from '../../../lib/data';
 import type { EditData } from '../../../lib/edit-view';
 import { KICKERS } from '../../lib/format';
@@ -30,6 +31,7 @@ export function EntryEditor({
   onClose: () => void;
 }) {
   const { save, busy, error } = useSave(edit.tripId);
+  const openReview = useContext(ReviewContext);
   // A loose moment or cluster has only its photos to edit ("Attach to…").
   const loose = entry.type === 'photo' || entry.type === 'cluster';
   const id = loose ? NaN : num(entry.id);
@@ -299,10 +301,27 @@ export function EntryEditor({
 
       {photos.length > 0 && (
         <div className="ed-photos">
-          <b>
-            Photos · {entry.photos.length}
-            {hidden.length ? ` (+${hidden.length} hidden)` : ''}
-          </b>
+          <div className="ed-photos-head">
+            <b>
+              Photos · {entry.photos.length}
+              {hidden.length ? ` (+${hidden.length} hidden)` : ''}
+            </b>
+            {openReview && (
+              <button
+                className="link-button"
+                onClick={() =>
+                  openReview({
+                    title: entry.title || 'Loose moment',
+                    photoIds: photos.map((p) => p.id),
+                    selected: picked,
+                    view: picked.length ? 'grid' : 'one',
+                  })
+                }
+              >
+                Full screen
+              </button>
+            )}
+          </div>
           <div className="ed-grid">
             {photos.map((p) => (
               <button

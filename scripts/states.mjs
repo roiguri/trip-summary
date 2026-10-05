@@ -147,6 +147,41 @@ export const STATES = {
   'edit-next': async (p) => {
     for (let i = 0; i < 3; i++) await p.getByRole('button', { name: 'Next finding' }).click();
   },
+  'edit-review': async (p) => {
+    await p
+      .locator('.left .entry', { hasText: 'Carmel Beach' })
+      .first()
+      .locator('.pencil:visible')
+      .click();
+    await p.getByRole('button', { name: 'Full screen' }).click();
+    await p.keyboard.press('s');
+  },
+  'edit-review-grid': async (p) => {
+    await p
+      .locator('.left .entry', { hasText: 'Carmel Beach' })
+      .first()
+      .locator('.pencil:visible')
+      .click();
+    await p.getByRole('button', { name: 'Full screen' }).click();
+    await p.getByRole('button', { name: 'Grid', exact: true }).click();
+    await p.locator('.rv-tile').nth(1).click();
+    await p
+      .locator('.rv-tile')
+      .nth(3)
+      .click({ modifiers: ['Shift'] });
+    await p.keyboard.press('h');
+  },
+  'phone-edit-review-grid': async (p) => {
+    await p
+      .locator('.left .entry', { hasText: 'Carmel Beach' })
+      .first()
+      .locator('.pencil:visible')
+      .click();
+    await p.getByRole('button', { name: 'Full screen' }).click();
+    await p.getByRole('button', { name: 'Grid', exact: true }).click();
+    await p.locator('.rv-tile').nth(0).click();
+    await p.keyboard.press('s');
+  },
   'phone-edit-timeline': (p) => p.evaluate(() => document.querySelector('.left')?.scrollTo(0, 500)),
   highlight: (p) => scrollToDay(p, '2026-05-15', 300),
   'home-empty': async () => {},
