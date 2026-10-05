@@ -161,6 +161,15 @@ From the first build; same preview page. These replace M2's inbox and refine H5.
 - An answer in edit mode (Use, Ignore, Fine as it is, Accept the day's) shows "Saving…" until the
   page has the change, then a ✓ chip on the entry saying what was done, with Undo, while editing.
 
+## Installable app (user decision, Oct 5)
+
+- Afterglow can be installed from the browser (Add to Home Screen on phones, Install on desktop): it
+  opens full-screen with the sun icon, its bars in the rail green. Icons are drawn from the mark by
+  `scripts/make-icons.mjs` (rounded, maskable for Android, opaque for iPhones).
+- Nothing works offline (no service worker), by decision; offline reading is for a later round.
+- On an iPhone, an installed app keeps its own sign-in, apart from Safari's, so it needs signing in
+  once inside it.
+
 ## Photos without review (user decision, Oct 4)
 
 - Picked photos join the trip as soon as all are copied: no review step, no Apply. On a published
