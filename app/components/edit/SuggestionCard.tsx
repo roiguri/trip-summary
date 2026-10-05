@@ -55,7 +55,8 @@ export function SuggestionCard({
   const { save, busy, error } = useSave(edit.tripId);
   const s = finding.suggestion;
   const [choice, setChoice] = useState<'add' | 'link'>('add');
-  const [name, setName] = useState('');
+  // Google's name for the place, when known, to keep or change.
+  const [name, setName] = useState(finding.placeName ?? '');
   const [times, setTimes] = useState<'keep' | 'other' | 'none'>('keep');
   const [from, setFrom] = useState(s.time);
   const [to, setTo] = useState(s.endTime);
@@ -100,6 +101,7 @@ export function SuggestionCard({
           Close
         </button>
       </div>
+      {finding.placeName && <h3 className="sg-name">{finding.placeName}</h3>}
       {at && <MiniMap at={at} near={nearest ? [nearest.e.lat!, nearest.e.lng!] : null} />}
       <p className="sg-meta">
         <b>

@@ -4,6 +4,7 @@
 import { merge, type SegmentView, type Suggestion } from './merge/index.ts';
 import type { Entry, Photo, TransitMode, Trip } from './model.ts';
 import type { Store } from './store/index.ts';
+import { configuredLookup, placeNames, type NameLookup } from './google/places.ts';
 
 /** A finding the owner set aside (DESIGN.md, "Edit mode, round 2", R1): shown only with "Show
  *  resolved", and each can be brought back. */
@@ -39,6 +40,8 @@ export type Finding = (
       /** The first few photos taken there (all a card shows), and how many there are. */
       photos: Photo[];
       photoCount: number;
+      /** Google's name for the place (Places API, by its place ID), when known. */
+      placeName: string | null;
     }
   | { kind: 'hidden'; entryId: number; title: string; date: string; time: string }
   /** Photos added since the owner last kept this entry's (or, for loose moments, this day's)
@@ -82,6 +85,7 @@ const span = (e: { time: string; end_time: string | null }) =>
 export async function editView(
   store: Store,
   tripId: string,
+  lookup: NameLookup | null = configuredLookup(),
 ): Promise<{ trip: Trip; edit: EditData } | null> {
   const [plan, segments, photos, edits] = await Promise.all([
     store.getPlan(tripId),
@@ -118,8 +122,17 @@ export async function editView(
         ? [{ kind: 'unvisited', entryId: id, title: e.title, date: e.day, time: span(e), setAside }]
         : [];
     });
+  // Names for unplanned stops, by Google place ID: cached, a few looked up per view.
+  const names = await placeNames(
+    store,
+    [...r.suggestions, ...r.setAside.dismissed].flatMap((s) =>
+      s.kind === 'visit' && s.placeId ? [s.placeId] : [],
+    ),
+    lookup,
+  );
   const fromSuggestions = (list: Suggestion[], setAside?: SetAside): Finding[] =>
     list.map((s) => ({
+      placeName: s.placeId ? (names.get(s.placeId) ?? null) : null,
       kind: 'stop',
       date: s.date,
       time: s.time,
