@@ -103,14 +103,27 @@ ok(
 );
 await p.goto(`${BASE}/trips/${TRIP}`);
 await p.waitForLoadState('networkidle');
+// Photos load as they come near the screen (lazily): scroll through the journey first.
+await p.evaluate(async () => {
+  const root = document.querySelector('.left');
+  for (let y = 0; y < root.scrollHeight; y += 500) {
+    root.scrollTo(0, y);
+    await new Promise((r) => setTimeout(r, 120));
+  }
+});
+await p.waitForLoadState('networkidle');
 const imgs = await p
   .locator('.left img')
   .evaluateAll((els) =>
     els.map((e) => ({ src: e.getAttribute('src'), ok: e.complete && e.naturalWidth > 0 })),
   );
 ok(
-  'the journey shows the copied photos, from /media',
-  imgs.length > 0 && imgs.every((i) => i.src.startsWith(`/media/trips/${TRIP}/media/`) && i.ok),
+  'the journey shows the copied photos, as thumbnails from /media',
+  imgs.length > 0 &&
+    imgs.every(
+      (i) =>
+        i.src.startsWith(`/media/trips/${TRIP}/media/`) && i.src.endsWith('/thumb.jpg') && i.ok,
+    ),
   `${imgs.filter((i) => !i.ok).length} broken of ${imgs.length}`,
 );
 const thumb = imgs[0].src;

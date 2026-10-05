@@ -110,7 +110,7 @@ export function DetailPanel({
                     key={p.id}
                     onClick={() => onPickPhoto(p)}
                   >
-                    <img src={p.url} alt={p.caption} />
+                    <img src={p.thumb ?? p.url} alt={p.caption} loading="lazy" decoding="async" />
                     <span>{p.caption}</span>
                   </button>
                 ))}

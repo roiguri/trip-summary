@@ -495,6 +495,7 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
       photo_id: n + 1,
       entry_id: entry,
       url: mediaUrl((p.kind === 'video' ? p.files.still : p.files.display) ?? ''),
+      ...(p.files.thumb ? { thumb: mediaUrl(p.files.thumb) } : {}),
       caption: typeof caption === 'string' ? caption : '',
       ...(use('photo', p.mediaId, 'highlighted') === true ? { highlighted: true as const } : {}),
       lat,
@@ -602,9 +603,10 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
       const rank = (id: string) => (order.includes(id) ? order.indexOf(id) : order.length);
       e.photos = [...e.photos].sort((a, b) => rank(a.id) - rank(b.id));
     }
+  // Shown only as small tiles in edit mode: the thumbnail where there is one.
   const hidden = hiddenPhotos.map((p) => ({
     id: p.id!,
-    url: p.url,
+    url: p.thumb ?? p.url,
     entryId: p.entry_id,
     date: p.date,
     time: p.time,

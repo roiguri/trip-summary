@@ -68,7 +68,7 @@ export function EntryEditor({
   const photos = [
     ...entry.photos.map((p) => ({
       id: p.id,
-      url: p.url,
+      url: p.thumb ?? p.url,
       time: p.time,
       hidden: false,
       star: !!p.highlighted,

@@ -11,6 +11,8 @@ export type Photo = {
   time: string;
   /** One of the owner's favourite photos (DESIGN.md, "Edit mode, round 2", PH1). */
   highlighted?: true;
+  /** A small version (about 400px) for cards and grids; `url` is the full one, for the viewer. */
+  thumb?: string;
 };
 export type Entry = {
   id: string;

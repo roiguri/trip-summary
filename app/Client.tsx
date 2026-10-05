@@ -370,6 +370,7 @@ export default function Client({
 
   return (
     <main
+      data-timing={edit?.timing}
       className={`shell ${collapsed && !edit ? 'collapsed' : ''} ${bar || edit ? 'with-bar' : ''} ${edit ? 'editing' : ''}`}
       style={
         {
