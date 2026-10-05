@@ -3256,6 +3256,119 @@ button.pill-button {
   background: #fffdfa;
   box-shadow: none;
 }
+.mini-pin.visit {
+  background: #3f8f7f;
+  box-shadow: 0 0 0 4px #3f8f7f40;
+}
+/* The place window (DESIGN.md, "Place window"): it takes the editor card's place. */
+.place-map {
+  height: 260px;
+  overflow: hidden;
+  border-radius: 12px;
+  cursor: crosshair;
+}
+.place-map .mini-pin {
+  cursor: grab;
+}
+.pw-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  margin: 0;
+  font-size: 11px;
+  color: #5d6b62;
+}
+.pw-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.pw-legend .mini-pin {
+  width: 10px;
+  height: 10px;
+  box-shadow: none;
+}
+.pw-legend small {
+  width: 100%;
+  color: #7f8c84;
+}
+.pw-list {
+  display: grid;
+  gap: 2px;
+  padding: 8px;
+  border: 1px solid #e3e8df;
+  border-radius: 12px;
+}
+.pw-list > small {
+  padding: 2px 4px 4px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: #8b9a8d;
+}
+.pw-list button {
+  display: grid;
+  min-width: 0;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 9px;
+  background: none;
+  font-size: 13px;
+  text-align: left;
+  color: #26382e;
+}
+.pw-list button:hover,
+.pw-list button.on {
+  background: #f3f6ef;
+}
+.pw-list button.on {
+  box-shadow: inset 0 0 0 1.5px #3f5c4b;
+}
+.pw-list button span {
+  overflow: hidden;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #7f8c84;
+}
+.pw-list button:focus-visible {
+  outline: 2px solid #b0734f;
+  outline-offset: 1px;
+}
+.pw-wait {
+  padding: 4px;
+  font-size: 12px;
+  color: #7f8c84;
+}
+.pw-chosen {
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #eef4ea;
+  font-size: 13px;
+}
+.pw-chosen small {
+  color: #5d6b62;
+}
+.pw-chosen .acts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+/* An entry's or a stop's place, with a way to change it. */
+.ed-place {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  font-size: 12px;
+}
+.ed-place small {
+  color: #7f8c84;
+}
 .sg-name {
   margin: 0;
   font-size: 19px;

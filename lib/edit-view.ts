@@ -5,6 +5,7 @@ import {
   merge,
   type MergeInput,
   type MergeResult,
+  type PlacePoint,
   type SegmentView,
   type Suggestion,
 } from './merge/index.ts';
@@ -87,6 +88,11 @@ export type EditData = {
   /** Entry ID → the fields the owner has changed, for "Undo my edits". */
   edited: Record<string, string[]>;
   hidden: { id: string; url: string; entryId: number | null; date: string; time: string }[];
+  /** Each located planned entry's Google place and position as used (the owner's, else the plan's),
+   *  and where entries (by ID) and stops (by key) were before the owner chose their place: for the
+   *  place window (DESIGN.md, "Place window"). */
+  entryPlaces: Record<string, PlacePoint>;
+  placeOverrides: { entries: Record<string, PlacePoint>; suggestions: Record<string, PlacePoint> };
   /** Photos added since last kept: shown with a NEW tag in the editor. */
   newPhotoIds: string[];
   /** How long building this took, step by step (Server-Timing format), for finding what's slow. */
@@ -278,6 +284,8 @@ export async function editDataFrom(
     findings,
     setAside,
     newPhotoIds,
+    entryPlaces: r.entryPlaces,
+    placeOverrides: r.placeOverrides,
     timing: t.header(),
     segments: r.segments,
     edited,

@@ -115,6 +115,12 @@ These replace the prototype `days` and `photos` tables.
    16:42 · checked out Thu 10:05 · Use · Ignore"); the booked times stay until the owner uses them.
    Photos taken at the lodging on any night of the stay are the stay's. Coming back to the lodging
    on any day of the stay is part of the stay, never a suggestion.
+9. **The owner's place** **(decided Oct 5)**: a place chosen in the place window (DESIGN.md, "Place
+   window") gives an entry its Google place ID and position before anything is matched, so the
+   visit it matches, a stay's visits, its pin and its Google Maps link all follow it; a pin placed by
+   hand has no place ID. For an unplanned stop it sets the stop's place and position (and so its name,
+   its link, and the entry it becomes when added). The plan's and the Timeline's own are kept, for
+   the window to show and for undo.
 
 Distances and times above are starting values to tune on real data. On the owner's real trip,
 150 m matched about two in five planned places, and 45 more had a visit the same day 150–500 m away;

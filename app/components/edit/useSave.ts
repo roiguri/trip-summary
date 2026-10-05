@@ -8,7 +8,7 @@ export type EditChange = {
   target: string;
   key: string;
   field: string;
-  value?: string | boolean | null;
+  value?: string | number | boolean | null;
 };
 
 /** A save's answer: what changed, from the merge the save ran (the edits route). */
