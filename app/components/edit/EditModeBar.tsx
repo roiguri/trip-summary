@@ -11,6 +11,8 @@ export function EditModeBar({
   onStep,
   showSetAside,
   onShowSetAside,
+  newPhotos,
+  onReviewNew,
 }: {
   tripId: string;
   status: 'draft' | 'published';
@@ -21,6 +23,9 @@ export function EditModeBar({
   onStep: (by: 1 | -1) => void;
   showSetAside: boolean;
   onShowSetAside: (on: boolean) => void;
+  /** How many photos are new, to review them all full screen. */
+  newPhotos: number;
+  onReviewNew: () => void;
 }) {
   return (
     <div className="editor-bar">
@@ -61,6 +66,13 @@ export function EditModeBar({
         </label>
       )}
       {status === 'published' && <span className="bar-hint long">Viewers see changes at once</span>}
+      {newPhotos > 0 && (
+        <button className="pill-button small" onClick={onReviewNew}>
+          <span className="long">Review new photos · </span>
+          {newPhotos}
+          <span className="short"> new</span>
+        </button>
+      )}
       <span className="bar-space" />
       <a className="pill-button small" href="?view=viewer">
         Preview as a viewer

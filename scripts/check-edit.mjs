@@ -297,7 +297,7 @@ ok(
 const photoCount = async (title) => {
   await open(title);
   const n = Number(
-    (await p.locator('.ed-photos > b').first().textContent()).match(/\d+/)?.[0] ?? 0,
+    (await p.locator('.ed-photos-head b').first().textContent()).match(/\d+/)?.[0] ?? 0,
   );
   await p.getByRole('button', { name: 'Close' }).click();
   return n;
