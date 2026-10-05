@@ -128,6 +128,8 @@ export type Journal = {
   unvisited: number[];
   orphanEdits: Edit[];
   builtAt: string;
+  /** The journal's format (JOURNAL_VERSION in lib/journal.ts): an older one is rebuilt on reading. */
+  version?: number;
 };
 
 export type Role = 'editor' | 'viewer';

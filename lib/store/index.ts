@@ -1,5 +1,6 @@
 // Every read and write of the app's data goes through here (docs/ARCHITECTURE.md, "Rules that keep it
 // portable"): moving off Firebase means rewriting this module, not the app.
+import { createHash } from 'node:crypto';
 import { adminApp } from '../firebase-admin.ts';
 import { getFirestore, type Firestore, type DocumentReference } from 'firebase-admin/firestore';
 import type {
@@ -24,6 +25,9 @@ export type * from './types.ts';
 const BATCH = 400;
 /** A document holds at most 1 MiB; refuse well before, with a clear message. */
 const MAX_DOC_BYTES = 900_000;
+/** A short fingerprint of a stored value, to tell whether it changed since it was last written. */
+const contentHash = (value: unknown) =>
+  createHash('sha256').update(JSON.stringify(value)).digest('base64url').slice(0, 22);
 
 const now = () => new Date().toISOString();
 /** Document IDs can't contain a slash; every key we store is checked rather than escaped. */
@@ -243,42 +247,96 @@ export function createStore(db: Firestore) {
         .doc(editId(target, key, field))
         .delete();
     },
+    /** Several edits written together (batched): set, or removed when `value` is undefined. */
+    async applyEdits(
+      tripId: string,
+      edits: (Omit<Edit, 'at' | 'value'> & { value?: Edit['value'] })[],
+    ) {
+      const col = sub(tripId, 'edits');
+      const at = now();
+      await writeAll(
+        edits.map((e) => [
+          col.doc(editId(e.target, e.key, e.field)),
+          e.value === undefined ? null : ({ ...e, at } as Edit),
+        ]) as [DocumentReference, object | null][],
+      );
+    },
     async listEdits(tripId: string): Promise<Edit[]> {
       return list<Edit>(tripId, 'edits');
     },
 
-    /** Replaces the trip's journal; days no longer in it are removed. */
+    /** Replaces the trip's journal; days no longer in it are removed. Only what changed is written:
+     *  each day's content hash is kept in the meta, and a day whose hash is the same isn't rewritten
+     *  (an edit that changes no day, like keeping new photos, writes just the meta). */
     async putJournal(tripId: string, j: Journal) {
       const col = sub(tripId, 'journal');
       const { days, ...meta } = j.trip;
-      const dayIds = new Set(days.map((d) => `day-${d.date}`));
-      const old = await col.select().get();
+      const before = (await col.doc('meta').get()).data() as
+        { dates?: string[]; hashes?: Record<string, string>; reviewHash?: string } | undefined;
+      const hashes = Object.fromEntries(days.map((d) => [d.date, contentHash(d)]));
+      const review = {
+        suggestions: j.suggestions,
+        proposals: j.proposals,
+        unvisited: j.unvisited,
+        orphanEdits: j.orphanEdits,
+      };
+      const reviewHash = contentHash(review);
+      const dates = new Set(days.map((d) => d.date));
       await writeAll([
-        ...old.docs
-          .filter((d) => d.id.startsWith('day-') && !dayIds.has(d.id))
-          .map((d) => [d.ref, null] as [DocumentReference, null]),
-        ...days.map((d) => [col.doc(docId(`day-${d.date}`)), d] as [DocumentReference, object]),
+        ...(before?.dates ?? [])
+          .filter((d) => !dates.has(d))
+          .map((d) => [col.doc(docId(`day-${d}`)), null] as [DocumentReference, null]),
+        ...days
+          .filter((d) => before?.hashes?.[d.date] !== hashes[d.date])
+          .map((d) => [col.doc(docId(`day-${d.date}`)), d] as [DocumentReference, object]),
+        ...(before?.reviewHash === reviewHash
+          ? []
+          : [[col.doc('review'), review] as [DocumentReference, object]]),
+        // Written last: a reader that finds the meta finds every day it lists.
         [
-          col.doc('review'),
+          col.doc('meta'),
           {
-            suggestions: j.suggestions,
-            proposals: j.proposals,
-            unvisited: j.unvisited,
-            orphanEdits: j.orphanEdits,
+            ...meta,
+            dates: days.map((d) => d.date),
+            builtAt: j.builtAt,
+            version: j.version ?? 1,
+            hashes,
+            reviewHash,
           },
         ],
-        // Written last: a reader that finds the meta finds every day it lists.
-        [col.doc('meta'), { ...meta, dates: days.map((d) => d.date), builtAt: j.builtAt }],
       ]);
+    },
+    /** What edit mode needs, as computed by the save that built the journal `builtAt` (a separate
+     *  document, so viewers never read it). Too large to store: removed, and edit mode merges fresh. */
+    async putEditCache(tripId: string, builtAt: string, data: object) {
+      const ref = sub(tripId, 'editCache').doc('current');
+      const body = JSON.stringify(data);
+      if (body.length > MAX_DOC_BYTES) await ref.delete();
+      else await ref.set({ builtAt, body });
+    },
+    async getEditCache(tripId: string): Promise<{ builtAt: string; data: unknown } | null> {
+      const d = (await sub(tripId, 'editCache').doc('current').get()).data() as
+        { builtAt: string; body: string } | undefined;
+      return d ? { builtAt: d.builtAt, data: JSON.parse(d.body) } : null;
     },
     async getJournal(tripId: string): Promise<Journal | null> {
       const snap = await sub(tripId, 'journal').get();
       const docs = new Map(snap.docs.map((d) => [d.id, d.data()]));
       const meta = docs.get('meta');
       if (!meta) return null;
-      const { dates, builtAt, ...trip } = meta as Journal['trip'] & {
+      const {
+        dates,
+        builtAt,
+        version,
+        hashes: _h,
+        reviewHash: _r,
+        ...trip
+      } = meta as Journal['trip'] & {
         dates: string[];
         builtAt: string;
+        version?: number;
+        hashes?: unknown;
+        reviewHash?: unknown;
       };
       const review = (docs.get('review') ?? {}) as Partial<Journal>;
       return {
@@ -291,6 +349,7 @@ export function createStore(db: Firestore) {
         unvisited: review.unvisited ?? [],
         orphanEdits: review.orphanEdits ?? [],
         builtAt,
+        version: version ?? 1,
       };
     },
 
