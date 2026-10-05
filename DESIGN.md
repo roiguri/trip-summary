@@ -191,6 +191,21 @@ Options: https://claude.ai/artifact/Ww8XTreh6aejD3rgKScwMv (names), https://clau
   they move into the menu. There are no Wishlist or Places links until those pages exist.
 - The browser tab shows "Afterglow" and the sun as its icon.
 
+## Place window (user decision, Oct 5)
+
+- Edit mode can set where an entry (a place or a stay) or an unplanned stop really was: "Place ·
+  Change" in the entry's editor, "Which place was this? · Choose" on a stop's card.
+- The window takes the editor card's place (in the right column under the map; in the sheet on a
+  phone), so the journey stays in view and no overlay is added: a map with the plan's pin, where the
+  Timeline put the visit (green) and the chosen place (copper, draggable); Google's places nearby
+  (name, type, distance), around where the owner actually was; a search biased to that area; or a pin
+  placed by hand (click the map or drag), with no Google place. "Use this place" saves it.
+- For an entry, "Keep the plan's name" or "Use Google's name"; for a stop, the chosen name becomes its
+  heading and fills the add form. "Back to the plan's place" (or the Timeline's) and "Undo my edits"
+  undo it.
+- The chosen place is what matching, the stay's visits, the pin and the Google Maps link use (merge
+  rule 9).
+
 ## Exact sampled backgrounds and remaining gaps
 
 The locked reference background is RGB (255,253,250), `#fffdfa`, sampled at (10,110), (800,110) and (10,500) across the whole, place and geometry captures. The large card interior in the locked whole/place captures is `#fffdf8` (255,253,248); the implementation sets those tokens explicitly. Recheck these pixels after a build. Remaining gaps: substitute/reused photos are not the original images and may not match captions; reference PNGs do not disclose an exact font binary (Arial/Helvetica family is inferred); the dotted multi-day end bend is still visually subtle rather than the reference's more pronounced curve.

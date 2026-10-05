@@ -352,6 +352,103 @@ ok(
   ),
 );
 
+// The place window (DESIGN.md, "Place window"): an entry's place, chosen from Google's places nearby
+// (the mock on the emulators), keeping the plan's name; then back to the plan's.
+const placeLine = () => p.locator('.editor .ed-place small').first().textContent();
+await open('Point Lobos State Natural Reserve');
+ok('an entry shows where its place comes from', (await placeLine()) === 'From the plan');
+await p.locator('.editor .ed-place').getByRole('button', { name: 'Change' }).click();
+await p.waitForSelector('.place-window .pw-list button[role="listitem"]');
+ok(
+  'the place window lists places nearby, with their type and distance',
+  (await p.locator('.place-window .pw-list[aria-label="Places nearby"] button').count()) >= 3 &&
+    /· \d+ (m|km)/.test(
+      (await p
+        .locator('.place-window .pw-list[aria-label="Places nearby"] button span')
+        .first()
+        .textContent()) ?? '',
+    ),
+);
+await p.locator('.place-window .pw-list button', { hasText: 'Harbour Lookout' }).click();
+await p.getByRole('button', { name: 'Use this place' }).click();
+ok(
+  'choosing a place keeps the plan’s name and records the choice',
+  (await until(
+    () =>
+      document.querySelector('.editor .ed-place small')?.textContent ===
+      'Chosen in the place window',
+  )) &&
+    (await p.locator('.editor[aria-label="Edit Point Lobos State Natural Reserve"]').count()) === 1,
+);
+await p.locator('.editor .ed-place').getByRole('button', { name: 'Change' }).click();
+await p.getByRole('button', { name: 'Back to the plan’s place' }).click();
+ok(
+  'and it can go back to the plan’s place',
+  await until(
+    () => document.querySelector('.editor .ed-place small')?.textContent === 'From the plan',
+  ),
+);
+await p.getByRole('button', { name: 'Close' }).click();
+
+// With Google's name: the entry is renamed on the journey; Undo my edits restores it.
+await open('Lovers Point Park');
+await p.locator('.editor .ed-place').getByRole('button', { name: 'Change' }).click();
+await p.waitForSelector('.place-window .pw-list button[role="listitem"]');
+await p.locator('.place-window .pw-list button', { hasText: 'Old Temple' }).click();
+await p.getByRole('radio', { name: 'Use Google’s name' }).click();
+await p.getByRole('button', { name: 'Use this place' }).click();
+ok(
+  'with Google’s name, the entry takes it on the journey',
+  await until(() =>
+    [...document.querySelectorAll('.left .entry')].some((e) =>
+      e.textContent.includes('Old Temple'),
+    ),
+  ),
+);
+await p.getByRole('button', { name: 'Undo my edits' }).click();
+ok(
+  'Undo my edits brings back its name and place',
+  await until(
+    () =>
+      [...document.querySelectorAll('.left .entry')].some((e) =>
+        e.textContent.includes('Lovers Point'),
+      ) &&
+      ![...document.querySelectorAll('.left .entry')].some((e) =>
+        e.textContent.includes('Old Temple'),
+      ),
+  ),
+);
+await p.getByRole('button', { name: 'Close' }).click();
+
+// An unplanned stop: "which place was this?" names it and fills the add form; then back to the
+// Timeline's place.
+await p
+  .locator('.left .ghost-card', { has: p.getByRole('button', { name: 'It’s a planned stop' }) })
+  .first()
+  .getByRole('button', { name: 'Add…' })
+  .click();
+await p.waitForSelector('.editor[aria-label="A stop you didn’t plan"]');
+await p.locator('.editor .ed-place').getByRole('button', { name: 'Choose' }).click();
+await p.waitForSelector('.place-window .pw-list button[role="listitem"]');
+await p.locator('.place-window .pw-list button', { hasText: 'Night Market' }).click();
+await p.getByRole('button', { name: 'Use this place' }).click();
+ok(
+  'a stop takes the chosen place’s name, in its heading and the add form',
+  (await until(() => document.querySelector('.editor .sg-name')?.textContent === 'Night Market')) &&
+    (await p.inputValue('#sg-name')) === 'Night Market',
+);
+await p.locator('.editor .ed-place').getByRole('button', { name: 'Choose' }).click();
+await p.getByRole('button', { name: 'Back to the Timeline’s place' }).click();
+ok(
+  'and it can go back to the Timeline’s place',
+  await until(
+    () =>
+      document.querySelector('.editor .ed-place small')?.textContent ===
+      'Where your Timeline put it',
+  ),
+);
+await p.getByRole('button', { name: 'Close' }).click();
+
 // After all those changes made in place, a fresh page from the server reads the same: nothing drifted.
 // The ✓ chips of this session's answers are the page's own, and go with a reload by design.
 const railText = () =>

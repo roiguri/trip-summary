@@ -15,6 +15,10 @@ const oneOf =
   (v) =>
     typeof v === 'string' && values.includes(v);
 const key: Rule = (v) => typeof v === 'string' && v.length > 0 && v.length <= 300;
+const lat: Rule = (v) => typeof v === 'number' && Number.isFinite(v) && v >= -90 && v <= 90;
+const lng: Rule = (v) => typeof v === 'number' && Number.isFinite(v) && v >= -180 && v <= 180;
+/** A Google place ID, or empty for a pin placed by hand (no Google place). */
+const placeId: Rule = (v) => v === '' || key(v);
 const isoTime: Rule = (v) => typeof v === 'string' && /^\d{4}-\d\d-\d\dT[\d:.]+Z$/.test(v);
 
 const FIELDS: Record<EditTarget, Record<string, Rule>> = {
@@ -32,6 +36,11 @@ const FIELDS: Record<EditTarget, Record<string, Rule>> = {
     visit: key,
     proposal: oneOf('ignored'),
     noVisit: bool,
+    /** The place chosen in the place window (DESIGN.md, "Place window"): Google's place and its
+     *  position, or a pin placed by hand. */
+    placeId,
+    lat,
+    lng,
     /** When the owner last kept this entry's new photos (edit mode stops marking them new). */
     photosSeen: isoTime,
     /** The photos shown on the journey, in order: up to three media IDs, comma-separated. */
@@ -55,6 +64,9 @@ const FIELDS: Record<EditTarget, Record<string, Rule>> = {
     dismissed: bool,
     title: text(200),
     times: (v) => v === 'none' || (typeof v === 'string' && /^\d\d:\d\d-\d\d:\d\d$/.test(v)),
+    placeId,
+    lat,
+    lng,
   },
   place: {},
 };

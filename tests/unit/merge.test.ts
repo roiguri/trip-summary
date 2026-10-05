@@ -464,3 +464,104 @@ test('a stay checked into after midnight moves to the next day once used', () =>
     'settled',
   );
 });
+
+// Rule 9, the owner's place (DESIGN.md, "Place window"): a plan whose place ID and pin are wrong.
+const breakPlace = (entryKey: string) => {
+  const row = plan.itinerary.find((r) => Number(r.entry_id) === ids[entryKey])!;
+  const broken = structuredClone(plan);
+  const place = broken.places.find((p) => p.place_id === row.place_id)!;
+  const right = {
+    lat: Number(place.lat),
+    lng: Number(place.lng),
+    placeId: String(place.google_place_id),
+  };
+  place.google_place_id = 'ChIJwrongplacexxxxxxxxxxxxxx';
+  place.lat = Number(place.lat) + 0.03; // about 3 km off
+  return { broken, right };
+};
+const choose = (key: string, p: { lat: number; lng: number; placeId: string }) => [
+  edit({ target: 'entry', key, field: 'placeId', value: p.placeId }),
+  edit({ target: 'entry', key, field: 'lat', value: p.lat }),
+  edit({ target: 'entry', key, field: 'lng', value: p.lng }),
+];
+
+test('a place chosen in the window decides which visit an entry matches; its times and photos follow', () => {
+  const { broken, right } = breakPlace('carmel-beach-visit');
+  const id = ids['carmel-beach-visit'];
+  const off = merge({ plan: broken, segments, photos, edits: [] });
+  assert.equal(off.matches[id], undefined, 'the wrong place matches no visit');
+  assert.equal(
+    off.proposals.some((p) => p.entryId === id),
+    false,
+  );
+  const fixed = merge({ plan: broken, segments, photos, edits: choose(String(id), right) });
+  assert.equal(fixed.matches[id]?.segment, plain.matches[id]?.segment, 'the right visit');
+  assert.deepEqual(
+    [
+      fixed.proposals.find((p) => p.entryId === id)?.start,
+      fixed.proposals.find((p) => p.entryId === id)?.end,
+    ],
+    ['09:28', '10:53'],
+  );
+  const shown = entries(fixed).find((e) => e.id === `i${id}`)!;
+  assert.equal(shown.photos.length, entry('carmel-beach-visit').photos.length, 'its photos');
+  assert.deepEqual([shown.lat, shown.lng], [right.lat, right.lng], 'its pin');
+  assert.ok(shown.maps_url?.includes(`query_place_id=${right.placeId}`), 'its Google Maps link');
+  assert.deepEqual(
+    fixed.placeOverrides.entries[String(id)]?.placeId,
+    'ChIJwrongplacexxxxxxxxxxxxxx',
+  );
+});
+
+test('a stay’s check-in follows the place chosen for its lodging', () => {
+  const { broken, right } = breakPlace('inn');
+  const id = ids['inn'];
+  const off = merge({ plan: broken, segments, photos, edits: [] });
+  assert.equal(
+    off.proposals.some((p) => p.entryId === id),
+    false,
+    'no visits at the wrong place',
+  );
+  const fixed = merge({ plan: broken, segments, photos, edits: choose(String(id), right) });
+  assert.equal(fixed.proposals.find((p) => p.entryId === id)?.start, '15:20');
+});
+
+test('a stop takes the place chosen for it, and so does the entry it becomes', () => {
+  const [a] = expected.suggestions;
+  const chosen = { placeId: 'ChIJchosenplacexxxxxxxxxxxx', lat: 36.5501, lng: -121.9201 };
+  const placed = [
+    edit({ target: 'suggestion', key: a, field: 'placeId', value: chosen.placeId }),
+    edit({ target: 'suggestion', key: a, field: 'lat', value: chosen.lat }),
+    edit({ target: 'suggestion', key: a, field: 'lng', value: chosen.lng }),
+  ];
+  const r = merge(input(placed));
+  const s = r.suggestions.find((x) => x.key === a)!;
+  assert.deepEqual([s.placeId, s.lat, s.lng], [chosen.placeId, chosen.lat, chosen.lng]);
+  assert.ok(r.placeOverrides.suggestions[a]);
+  const added = merge(
+    input([
+      ...placed,
+      edit({ target: 'suggestion', key: a, field: 'approved', value: true }),
+      edit({ target: 'suggestion', key: a, field: 'title', value: 'Chosen place' }),
+    ]),
+  );
+  const e = entries(added).find((x) => x.title === 'Chosen place')!;
+  assert.deepEqual([e.lat, e.lng], [chosen.lat, chosen.lng]);
+  assert.ok(e.maps_url?.includes(`query_place_id=${chosen.placeId}`));
+});
+
+test('undoing a chosen place brings back the plan’s', () => {
+  const { right } = breakPlace('carmel-beach-visit');
+  const key = String(ids['carmel-beach-visit']);
+  const far = { ...right, lat: right.lat + 0.05, placeId: '' };
+  const moved = merge(input(choose(key, far)));
+  assert.notDeepEqual(entry('carmel-beach-visit', moved).lat, entry('carmel-beach-visit').lat);
+  assert.equal(
+    moved.matches[Number(key)],
+    undefined,
+    'a pin far away, with no place ID, matches nothing',
+  );
+  const undone = merge(input([]));
+  assert.deepEqual(entry('carmel-beach-visit', undone), entry('carmel-beach-visit'));
+  assert.deepEqual(undone.placeOverrides.entries, {});
+});

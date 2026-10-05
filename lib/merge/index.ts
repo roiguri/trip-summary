@@ -11,6 +11,7 @@ import {
 } from '../model.ts';
 import { localMidnightUtc } from '../import/timeline.ts';
 import { mediaUrl } from '../media/paths.ts';
+import { mapsLink } from '../maps-link.ts';
 import type { Edit, JarvisRow, PlanSource, TimelineSegment, TripPhoto } from '../store/types.ts';
 
 /** Starting values from the design, to tune on real data. */
@@ -103,8 +104,15 @@ export type Proposal = {
   stay?: { checkIn: boolean; checkOut: boolean; inDate: string; outDate: string };
 };
 
+/** A position and Google place, as the plan or the Timeline had them before the owner chose another. */
+export type PlacePoint = { lat: number | null; lng: number | null; placeId: string | null };
+
 export type MergeResult = {
   trip: Trip;
+  /** Where entries (by ID) and stops (by key) were before the owner chose their place (rule 9). */
+  placeOverrides: { entries: Record<string, PlacePoint>; suggestions: Record<string, PlacePoint> };
+  /** Each located planned entry's Google place and position, as used (the owner's, else the plan's). */
+  entryPlaces: Record<string, PlacePoint>;
   /** Jarvis entry ID → the visit or activity that gave it actual times. */
   matches: Record<string, { segment: string; by: MatchedBy | 'time' }>;
   /** Unmatched visits and activities worth offering, shown only in edit mode. */
@@ -212,6 +220,24 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
       googlePlaceId: str(p?.google_place_id),
     };
   });
+
+  // Rule 9, the owner's place (decided Oct 5, DESIGN.md "Place window"): a planned entry's Google
+  // place and position chosen in the place window replace the plan's before anything is matched, so
+  // its visit, a stay's visits, its pin and its Google Maps link all follow. An empty place ID is a pin
+  // placed by hand, with no Google place. The plan's own are kept, for the window to show.
+  const entryPlaceOverrides: Record<string, PlacePoint> = {};
+  for (const item of items) {
+    const key = String(item.entry_id);
+    const id = use('entry', key, 'placeId');
+    const la = use('entry', key, 'lat');
+    const ln = use('entry', key, 'lng');
+    const moved = typeof la === 'number' && typeof ln === 'number';
+    if (typeof id !== 'string' && !moved) continue;
+    entryPlaceOverrides[key] = { lat: item.lat, lng: item.lng, placeId: item.googlePlaceId };
+    if (typeof id === 'string') item.googlePlaceId = id || null;
+    if (moved) [item.lat, item.lng] = [la, ln];
+    item.maps_url = mapsLink({ lat: item.lat, lng: item.lng, placeId: item.googlePlaceId });
+  }
 
   // Rule 3, visit → entry. A visit near the entry's place or with its place ID is a candidate on the
   // entry's day; the best pair (near and same ID first, then closest to the planned time) wins, and
@@ -405,6 +431,7 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
         metres(st.lat, st.lng, v.lat, v.lng) <= THRESHOLDS.matchMetres));
   const suggestions: Suggestion[] = [];
   const dismissed: Suggestion[] = [];
+  const suggestionPlaceOverrides: Record<string, PlacePoint> = {};
   for (const s of segments) {
     if (takenVisits.has(s.key) || takenActivities.has(s.key)) continue;
     const start = local(s.startUtc, s.startOffsetMin, timeZone);
@@ -416,15 +443,22 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
         continue;
       if (stays.some((st) => atStay(st, s, start.date))) continue;
     } else if ((s.distanceMeters ?? 0) / 1000 <= THRESHOLDS.suggestActivityKm) continue;
+    // The owner's place for a stop (rule 9): its Google place and position, chosen in the window.
+    const id = use('suggestion', s.key, 'placeId');
+    const la = use('suggestion', s.key, 'lat');
+    const ln = use('suggestion', s.key, 'lng');
+    const moved = typeof la === 'number' && typeof ln === 'number';
+    if (typeof id === 'string' || moved)
+      suggestionPlaceOverrides[s.key] = { lat: s.lat, lng: s.lng, placeId: s.placeId };
     (use('suggestion', s.key, 'dismissed') === true ? dismissed : suggestions).push({
       key: s.key,
       kind: s.kind,
-      placeId: s.placeId,
+      placeId: typeof id === 'string' ? id || null : s.placeId,
       date: start.date,
       time: start.time,
       endTime: local(s.endUtc, s.endOffsetMin, timeZone).time,
-      lat: s.lat,
-      lng: s.lng,
+      lat: moved ? la : s.lat,
+      lng: moved ? ln : s.lng,
       endLat: s.kind === 'activity' ? s.endLat : null,
       endLng: s.kind === 'activity' ? s.endLng : null,
       mode: s.kind === 'activity' && s.mode ? (MODES[s.mode] ?? null) : null,
@@ -449,14 +483,14 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
       notes: null,
       lat: s.lat,
       lng: s.lng,
-      maps_url: null,
+      maps_url: s.kind === 'visit' ? mapsLink(s) : null,
       category: null,
       from_location: null,
       to_location: null,
       departure_timezone: null,
       arrival_timezone: null,
       mode: s.mode,
-      googlePlaceId: null,
+      googlePlaceId: s.kind === 'visit' ? s.placeId : null,
     });
   });
   const remaining = suggestions.filter((s) => !approved.includes(s));
@@ -693,6 +727,12 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
     segments: views,
     hidden,
     added: approved.map((s, n) => ({ entryId: -(n + 1), key: s.key })),
+    placeOverrides: { entries: entryPlaceOverrides, suggestions: suggestionPlaceOverrides },
+    entryPlaces: Object.fromEntries(
+      items
+        .filter((i) => i.entry_id > 0 && (i.lat !== null || i.googlePlaceId))
+        .map((i) => [String(i.entry_id), { lat: i.lat, lng: i.lng, placeId: i.googlePlaceId }]),
+    ),
     orphanEdits,
   };
 }

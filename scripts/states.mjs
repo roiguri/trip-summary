@@ -144,6 +144,24 @@ export const STATES = {
       .click(),
   'edit-stop': (p) =>
     p.locator('.left .ghost-card').first().getByRole('button', { name: 'Add…' }).click(),
+  'edit-place': async (p) => {
+    await p
+      .locator('.left .entry', { hasText: 'Carmel Beach' })
+      .first()
+      .locator('.pencil:visible')
+      .click();
+    await p.locator('.editor .ed-place').getByRole('button', { name: 'Change' }).click();
+    await p.locator('.place-window .pw-list button', { hasText: 'Harbour Lookout' }).click();
+  },
+  'phone-edit-place': async (p) => {
+    await p
+      .locator('.left .entry', { hasText: 'Carmel Beach' })
+      .first()
+      .locator('.pencil:visible')
+      .click();
+    await p.locator('.editor .ed-place').getByRole('button', { name: 'Change' }).click();
+    await p.locator('.place-window .pw-list button', { hasText: 'Harbour Lookout' }).click();
+  },
   'edit-next': async (p) => {
     for (let i = 0; i < 3; i++) await p.getByRole('button', { name: 'Next finding' }).click();
   },

@@ -4,6 +4,7 @@ import * as maplibregl from 'maplibre-gl';
 import type { Day } from '../../../lib/data';
 import type { EditData, Finding } from '../../../lib/edit-view';
 import { dayLabel, distance, mapsLink, metres, useSave } from './useSave';
+import { PlaceWindow } from './PlaceWindow';
 
 maplibregl.setWorkerUrl('/maplibre/maplibre-gl-worker.mjs');
 
@@ -57,6 +58,9 @@ export function SuggestionCard({
   const [choice, setChoice] = useState<'add' | 'link'>('add');
   // Google's name for the place, when known, to keep or change.
   const [name, setName] = useState(finding.placeName ?? '');
+  // The place window open (DESIGN.md, "Place window"): "which place was this?".
+  const [placing, setPlacing] = useState(false);
+  const original = edit.placeOverrides.suggestions[s.key];
   const [times, setTimes] = useState<'keep' | 'other' | 'none'>('keep');
   const [from, setFrom] = useState(s.time);
   const [to, setTo] = useState(s.endTime);
@@ -93,6 +97,49 @@ export function SuggestionCard({
           : []),
     ]).then((ok) => ok && onClose());
 
+  if (placing) {
+    const point = (p: { lat: number | null; lng: number | null } | undefined) =>
+      p && p.lat !== null && p.lng !== null ? { lat: p.lat, lng: p.lng } : null;
+    return (
+      <PlaceWindow
+        tripId={edit.tripId}
+        kind="stop"
+        title={finding.placeName ?? 'this stop'}
+        planned={null}
+        visit={point(original ?? s)}
+        current={point(s) && { ...point(s)!, placeId: s.placeId }}
+        busy={busy}
+        onClose={() => setPlacing(false)}
+        onBack={
+          original
+            ? () =>
+                save(
+                  ['placeId', 'lat', 'lng'].map((field) => ({
+                    target: 'suggestion',
+                    key: s.key,
+                    field,
+                    value: undefined,
+                  })),
+                ).then((ok) => ok && setPlacing(false))
+            : undefined
+        }
+        onUse={(place) =>
+          save([
+            { target: 'suggestion', key: s.key, field: 'placeId', value: place.id },
+            { target: 'suggestion', key: s.key, field: 'lat', value: place.lat },
+            { target: 'suggestion', key: s.key, field: 'lng', value: place.lng },
+            ...(place.name
+              ? [{ target: 'suggestion', key: s.key, field: 'title', value: place.name }]
+              : []),
+          ]).then((ok) => {
+            if (ok && place.name) setName(place.name);
+            return ok;
+          })
+        }
+      />
+    );
+  }
+
   return (
     <section className="editor" aria-label="A stop you didn’t plan">
       <div className="ed-kick">
@@ -102,6 +149,15 @@ export function SuggestionCard({
         </button>
       </div>
       {finding.placeName && <h3 className="sg-name">{finding.placeName}</h3>}
+      {s.kind === 'visit' && (
+        <div className="ed-place">
+          <b>{finding.placeName ? 'Not this place?' : 'Which place was this?'}</b>
+          <small>{original ? 'Chosen in the place window' : 'Where your Timeline put it'}</small>
+          <button className="link-button" onClick={() => setPlacing(true)}>
+            Choose
+          </button>
+        </div>
+      )}
       {at && <MiniMap at={at} near={nearest ? [nearest.e.lat!, nearest.e.lng!] : null} />}
       <p className="sg-meta">
         <b>

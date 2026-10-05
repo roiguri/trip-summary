@@ -3,6 +3,7 @@ import { useState } from 'react';
 import type { Day, Entry, TransitMode } from '../../../lib/data';
 import type { EditData } from '../../../lib/edit-view';
 import { KICKERS } from '../../lib/format';
+import { PlaceWindow } from './PlaceWindow';
 import { dayLabel, distance, mapsLink, metres, useSave, type EditChange } from './useSave';
 
 const MODES: [TransitMode, string][] = [
@@ -35,7 +36,7 @@ export function EntryEditor({
   const id = loose ? NaN : num(entry.id);
   const fromSuggestion = edit.added[String(id)];
   // An added stop's edits live under its suggestion; a planned entry's under its Jarvis ID.
-  const set = (field: string, value?: string | boolean | null): EditChange =>
+  const set = (field: string, value?: string | number | boolean | null): EditChange =>
     fromSuggestion
       ? {
           target: 'suggestion',
@@ -52,6 +53,8 @@ export function EntryEditor({
   const [to, setTo] = useState(endTime);
   const [notes, setNotes] = useState(entry.notes);
   const [picked, setPicked] = useState<string[]>([]);
+  // The place window open (it takes the editor's place).
+  const [placing, setPlacing] = useState(false);
   const [moving, setMoving] = useState(false);
   const [otherDay, setOtherDay] = useState('');
 
@@ -113,6 +116,57 @@ export function EntryEditor({
     setPicked([]);
     setMoving(false);
   };
+
+  // Its place (DESIGN.md, "Place window"): the plan's, or one the owner chose (an added stop: where the
+  // Timeline put it, or one chosen).
+  const located = !loose && (entry.type === 'place' || entry.type === 'lodging');
+  const original = fromSuggestion
+    ? edit.placeOverrides.suggestions[fromSuggestion]
+    : edit.placeOverrides.entries[String(id)];
+  const used = fromSuggestion ? null : edit.entryPlaces[String(id)];
+  const at = (p?: { lat: number | null; lng: number | null } | null) =>
+    p && p.lat !== null && p.lng !== null ? { lat: p.lat, lng: p.lng } : null;
+  const placedHow = !original
+    ? fromSuggestion
+      ? 'Where your Timeline put it'
+      : 'From the plan'
+    : fromSuggestion || used?.placeId
+      ? 'Chosen in the place window'
+      : 'A pin placed by hand';
+  if (placing)
+    return (
+      <PlaceWindow
+        tripId={edit.tripId}
+        kind="entry"
+        title={entry.title}
+        planned={fromSuggestion ? null : at(original ?? used)}
+        visit={fromSuggestion ? at(original ?? entry) : at(linked)}
+        current={at(entry) && { ...at(entry)!, placeId: used?.placeId ?? null }}
+        busy={busy}
+        onClose={() => setPlacing(false)}
+        onBack={
+          original
+            ? () =>
+                save([
+                  set('placeId', undefined),
+                  set('lat', undefined),
+                  set('lng', undefined),
+                ]).then((ok) => ok && setPlacing(false))
+            : undefined
+        }
+        onUse={(place, useName) =>
+          save([
+            set('placeId', place.id),
+            set('lat', place.lat),
+            set('lng', place.lng),
+            ...(useName && place.name ? [set('title', place.name)] : []),
+          ]).then((ok) => {
+            if (ok && useName && place.name) setTitle(place.name);
+            return ok;
+          })
+        }
+      />
+    );
 
   return (
     <section className="editor" aria-label={`Edit ${entry.title}`}>
@@ -185,6 +239,16 @@ export function EntryEditor({
               {label}
             </button>
           ))}
+        </div>
+      )}
+
+      {located && (
+        <div className="ed-place">
+          <b>Place</b>
+          <small>{placedHow}</small>
+          <button className="link-button" onClick={() => setPlacing(true)}>
+            Change
+          </button>
         </div>
       )}
 
