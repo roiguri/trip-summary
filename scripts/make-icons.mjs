@@ -2,6 +2,7 @@
 // rounded for "any" use, full-bleed with the sun inside the central safe zone for "maskable" (Android
 // crops it to its own shape), and opaque for iPhones' home screen. Run after changing the mark:
 //   node scripts/make-icons.mjs
+import { writeFileSync } from 'node:fs';
 import sharp from 'sharp';
 
 const SUN = (scale, dx, dy) =>
@@ -26,4 +27,6 @@ for (const [name, size, inset, rounded] of icons)
   await sharp(Buffer.from(square(size, inset, rounded)))
     .png()
     .toFile(`public/icons/${name}`);
-console.log(`Wrote ${icons.length} icons to public/icons/`);
+// The browser tab's icon, centred the same way.
+writeFileSync('app/icon.svg', square(64, 9, true) + '\n');
+console.log(`Wrote ${icons.length} icons to public/icons/, and app/icon.svg`);
