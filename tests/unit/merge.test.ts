@@ -57,7 +57,40 @@ test('a matched place gets its actual times as a proposal, even over an hour lat
   );
   assert.equal(proposal('aquarium-visit')?.start, '11:15');
   assert.equal(proposal('lovers-point-visit'), undefined, 'skipped: nothing to propose');
-  assert.equal(proposal('inn'), undefined, 'a stay keeps its booking');
+});
+
+test('a stay gets its actual check-in and check-out as one proposal (rule 8)', () => {
+  const p = proposal('inn')!;
+  assert.ok(p.stay, 'a stay’s proposal');
+  // Arrived at the inn at 15:20 on the check-in day; left at 09:40 on the check-out day.
+  assert.deepEqual(
+    [p.start, p.end, p.stay],
+    ['15:20', '09:40', { checkIn: true, checkOut: true, outDate: '2026-05-17' }],
+  );
+  const key = String(p.entryId);
+  const used = merge(
+    input([
+      edit({ target: 'entry', key, field: 'start_time', value: p.start }),
+      edit({ target: 'entry', key, field: 'end_time', value: p.end }),
+    ]),
+  );
+  assert.equal(
+    used.proposals.some((x) => x.entryId === p.entryId),
+    false,
+    'settled once used',
+  );
+  const stay = entries(used).find((e) => e.id === `i${p.entryId}`)!;
+  assert.equal(stay.time, '15:20');
+  assert.ok(stay.check_out?.endsWith('09:40'), stay.check_out ?? '');
+});
+
+test('photos at the lodging on any night of a stay are the stay’s', () => {
+  const lodge = entries().find((e) => e.id === `i${ids['river-lodge-stay']}`);
+  assert.ok(lodge, 'the lodge');
+  assert.ok(
+    lodge.photos.some((x) => x.date === '2026-05-18' && (x.time === '19:05' || x.time === '20:10')),
+    'the evening photos at the lodge',
+  );
 });
 
 test('a leg gets its mode and actual times as a proposal, read at each end’s own offset', () => {
@@ -96,8 +129,18 @@ test('photos taken during a matched visit attach to its entry; others are loose 
   assert.ok(looseTimes.includes('2026-05-19 08:10'), 'taken at a stop, not at the lodge');
 });
 
+// Two evening photos at the lodge (19:05 and 20:10 on the 18th) belong to the stay; made loose (as the
+// owner can), they show the grouping and placement of loose moments.
+const atLodge = entries()
+  .flatMap((e) => e.photos)
+  .filter((x) => x.date === '2026-05-18' && (x.time === '19:05' || x.time === '20:10'))
+  .map((x) => x.id);
+const loosened = merge(
+  input(atLodge.map((id) => edit({ target: 'photo', key: id, field: 'entry', value: null }))),
+);
+
 test('loose photos group by a 45-minute gap, not by clock hour', () => {
-  const groups = entries()
+  const groups = entries(loosened)
     .filter((e) => e.type === 'photo' || e.type === 'cluster')
     .map((e) => e.photos.map((p) => `${p.date} ${p.time}`));
   const groupOf = (t: string) => groups.findIndex((g) => g.includes(t));
@@ -124,7 +167,7 @@ test('a photo’s local time comes from EXIF, else from the Timeline at that mom
 });
 
 test('a loose photo is placed where the Timeline puts its moment', () => {
-  const p = entries().find((e) => e.time === '19:05' && e.type === 'photo')!.photos[0];
+  const p = entries(loosened).find((e) => e.time === '19:05' && e.type === 'photo')!.photos[0];
   assert.ok(p.lat !== null && Math.abs(p.lat - 36.27) < 0.5);
 });
 

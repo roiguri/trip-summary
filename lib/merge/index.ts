@@ -98,6 +98,8 @@ export type Proposal = {
   start: string;
   end: string;
   mode: TransitMode | null;
+  /** A stay's actual check-in (`start`) and check-out (`end`, on `outDate`): which the Timeline knows. */
+  stay?: { checkIn: boolean; checkOut: boolean; outDate: string };
 };
 
 export type MergeResult = {
@@ -275,8 +277,7 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
     matches[p.item.entry_id] = { segment: p.visit.key, by: p.by };
   }
   // The Timeline changes nothing by itself (decided Oct 3): what it found about a planned entry is a
-  // proposal, for the owner to accept in edit mode. A stay is left out: an overnight visit says when
-  // the owner was there, not when the booking ran.
+  // proposal, for the owner to accept in edit mode. Stays have their own rule (rule 8, below).
   const proposals: Proposal[] = [];
   for (const item of items) {
     const v = visitOf.get(item.entry_id);
@@ -284,6 +285,57 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
     const start = local(v.startUtc, v.startOffsetMin, timeZone).time;
     const end = local(v.endUtc, v.endOffsetMin, timeZone).time;
     proposals.push({ entryId: item.entry_id, segment: v.key, start, end, mode: null });
+  }
+
+  // Rule 8, stays (decided Oct 5): the actual check-in and check-out come from the stay's visits to the
+  // lodging: every visit during the stay near its pin or with its place ID, or near the visit the
+  // owner linked (which shows where the lodging really is). Check-in: the first arrival on the
+  // check-in day (or, arriving after midnight, before noon the next day); check-out: the last
+  // departure on the check-out day. Proposed together, as one finding; either may be unknown.
+  const stayVisits = new Map<number, TimelineSegment[]>();
+  const nextDay = (date: string) =>
+    new Date(Date.parse(`${date}T12:00:00Z`) + 86_400_000).toISOString().slice(0, 10);
+  const close = (
+    a: { lat: number | null; lng: number | null },
+    b: { lat: number | null; lng: number | null },
+  ) =>
+    a.lat !== null &&
+    a.lng !== null &&
+    b.lat !== null &&
+    b.lng !== null &&
+    metres(a.lat, a.lng, b.lat, b.lng) <= THRESHOLDS.matchMetres;
+  for (const st of items) {
+    if (st.item_type !== 'lodging' || unlinked.has(st.entry_id)) continue;
+    const anchor = visitOf.get(st.entry_id);
+    const last = st.end_date ?? st.start_date;
+    const atLodging = (v: TimelineSegment) =>
+      (!!st.googlePlaceId && v.placeId === st.googlePlaceId) ||
+      close(st, v) ||
+      (!!anchor && ((!!anchor.placeId && v.placeId === anchor.placeId) || close(anchor, v)));
+    const mine = visits
+      .filter((v) => {
+        if (v !== anchor && takenVisits.has(v.key)) return false;
+        const from = local(v.startUtc, v.startOffsetMin, timeZone).date;
+        const to = local(v.endUtc, v.endOffsetMin, timeZone).date;
+        return to >= st.start_date && from <= last && atLodging(v);
+      })
+      .sort((a, b) => a.startUtc.localeCompare(b.startUtc));
+    stayVisits.set(st.entry_id, mine);
+    const startOf = (v: TimelineSegment) => local(v.startUtc, v.startOffsetMin, timeZone);
+    const endOf = (v: TimelineSegment) => local(v.endUtc, v.endOffsetMin, timeZone);
+    const checkIn =
+      mine.find((v) => startOf(v).date === st.start_date) ??
+      mine.find((v) => startOf(v).date === nextDay(st.start_date) && startOf(v).time < '12:00');
+    const checkOut = [...mine].reverse().find((v) => endOf(v).date === last);
+    if (!checkIn && !checkOut) continue;
+    proposals.push({
+      entryId: st.entry_id,
+      segment: (checkIn ?? checkOut)!.key,
+      start: checkIn ? startOf(checkIn).time : '',
+      end: checkOut ? endOf(checkOut).time : '',
+      mode: null,
+      stay: { checkIn: !!checkIn, checkOut: !!checkOut, outDate: last },
+    });
   }
 
   // Rule 4, activity → transit: the activity that overlaps the planned leg most sets its mode and
@@ -425,8 +477,9 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
     const item = shownById.get(p.entryId);
     return (
       !!item &&
-      (p.start !== item.start_time ||
-        p.end !== item.end_time ||
+      // A side the Timeline doesn't know (a stay's check-in or check-out) isn't compared.
+      ((p.stay?.checkIn !== false && p.start !== item.start_time) ||
+        (p.stay?.checkOut !== false && p.end !== item.end_time) ||
         // A leg's mode as drawn (its own, else from its title), so "Use" settles it.
         (p.mode !== null && item.item_type === 'transit' && p.mode !== legMode(item)))
     );
@@ -469,7 +522,7 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
     const moved = use('photo', p.mediaId, 'entry');
     if (moved !== undefined)
       entry = moved === null || !entryIds.has(String(moved)) ? null : Number(moved);
-    else
+    else {
       for (const [id, v] of visitOf)
         if (
           entryIds.has(String(id)) &&
@@ -477,6 +530,15 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
           t <= Date.parse(v.endUtc) + slack
         )
           entry = id;
+      // At the lodging on any night of a stay: the stay's photo.
+      if (entry === null)
+        for (const [id, vs] of stayVisits)
+          if (
+            entryIds.has(String(id)) &&
+            vs.some((v) => Date.parse(v.startUtc) - slack <= t && t <= Date.parse(v.endUtc) + slack)
+          )
+            entry = id;
+    }
 
     // Where it was taken: its visit's place, or along an activity in proportion to the time.
     let lat: number | null = null;

@@ -257,9 +257,11 @@ export default function Client({
       field,
       value: had.includes(field) ? value : undefined,
     });
+    // A stay's end time is its check-out time, kept in its check-out ("date · time").
+    const end = e.type === 'lodging' ? (e.check_out?.split(' · ')[1] ?? '') : (e.end_time ?? '');
     return [
       back('start_time', e.time),
-      back('end_time', e.end_time ?? ''),
+      back('end_time', end),
       ...(mode && e.mode ? [back('mode', e.mode)] : []),
     ];
   };
@@ -318,7 +320,7 @@ export default function Client({
         })),
     day: (date) => {
       const times = edit.findings.filter(
-        (f) => (f.kind === 'times' || f.kind === 'mode') && f.date === date,
+        (f) => (f.kind === 'times' || f.kind === 'mode' || f.kind === 'stay') && f.date === date,
       );
       return times.length ? (
         <div className="day-accept">

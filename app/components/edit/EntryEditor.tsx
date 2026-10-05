@@ -46,7 +46,10 @@ export function EntryEditor({
       : { target: 'entry', key: String(id), field, value };
   const [title, setTitle] = useState(entry.title);
   const [from, setFrom] = useState(entry.time);
-  const [to, setTo] = useState(entry.end_time ?? '');
+  // A stay's end is its check-out time, kept in its check-out ("date · time").
+  const endTime =
+    entry.type === 'lodging' ? (entry.check_out?.split(' · ')[1] ?? '') : (entry.end_time ?? '');
+  const [to, setTo] = useState(endTime);
   const [notes, setNotes] = useState(entry.notes);
   const [picked, setPicked] = useState<string[]>([]);
   const [moving, setMoving] = useState(false);
@@ -134,7 +137,7 @@ export function EntryEditor({
           </label>
           <div className="ed-row">
             <label className="ed-field">
-              {entry.type === 'transit' ? 'Leaves' : 'From'}
+              {entry.type === 'transit' ? 'Leaves' : entry.type === 'lodging' ? 'Check-in' : 'From'}
               <input
                 id="ed-from"
                 type="time"
@@ -144,13 +147,13 @@ export function EntryEditor({
               />
             </label>
             <label className="ed-field">
-              {entry.type === 'transit' ? 'Arrives' : 'To'}
+              {entry.type === 'transit' ? 'Arrives' : entry.type === 'lodging' ? 'Check-out' : 'To'}
               <input
                 id="ed-to"
                 type="time"
                 value={to}
                 onChange={(e) => setTo(e.target.value)}
-                onBlur={() => to !== (entry.end_time ?? '') && saveTimes(from, to)}
+                onBlur={() => to !== endTime && saveTimes(from, to)}
               />
             </label>
             <button
@@ -212,23 +215,26 @@ export function EntryEditor({
                   )}
                 </small>
                 <span className="acts">
-                  <button
-                    className="pill-button small primary"
-                    disabled={
-                      busy || (linked.time === entry.time && linked.endTime === entry.end_time)
-                    }
-                    onClick={() => {
-                      setFrom(linked.time);
-                      setTo(linked.endTime);
-                      save([
-                        set('start_time', linked.time),
-                        set('end_time', linked.endTime),
-                        ...(linked.mode ? [set('mode', linked.mode)] : []),
-                      ]);
-                    }}
-                  >
-                    Use these times
-                  </button>
+                  {/* A stay's actual check-in and check-out come from all its visits: its finding. */}
+                  {entry.type !== 'lodging' && (
+                    <button
+                      className="pill-button small primary"
+                      disabled={
+                        busy || (linked.time === entry.time && linked.endTime === entry.end_time)
+                      }
+                      onClick={() => {
+                        setFrom(linked.time);
+                        setTo(linked.endTime);
+                        save([
+                          set('start_time', linked.time),
+                          set('end_time', linked.endTime),
+                          ...(linked.mode ? [set('mode', linked.mode)] : []),
+                        ]);
+                      }}
+                    >
+                      Use these times
+                    </button>
+                  )}
                   <button
                     className="pill-button small"
                     disabled={busy}

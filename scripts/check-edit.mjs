@@ -177,6 +177,24 @@ ok(
 );
 await resolved(false);
 
+// A stay: its actual check-in and check-out from the Timeline, as one finding (rule 8).
+const inn = entry('Carmel Garden Inn');
+ok(
+  'a stay offers its actual check-in and check-out',
+  ((await inn.locator('.fnd').first().textContent()) ?? '').includes('Checked in 15:20'),
+  await inn.locator('.fnd').first().textContent(),
+);
+await inn.locator('.fnd').first().getByRole('button', { name: 'Use' }).click();
+ok(
+  'Use sets the stay’s check-in',
+  await until(() =>
+    [...document.querySelectorAll('.left .entry')].some(
+      (e) =>
+        e.textContent.includes('Carmel Garden Inn') && e.textContent.includes('CHECK-IN · 15:20'),
+    ),
+  ),
+);
+
 // Not visited: link a visit by hand.
 await entry('Lovers Point').locator('.fnd').getByRole('button', { name: 'Link a visit' }).click();
 await p.waitForSelector('.editor >> #ed-link');
