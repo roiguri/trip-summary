@@ -5,6 +5,7 @@ import type { Day, Entry, TransitMode } from '../../../lib/data';
 import type { EditData } from '../../../lib/edit-view';
 import { KICKERS } from '../../lib/format';
 import { PlaceWindow } from './PlaceWindow';
+import { EntryBlock } from './BlockEditor';
 import { dayLabel, distance, mapsLink, metres, useSave, type EditChange } from './useSave';
 
 const MODES: [TransitMode, string][] = [
@@ -581,6 +582,10 @@ export function EntryEditor({
             </div>
           )}
         </div>
+      )}
+
+      {!loose && (
+        <EntryBlock entry={entry} days={days} edit={edit} set={set} save={save} busy={busy} />
       )}
 
       <div className="ed-foot">

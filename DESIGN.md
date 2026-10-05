@@ -222,6 +222,29 @@ Options: https://claude.ai/artifact/Ww8XTreh6aejD3rgKScwMv (names), https://clau
 - The chosen place is what matching, the stay's visits, the pin and the Google Maps link use (merge
   rule 9).
 
+## Blocks (user decisions, Oct 6)
+
+A block is the owner's group of entries that form one larger event (a bike ride, a trek, a food
+tour). Only the owner makes them; the app never suggests one.
+
+- **Made from an entry, never by multi-select.** In an entry's editor, "Start a block here" (name,
+  emoji, colour, note) or "Add to block ▾". A block runs from its first attached entry to its last,
+  and everything between belongs to it; blocks never overlap (an entry already in one stays there).
+  Only an end entry offers "Remove from the block", which shortens it.
+- **Personalised, no kinds:** an emoji (presets or any typed) and one of six colours (teal, copper,
+  olive, plum, blue, ochre).
+- **Drawn as a ticket on dot-grid paper** (option 2 of round 3): a sheet of dotted paper in the
+  block's colour behind its entries, under the rail, and a ticket at the sheet's **top right**: the
+  emoji on a stub torn along a dashed line, then the title and its span, stops and photos. Rejected:
+  a rounded card (round 1), and a taped header like the day banners (round 2).
+- **Over several days:** a sheet on each day, titled "day k of n"; the edges that join days are
+  dashed.
+- The ticket opens the block for a viewer (its photos and note in the detail card, "THE BLOCK"), and
+  the block's editor in edit mode: rename, emoji, colour, note, what's attached, and **Ungroup**
+  (the entries stay).
+- Stored as edits: the block's fields under target `block`, and a `block` field on each attached
+  entry or added stop (`lib/blocks.ts`).
+
 ## Exact sampled backgrounds and remaining gaps
 
 The locked reference background is RGB (255,253,250), `#fffdfa`, sampled at (10,110), (800,110) and (10,500) across the whole, place and geometry captures. The large card interior in the locked whole/place captures is `#fffdf8` (255,253,248); the implementation sets those tokens explicitly. Recheck these pixels after a build. Remaining gaps: substitute/reused photos are not the original images and may not match captions; reference PNGs do not disclose an exact font binary (Arial/Helvetica family is inferred); the dotted multi-day end bend is still visually subtle rather than the reference's more pronounced curve.

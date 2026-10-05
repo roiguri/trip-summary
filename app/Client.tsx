@@ -79,6 +79,8 @@ export default function Client({
   const [showSetAside, setShowSetAside] = useState(false);
   // Photos open full screen for review (DESIGN.md, "Photo review").
   const [review, setReview] = useState<ReviewScope | null>(null);
+  // Edit mode: the block whose editor is open (DESIGN.md, "Blocks").
+  const [blockKey, setBlockKey] = useState<string | null>(null);
   const [stepKey, setStepKey] = useState<string | null>(null);
   const { save, busy } = useSave(edit?.tripId ?? '', applySaved);
   // The finding being saved ("Saving…" until the page shows it), and what was just resolved: each
@@ -142,13 +144,39 @@ export default function Client({
     () => new Map(days.flatMap((d) => d.entries).map((e) => [e.id, e])),
     [days],
   );
+  // An album is a day's photos, or a block's ("block:<id>", DESIGN.md "Blocks").
+  const albumBlock = album?.startsWith('block:')
+    ? (trip.blocks?.find((b) => `block:${b.id}` === album) ?? null)
+    : null;
   const photos = album
     ? allPhotos(days).filter((p) =>
-        days
-          .find((d) => d.date === album)
-          ?.entries.some((e) => e.photos.some((x) => x.id === p.id)),
+        albumBlock
+          ? days.some((d) =>
+              d.entries.some(
+                (e) => e.block === albumBlock.id && e.photos.some((x) => x.id === p.id),
+              ),
+            )
+          : days
+              .find((d) => d.date === album)
+              ?.entries.some((e) => e.photos.some((x) => x.id === p.id)),
       )
     : selected?.photos || [];
+  // A block's ticket: its album for viewers; in edit mode, its editor.
+  function openBlock(id: string) {
+    if (edit) {
+      setSelected(null);
+      setStopKey(null);
+      setBlockKey(id);
+      return;
+    }
+    const b = trip.blocks?.find((x) => x.id === id);
+    if (b) setDay(b.days[0]);
+    setAlbum(`block:${id}`);
+    setSelected(null);
+    setPhotoPage(0);
+    setActivePhoto(null);
+    setFocus(null);
+  }
 
   function closeDetails() {
     panelCorner.current = !mapOpen;
@@ -173,6 +201,7 @@ export default function Client({
       root.scrollTo({ top: Math.max(0, top - 60), behavior: 'smooth' });
     }
     setSelected(e);
+    setBlockKey(null);
     setAlbum(null);
     setPhotoPage(0);
     setActivePhoto(null);
@@ -240,12 +269,21 @@ export default function Client({
   const closeEditor = () => {
     setSelected(null);
     setStopKey(null);
+    setBlockKey(null);
   };
   const editPanel = edit && (
-    <EditPanel edit={edit} days={days} selected={current} stopKey={stopKey} onClose={closeEditor} />
+    <EditPanel
+      edit={edit}
+      days={days}
+      selected={current}
+      stopKey={stopKey}
+      blockKey={blockKey}
+      onClose={closeEditor}
+    />
   );
   const openStop = (key: string) => {
     setSelected(null);
+    setBlockKey(null);
     setStopKey(key);
   };
 
@@ -455,6 +493,8 @@ export default function Client({
               onChoose={choose}
               onShowAlbum={showAlbum}
               edit={timelineEdit}
+              blocks={trip.blocks}
+              onOpenBlock={openBlock}
             />
           </section>
           {edit ? (
@@ -481,7 +521,7 @@ export default function Client({
                     onClose={closePhoneMap}
                   />
                 )}
-                {(selected || stopKey) && (
+                {(selected || stopKey || blockKey) && (
                   <PhoneSheet title="Edit" closing={false} onClose={closeEditor}>
                     {editPanel}
                   </PhoneSheet>
@@ -542,6 +582,7 @@ export default function Client({
                       <DetailPanel
                         selected={selected}
                         album={album}
+                        block={albumBlock}
                         days={days}
                         photos={photos}
                         page={photoPage}
@@ -572,6 +613,7 @@ export default function Client({
                     <DetailPanel
                       selected={selected}
                       album={album}
+                      block={albumBlock}
                       days={days}
                       photos={photos}
                       page={photoPage}

@@ -78,6 +78,16 @@ export type Finding = (
     }
 ) & { setAside?: SetAside };
 
+/** A block as the owner set it up: its fields, and the entries (or added stops) attached to it. */
+export type BlockDef = {
+  id: string;
+  title: string;
+  emoji: string;
+  color: string;
+  note: string;
+  members: { target: 'entry' | 'suggestion'; key: string }[];
+};
+
 export type EditData = {
   tripId: string;
   /** Open findings, in date and time order: "n to review". */
@@ -95,6 +105,8 @@ export type EditData = {
   placeOverrides: { entries: Record<string, PlacePoint>; suggestions: Record<string, PlacePoint> };
   /** Photos added since last kept: shown with a NEW tag in the editor. */
   newPhotoIds: string[];
+  /** Every block the owner made, with the entries attached to it (DESIGN.md, "Blocks"). */
+  blocks: BlockDef[];
   /** How long building this took, step by step (Server-Timing format), for finding what's slow. */
   timing: string;
   /** The media ID of the owner's chosen cover, if any. */
@@ -284,6 +296,7 @@ export async function editDataFrom(
     findings,
     setAside,
     newPhotoIds,
+    blocks: blockDefs(edits),
     entryPlaces: r.entryPlaces,
     placeOverrides: r.placeOverrides,
     timing: t.header(),
@@ -293,4 +306,28 @@ export async function editDataFrom(
     cover: typeof cover === 'string' ? cover : null,
     added: Object.fromEntries(r.added.map((a) => [String(a.entryId), a.key])),
   };
+}
+
+/** The owner's blocks, from their edits: fields, and what's attached. */
+function blockDefs(
+  edits: { target: string; key: string; field: string; value?: unknown }[],
+): BlockDef[] {
+  const defs = new Map<string, BlockDef>();
+  for (const e of edits)
+    if (e.target === 'block' && typeof e.value === 'string') {
+      if (!defs.has(e.key))
+        defs.set(e.key, { id: e.key, title: '', emoji: '', color: 'teal', note: '', members: [] });
+      const d = defs.get(e.key)!;
+      if (e.field === 'title' || e.field === 'emoji' || e.field === 'color' || e.field === 'note')
+        d[e.field] = e.value;
+    }
+  for (const e of edits)
+    if (
+      e.field === 'block' &&
+      typeof e.value === 'string' &&
+      defs.has(e.value) &&
+      (e.target === 'entry' || e.target === 'suggestion')
+    )
+      defs.get(e.value)!.members.push({ target: e.target, key: e.key });
+  return [...defs.values()];
 }

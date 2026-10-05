@@ -22,6 +22,7 @@
     "check:photos": "node scripts/check-photos.mjs",
     "check:edit": "node scripts/check-edit.mjs",
     "check:review": "node scripts/check-review.mjs",
+    "check:blocks": "node scripts/check-blocks.mjs",
     "format:check": "prettier --check .",
     "visual": "node scripts/visual.mjs",
     "visual:update": "node scripts/visual.mjs --update",

@@ -43,6 +43,24 @@ export type Entry = {
   /** Transit: the outermost multi-day lane running when the leg starts (-1 if none), so its text can
    *  sit close to the rail but clear of the lanes. */
   outer?: number;
+  /** The block it belongs to (DESIGN.md, "Blocks"); absent otherwise. */
+  block?: string;
+};
+
+/** A group of entries forming one larger event (a bike ride, a trek), made by the owner: from its
+ *  first attached entry to its last, everything between included (DESIGN.md, "Blocks"). */
+export type Block = {
+  id: string;
+  title: string;
+  emoji: string;
+  color: string;
+  note: string;
+  /** The days it covers, in order. */
+  days: string[];
+  start: { date: string; time: string };
+  end: { date: string; time: string };
+  stops: number;
+  photos: number;
 };
 export type TransitMode = 'car' | 'train' | 'flight' | 'bus' | 'ferry' | 'walk' | 'bike';
 
@@ -74,6 +92,8 @@ export type Trip = {
   timezone: string;
   destination: { name: string; lat: number | null; lng: number | null };
   days: Day[];
+  /** The owner's blocks; absent when there are none, so unedited trips are unchanged. */
+  blocks?: Block[];
 };
 
 /** How a leg was travelled, guessed from its title when no Timeline activity says (anything

@@ -1,5 +1,5 @@
 'use client';
-import type { Day, Entry, Photo } from '../../lib/data';
+import type { Block, Day, Entry, Photo } from '../../lib/data';
 import { KICKERS, formatDay, transitTimes } from '../lib/format';
 import { EntryCaption } from './EntryCaption';
 import { PagerChevron, TransitIcon } from './icons';
@@ -13,6 +13,7 @@ const PER_PAGE = 12;
 export function DetailPanel({
   selected,
   album,
+  block,
   days,
   photos,
   page,
@@ -25,6 +26,8 @@ export function DetailPanel({
 }: {
   selected: Entry | null;
   album: string | null;
+  /** The block whose album this is (DESIGN.md, "Blocks"), if it's a block's. */
+  block?: Block | null;
   days: Day[];
   photos: Photo[];
   page: number;
@@ -37,7 +40,11 @@ export function DetailPanel({
 }) {
   const pagePhotos = photos.slice(page * PER_PAGE, page * PER_PAGE + PER_PAGE);
   const pages = Math.ceil(photos.length / PER_PAGE);
-  const title = album ? days.find((d) => d.date === album)?.title : selected?.title;
+  const title = block
+    ? `${block.emoji ? `${block.emoji} ` : ''}${block.title}`
+    : album
+      ? days.find((d) => d.date === album)?.title
+      : selected?.title;
   return (
     <section
       className={`panel ${album ? 'panel-album' : `panel-${selected?.type}`} ${closing ? 'is-closing' : ''} ${fromCorner ? 'from-corner' : ''}`}
@@ -49,11 +56,33 @@ export function DetailPanel({
         <div className="panel-body">
           {/* What the entry is, and its date (user decision: one label row above the title). */}
           <div className="panel-kicker">
-            <span>{album ? 'THE DAY' : selected ? KICKERS[selected.type] : ''}</span>
-            <span>{album || selected?.day}</span>
+            <span>
+              {block ? 'THE BLOCK' : album ? 'THE DAY' : selected ? KICKERS[selected.type] : ''}
+            </span>
+            <span>
+              {block
+                ? block.days.length > 1
+                  ? `${block.start.date} – ${block.end.date}`
+                  : block.start.date
+                : album || selected?.day}
+            </span>
           </div>
           {title && <h2>{title}</h2>}
-          {album && (
+          {block && (
+            <>
+              <div className="meta">
+                <span className="meta-time">
+                  {block.days.length > 1
+                    ? `${formatDay(block.start.date)} – ${formatDay(block.end.date)}`
+                    : `${formatDay(block.start.date)} · ${[block.start.time, block.end.time].filter(Boolean).join(' – ')}`}{' '}
+                  · {block.stops} {block.stops === 1 ? 'stop' : 'stops'} · {photos.length}{' '}
+                  {photos.length === 1 ? 'photo' : 'photos'}
+                </span>
+              </div>
+              {block.note && <EntryCaption className="detail-note" text={block.note} lines={4} />}
+            </>
+          )}
+          {album && !block && (
             <div className="meta">
               <span className="meta-time">
                 Day {days.findIndex((d) => d.date === album) + 1} · {formatDay(album)} ·{' '}
