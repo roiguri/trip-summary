@@ -65,7 +65,11 @@ test('a stay gets its actual check-in and check-out as one proposal (rule 8)', (
   // Arrived at the inn at 15:20 on the check-in day; left at 09:40 on the check-out day.
   assert.deepEqual(
     [p.start, p.end, p.stay],
-    ['15:20', '09:40', { checkIn: true, checkOut: true, outDate: '2026-05-17' }],
+    [
+      '15:20',
+      '09:40',
+      { checkIn: true, checkOut: true, inDate: '2026-05-15', outDate: '2026-05-17' },
+    ],
   );
   const key = String(p.entryId);
   const used = merge(
@@ -412,5 +416,51 @@ test('a leg’s proposal settles once its times are used, its mode read from the
     used.proposals.some((x) => x.entryId === ids[key]),
     false,
     'and settled by using them',
+  );
+});
+
+test('a stay checked into after midnight moves to the next day once used', () => {
+  // The inn's check-in visit, moved to 00:02 the next morning (no visit on the check-in day).
+  const innId = ids['inn'];
+  const first = plain.proposals.find((x) => x.entryId === innId)!;
+  const visit = segments.find((s) => s.key === first.segment)!;
+  const checkInDay = entry('inn').day;
+  const next = new Date(Date.parse(`${checkInDay}T12:00:00Z`) + 86_400_000)
+    .toISOString()
+    .slice(0, 10);
+  const offset = visit.startOffsetMin ?? 0;
+  const late = {
+    ...visit,
+    key: `${visit.key}:late`,
+    startUtc: new Date(Date.parse(`${next}T00:02:00Z`) - offset * 60_000).toISOString(),
+  };
+  // No visit to the inn on the check-in day at all: only the late one.
+  const sameDay = (s: (typeof segments)[number]) =>
+    s.kind === 'visit' &&
+    s.placeId === visit.placeId &&
+    new Date(Date.parse(s.startUtc) + (s.startOffsetMin ?? 0) * 60_000)
+      .toISOString()
+      .slice(0, 10) === checkInDay;
+  const moved = [...segments.filter((s) => !sameDay(s)), late];
+  const r = merge({ plan, segments: moved, photos, edits: [] });
+  const p = r.proposals.find((x) => x.entryId === innId)!;
+  assert.deepEqual([p.start, p.stay?.inDate], ['00:02', next]);
+  const key = String(innId);
+  const used = merge({
+    plan,
+    segments: moved,
+    photos,
+    edits: [
+      edit({ target: 'entry', key, field: 'start_time', value: '00:02' }),
+      edit({ target: 'entry', key, field: 'start_date', value: next }),
+      edit({ target: 'entry', key, field: 'end_time', value: p.end }),
+    ],
+  });
+  const stay = entries(used).find((e) => e.id === `i${innId}`)!;
+  assert.deepEqual([stay.day, stay.time], [next, '00:02'], 'on the next day, at 00:02');
+  assert.equal(
+    used.proposals.some((x) => x.entryId === innId),
+    false,
+    'settled',
   );
 });

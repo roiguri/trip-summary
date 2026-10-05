@@ -47,6 +47,8 @@ export type Finding = (
       title: string;
       date: string;
       checkIn: string | null;
+      /** The check-in's day: the next day when the arrival was after midnight. */
+      inDate: string;
       checkOut: string | null;
       outDate: string;
     }
@@ -148,6 +150,7 @@ export async function editDataFrom(
             title: e.title,
             date: e.day,
             checkIn: p.stay.checkIn ? p.start : null,
+            inDate: p.stay.inDate,
             checkOut: p.stay.checkOut ? p.end : null,
             outDate: p.stay.outDate,
             setAside,
