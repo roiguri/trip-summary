@@ -27,16 +27,17 @@ export async function POST(req: Request, { params }: { params: Promise<{ tripId:
   const store = getStore();
   if (!(await store.getPlan(tripId))) return new Response('Import the plan first', { status: 409 });
   const by = await actor();
-  for (const e of edits as EditRequest[])
-    if (e.value === undefined) await store.removeEdit(tripId, e.target, e.key, e.field);
-    else
-      await store.setEdit(tripId, {
-        target: e.target,
-        key: e.key,
-        field: e.field,
-        value: e.value,
-        by,
-      });
+  // All together (batched), then one rebuild.
+  await store.applyEdits(
+    tripId,
+    (edits as EditRequest[]).map((e) => ({
+      target: e.target,
+      key: e.key,
+      field: e.field,
+      value: e.value,
+      by,
+    })),
+  );
   t.mark('save');
   await rebuildJournal(store, tripId);
   t.mark('rebuild');

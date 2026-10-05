@@ -4,7 +4,7 @@ import { accessToTrip, currentAccount } from '../../../lib/auth/session';
 import { previewPending } from '../../../lib/import/stage';
 import { review } from '../../../lib/review';
 import { EditorBar, type SharedWith } from '../../components/EditorBar';
-import { editView } from '../../../lib/edit-view';
+import { currentEditView, currentJournal } from '../../../lib/journal';
 import Client from '../../Client';
 
 const opened = (iso: string) =>
@@ -24,7 +24,7 @@ export default async function TripPage({
   const access = await accessToTrip(tripId);
   if (!access) notFound();
   const store = getStore();
-  const journal = await store.getJournal(tripId);
+  const journal = await currentJournal(store, tripId);
   if (!journal) notFound();
   const name = account.name ?? account.email ?? 'Signed in';
   // An editor previewing sees exactly what a viewer does, with a way back.
@@ -45,9 +45,9 @@ export default async function TripPage({
       </>
     );
 
-  // Edit mode (DESIGN.md, "Edit mode"): the trip merged fresh, with what edit mode needs.
+  // Edit mode (DESIGN.md, "Edit mode"): the journal and what the last save computed with it.
   if (query.edit === '1') {
-    const view = await editView(store, tripId);
+    const view = await currentEditView(store, tripId);
     if (view)
       return (
         <Client trip={view.trip} account={name} edit={view.edit} status={access.trip.status} />

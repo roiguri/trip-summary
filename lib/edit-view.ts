@@ -1,7 +1,14 @@
 // What edit mode shows (DESIGN.md, "Edit mode"): the trip merged fresh from its sources and edits,
 // and from it the inbox of the Timeline's findings, each day's visits for linking, and what the owner
 // has already changed.
-import { merge, type SegmentView, type Suggestion } from './merge/index.ts';
+import {
+  merge,
+  type MergeInput,
+  type MergeResult,
+  type SegmentView,
+  type Suggestion,
+} from './merge/index.ts';
+import { readSources } from './sources.ts';
 import type { Entry, Photo, TransitMode, Trip } from './model.ts';
 import type { Store } from './store/index.ts';
 import { configuredLookup, placeNames, type NameLookup } from './google/places.ts';
@@ -84,23 +91,32 @@ const firstPhotos = (all: Photo[]) => ({ photos: all.slice(0, 6), photoCount: al
 const span = (e: { time: string; end_time: string | null }) =>
   e.end_time ? `${e.time} – ${e.end_time}` : e.time || 'no time';
 
-/** The trip as the editor sees it, and what edit mode needs; null without a plan. */
+/** The trip as the editor sees it, and what edit mode needs, merged fresh; null without a plan.
+ *  (Edit mode normally reads what the last save stored: `currentEditView` in lib/journal.ts.) */
 export async function editView(
   store: Store,
   tripId: string,
   lookup: NameLookup | null = configuredLookup(),
 ): Promise<{ trip: Trip; edit: EditData } | null> {
   const t = timer();
-  const [plan, segments, photos, edits] = await Promise.all([
-    store.getPlan(tripId),
-    store.listTimeline(tripId),
-    store.listPhotos(tripId),
-    store.listEdits(tripId),
-  ]);
-  if (!plan) return null;
+  const inputs = await readSources(store, tripId);
+  if (!inputs) return null;
   t.mark('read');
-  const r = merge({ plan, segments, photos, edits });
+  const r = merge(inputs);
   t.mark('merge');
+  return { trip: r.trip, edit: await editDataFrom(store, tripId, inputs, r, lookup, t) };
+}
+
+/** What edit mode needs, from a merge already done: the save computes it with the journal, from the
+ *  same merge, so it can't disagree with what viewers see. */
+export async function editDataFrom(
+  store: Store,
+  tripId: string,
+  { plan, photos, edits }: MergeInput,
+  r: MergeResult,
+  lookup: NameLookup | null,
+  t = timer(),
+): Promise<EditData> {
   const entries = new Map<number, Entry>();
   for (const d of r.trip.days)
     for (const e of d.entries)
@@ -232,18 +248,15 @@ export async function editView(
     (e) => e.target === 'trip' && e.key === tripId && e.field === 'cover',
   )?.value;
   return {
-    trip: r.trip,
-    edit: {
-      tripId,
-      findings,
-      setAside,
-      newPhotoIds,
-      timing: t.header(),
-      segments: r.segments,
-      edited,
-      hidden: r.hidden,
-      cover: typeof cover === 'string' ? cover : null,
-      added: Object.fromEntries(r.added.map((a) => [String(a.entryId), a.key])),
-    },
+    tripId,
+    findings,
+    setAside,
+    newPhotoIds,
+    timing: t.header(),
+    segments: r.segments,
+    edited,
+    hidden: r.hidden,
+    cover: typeof cover === 'string' ? cover : null,
+    added: Object.fromEntries(r.added.map((a) => [String(a.entryId), a.key])),
   };
 }
