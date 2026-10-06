@@ -242,8 +242,17 @@ tour). Only the owner makes them; the app never suggests one.
 - The ticket opens the block for a viewer (its photos and note in the detail card, "THE BLOCK"), and
   the block's editor in edit mode: rename, emoji, colour, note, what's attached, and **Ungroup**
   (the entries stay).
-- Stored as edits: the block's fields under target `block`, and a `block` field on each attached
-  entry or added stop (`lib/blocks.ts`).
+- **Loose photos join too** (Oct 6): a loose moment's editor has the same Block section; it is
+  attached by its photos, so it stays attached as moments regroup.
+- **Folded** (Oct 6, option B of three): a contact sheet of six photos left of the rail, the stops
+  on the rail at the right (each opens its entry). The owner sets "Show collapsed" in the block's
+  editor; anyone can unfold or fold it ("Show 3 stops ▾" / "Fold ▴" beside the ticket; on a phone,
+  under it). Edit mode starts unfolded.
+- **Which photos:** "Show on the block" in the block's editor picks the contact sheet's photos, in
+  order, as "Show on the journey" does for an entry's three; then highlights, then time order.
+  Added stops now have "Show on the journey" too.
+- Stored as edits: the block's fields under target `block` (also `collapsed`, `photos`), and a
+  `block` field on each attached entry, added stop or loose photo (`lib/blocks.ts`).
 
 ## Exact sampled backgrounds and remaining gaps
 

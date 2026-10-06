@@ -85,7 +85,10 @@ export type BlockDef = {
   emoji: string;
   color: string;
   note: string;
-  members: { target: 'entry' | 'suggestion'; key: string }[];
+  collapsed: boolean;
+  /** Its contact sheet's photos as chosen, comma-separated ('' for time order). */
+  photos: string;
+  members: { target: 'entry' | 'suggestion' | 'photo'; key: string }[];
 };
 
 export type EditData = {
@@ -314,11 +317,28 @@ function blockDefs(
 ): BlockDef[] {
   const defs = new Map<string, BlockDef>();
   for (const e of edits)
-    if (e.target === 'block' && typeof e.value === 'string') {
+    if (e.target === 'block' && e.value !== undefined && e.value !== null) {
       if (!defs.has(e.key))
-        defs.set(e.key, { id: e.key, title: '', emoji: '', color: 'teal', note: '', members: [] });
+        defs.set(e.key, {
+          id: e.key,
+          title: '',
+          emoji: '',
+          color: 'teal',
+          note: '',
+          collapsed: false,
+          photos: '',
+          members: [],
+        });
       const d = defs.get(e.key)!;
-      if (e.field === 'title' || e.field === 'emoji' || e.field === 'color' || e.field === 'note')
+      if (e.field === 'collapsed') d.collapsed = e.value === true;
+      else if (
+        typeof e.value === 'string' &&
+        (e.field === 'title' ||
+          e.field === 'emoji' ||
+          e.field === 'color' ||
+          e.field === 'note' ||
+          e.field === 'photos')
+      )
         d[e.field] = e.value;
     }
   for (const e of edits)
@@ -326,7 +346,7 @@ function blockDefs(
       e.field === 'block' &&
       typeof e.value === 'string' &&
       defs.has(e.value) &&
-      (e.target === 'entry' || e.target === 'suggestion')
+      (e.target === 'entry' || e.target === 'suggestion' || e.target === 'photo')
     )
       defs.get(e.value)!.members.push({ target: e.target, key: e.key });
   return [...defs.values()];

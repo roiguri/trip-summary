@@ -5,6 +5,7 @@ import { formatDay, noteDir, transitTimes } from '../lib/format';
 import { EntryCaption } from './EntryCaption';
 import { TransitIcon } from './icons';
 import { LanePath, laneClass } from './lanes';
+import { sheetPhotos } from '../../lib/blocks';
 
 /** Edit mode's additions to the rail (DESIGN.md, "Edit mode, round 2", T1), drawn by the caller:
  *  what goes under an entry, the dashed cards placed at their own times, and a day banner's chip. */
@@ -97,18 +98,39 @@ const shortDay = (date: string) =>
   });
 
 /** A block's sheet on one day (DESIGN.md, "Blocks"): dot-grid paper behind its entries, its ticket
- *  at the top right; a block spanning days has a sheet on each, its joining edges open. */
+ *  at the top right; a block spanning days has a sheet on each, its joining edges open. Folded, it
+ *  shows a contact sheet of its photos and its stops on the rail. */
 function BlockSheet({
   block,
   day,
+  entries,
+  folded,
+  onFold,
   onOpen,
+  onChoose,
   children,
 }: {
   block: Block;
   day: string;
+  /** Its entries on this day. */
+  entries: Entry[];
+  folded: boolean;
+  onFold: () => void;
   onOpen?: (id: string) => void;
+  onChoose: (e: Entry) => void;
   children: React.ReactNode;
 }) {
+  const stops = entries.filter(
+    (e) =>
+      e.type !== 'photo' &&
+      e.type !== 'cluster' &&
+      e.type !== 'note' &&
+      e.stay?.role !== 'checkout',
+  );
+  const photos = sheetPhotos(
+    entries.flatMap((e) => e.photos),
+    block.shown,
+  );
   const at = block.days.indexOf(day);
   const many = block.days.length > 1;
   const span = many
@@ -116,29 +138,63 @@ function BlockSheet({
     : [block.start.time, block.end.time].filter(Boolean).join(' – ');
   return (
     <div
-      className={`block-sheet ${at > 0 ? 'cont-prev' : ''} ${many && at < block.days.length - 1 ? 'cont-next' : ''}`}
+      className={`block-sheet ${folded ? 'folded' : ''} ${at > 0 ? 'cont-prev' : ''} ${many && at < block.days.length - 1 ? 'cont-next' : ''}`}
       style={{ '--bc': block.color } as React.CSSProperties}
       data-block={block.id}
     >
-      <button className="block-ticket" onClick={() => onOpen?.(block.id)}>
-        {block.emoji && <span className="stub">{block.emoji}</span>}
-        <span className="txt">
-          <b>
-            {block.title}
-            {many ? ` · day ${at + 1} of ${block.days.length}` : ''}
-          </b>
-          <small>
-            {[
-              span,
-              `${block.stops} ${block.stops === 1 ? 'stop' : 'stops'}`,
-              block.photos ? `${block.photos} ${block.photos === 1 ? 'photo' : 'photos'}` : '',
-            ]
-              .filter(Boolean)
-              .join(' · ')}
-          </small>
-        </span>
-      </button>
-      {children}
+      <div className="block-head">
+        <button className="block-fold" aria-expanded={!folded} onClick={onFold}>
+          {folded ? `Show ${stops.length} ${stops.length === 1 ? 'stop' : 'stops'} ▾` : 'Fold ▴'}
+        </button>
+        <button className="block-ticket" onClick={() => onOpen?.(block.id)}>
+          {block.emoji && <span className="stub">{block.emoji}</span>}
+          <span className="txt">
+            <b>
+              {block.title}
+              {many ? ` · day ${at + 1} of ${block.days.length}` : ''}
+            </b>
+            <small>
+              {[
+                span,
+                `${block.stops} ${block.stops === 1 ? 'stop' : 'stops'}`,
+                block.photos ? `${block.photos} ${block.photos === 1 ? 'photo' : 'photos'}` : '',
+              ]
+                .filter(Boolean)
+                .join(' · ')}
+            </small>
+          </span>
+        </button>
+      </div>
+      {folded ? (
+        <div className="block-folded">
+          {photos.length > 0 ? (
+            <button
+              className="bk-contact"
+              aria-label={`${block.title}: its photos`}
+              onClick={() => onOpen?.(block.id)}
+            >
+              {photos.map((p) => (
+                // eslint-disable-next-line @next/next/no-img-element -- stored media, served as is
+                <img key={p.id} src={p.thumb ?? p.url} alt="" loading="lazy" decoding="async" />
+              ))}
+            </button>
+          ) : (
+            <span />
+          )}
+          <ol className="bk-stops">
+            {stops.map((e) => (
+              <li key={e.id}>
+                <button onClick={() => onChoose(e)}>
+                  <b>{e.title}</b>
+                  <small>{byline(e)}</small>
+                </button>
+              </li>
+            ))}
+          </ol>
+        </div>
+      ) : (
+        children
+      )}
     </div>
   );
 }
@@ -193,6 +249,9 @@ export function Timeline({
   blocks?: Block[];
   onOpenBlock?: (id: string) => void;
 }) {
+  // Blocks folded or unfolded here; until then, as the owner set it (in edit mode, unfolded).
+  const [folds, setFolds] = useState<Record<string, boolean>>({});
+  const isFolded = (b: Block) => folds[b.id] ?? (!edit && !!b.collapsed);
   // Multi-day focus: the hovered span, else the selected one; its lane, labels and end marker
   // are emphasised and other lanes fade (only when more than one lane is drawn).
   const [hoverSpan, setHoverSpan] = useState<string | null>(null);
@@ -336,7 +395,13 @@ export function Timeline({
                   key={`block-${block.id}`}
                   block={block}
                   day={d.date}
+                  entries={g.items.flatMap(({ item }) =>
+                    item.kind === 'entry' ? [item.entry] : [],
+                  )}
+                  folded={isFolded(block)}
+                  onFold={() => setFolds({ ...folds, [block.id]: !isFolded(block) })}
                   onOpen={onOpenBlock}
+                  onChoose={onChoose}
                 >
                   {g.items.map(render)}
                 </BlockSheet>

@@ -7,6 +7,7 @@ import { readJarvisPlan } from '../../lib/import/plan.ts';
 import { sliceTimeline } from '../../lib/import/timeline.ts';
 import type { Edit } from '../../lib/store/types.ts';
 import { jarvisFile, mockEdits, mockPhotos } from '../helpers.ts';
+import { sheetPhotos } from '../../lib/blocks.ts';
 
 const expected = JSON.parse(readFileSync('data/mock/expected.json', 'utf8'));
 const sample = JSON.parse(readFileSync('data/sample-trip.json', 'utf8'));
@@ -598,6 +599,48 @@ test('a block covers everything from its first attached entry to its last', () =
     day.slice(first, last + 1).reduce((n, e) => n + e.photos.length, 0),
   );
   assert.equal(plain.trip.blocks, undefined, 'no blocks, no change');
+});
+
+test('a loose moment joins a block by its photos, and can be its end', () => {
+  const plain = merge(input([]));
+  const day = plain.trip.days[0].entries;
+  const start = day.findIndex((e) => e.id === `i${ids['carmel-beach-visit']}`);
+  const moment = day.findIndex((e, i) => i > start && (e.type === 'photo' || e.type === 'cluster'));
+  assert.ok(start >= 0 && moment > start, 'the sample has a loose moment after the beach');
+  const r = merge(
+    input([
+      edit({ target: 'block', key: 'bloose1', field: 'title', value: 'Morning' }),
+      edit({
+        target: 'entry',
+        key: String(ids['carmel-beach-visit']),
+        field: 'block',
+        value: 'bloose1',
+      }),
+      ...day[moment].photos.map((p) =>
+        edit({ target: 'photo', key: p.id, field: 'block', value: 'bloose1' }),
+      ),
+    ]),
+  );
+  const after = r.trip.days[0].entries;
+  assert.equal(after[moment].block, 'bloose1');
+  assert.ok(after.slice(start, moment + 1).every((e) => e.block === 'bloose1'));
+  assert.ok(
+    after.slice(moment + 1).every((e) => e.block === undefined),
+    'it ends at the moment',
+  );
+});
+
+test("a block's contact sheet: chosen photos, then highlights, then time order", () => {
+  const ph = (id: string, highlighted?: true) => ({ id, ...(highlighted ? { highlighted } : {}) });
+  const all = [ph('a'), ph('b'), ph('c', true), ph('d'), ph('e'), ph('f'), ph('g'), ph('h')];
+  assert.deepEqual(
+    sheetPhotos(all, ['f', 'b']).map((p) => p.id),
+    ['f', 'b', 'c', 'a', 'd', 'e'],
+  );
+  assert.deepEqual(
+    sheetPhotos(all).map((p) => p.id),
+    ['c', 'a', 'b', 'd', 'e', 'f'],
+  );
 });
 
 test('a block can span days; blocks never overlap; undoing removes it', () => {

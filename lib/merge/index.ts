@@ -703,10 +703,16 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
       },
     ];
   });
-  // The photos an entry shows on the journey, in the owner's order, come first (MP1).
+  // The photos an entry shows on the journey, in the owner's order, come first (MP1); an added
+  // stop's are kept under its suggestion.
+  const addedKey = new Map(approved.map((s, n) => [`i${-(n + 1)}`, s.key]));
   for (const d of trip.days)
     for (const e of d.entries) {
-      const main = /^i\d+$/.test(e.id) ? use('entry', e.id.slice(1), 'photos') : undefined;
+      const main = /^i\d+$/.test(e.id)
+        ? use('entry', e.id.slice(1), 'photos')
+        : addedKey.has(e.id)
+          ? use('suggestion', addedKey.get(e.id)!, 'photos')
+          : undefined;
       if (typeof main !== 'string' || !main) continue;
       const order = main.split(',');
       const rank = (id: string) => (order.includes(id) ? order.indexOf(id) : order.length);

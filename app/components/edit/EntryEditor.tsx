@@ -86,7 +86,7 @@ export function EntryEditor({
   ];
   // The photos shown on the journey, in order (DESIGN.md, "Edit mode, round 2", MP1): numbered in
   // the grid; "Show on the journey" puts the selected first.
-  const canPick = !loose && !fromSuggestion;
+  const canPick = !loose;
   const main = canPick ? entry.photos.slice(0, 3).map((p) => p.id) : [];
   const showOnJourney = () => {
     const chosen = picked.filter((p) => !hidden.some((h) => h.id === p));
@@ -584,9 +584,19 @@ export function EntryEditor({
         </div>
       )}
 
-      {!loose && (
-        <EntryBlock entry={entry} days={days} edit={edit} set={set} save={save} busy={busy} />
-      )}
+      <EntryBlock
+        entry={entry}
+        days={days}
+        edit={edit}
+        // A loose moment joins by its photos; anything else by its own edit.
+        attach={(b) =>
+          loose
+            ? entry.photos.map((p) => ({ target: 'photo', key: p.id, field: 'block', value: b }))
+            : [set('block', b)]
+        }
+        save={save}
+        busy={busy}
+      />
 
       <div className="ed-foot">
         {!fromSuggestion && !loose && (
