@@ -61,6 +61,10 @@ export type Block = {
   end: { date: string; time: string };
   stops: number;
   photos: number;
+  /** Shown folded by default: a contact sheet of its photos and its stops (the owner's choice). */
+  collapsed?: true;
+  /** The photos the owner chose for its contact sheet, in order (media IDs). */
+  shown?: string[];
 };
 export type TransitMode = 'car' | 'train' | 'flight' | 'bus' | 'ferry' | 'walk' | 'bike';
 

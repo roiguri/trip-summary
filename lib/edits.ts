@@ -15,6 +15,13 @@ const oneOf =
   (v) =>
     typeof v === 'string' && values.includes(v);
 const key: Rule = (v) => typeof v === 'string' && v.length > 0 && v.length <= 300;
+/** Up to `n` media IDs, comma-separated, in order. */
+const mediaIds =
+  (n: number): Rule =>
+  (v) =>
+    typeof v === 'string' &&
+    v.split(',').length <= n &&
+    v.split(',').every((id) => /^[\w.-]{1,200}$/.test(id));
 const blockId: Rule = (v) => typeof v === 'string' && /^b[a-z0-9]{4,24}$/.test(v);
 const lat: Rule = (v) => typeof v === 'number' && Number.isFinite(v) && v >= -90 && v <= 90;
 const lng: Rule = (v) => typeof v === 'number' && Number.isFinite(v) && v >= -180 && v <= 180;
@@ -47,10 +54,7 @@ const FIELDS: Record<EditTarget, Record<string, Rule>> = {
     /** The block it's attached to (a block's key). */
     block: blockId,
     /** The photos shown on the journey, in order: up to three media IDs, comma-separated. */
-    photos: (v) =>
-      typeof v === 'string' &&
-      v.split(',').length <= 3 &&
-      v.split(',').every((id) => /^[\w.-]{1,200}$/.test(id)),
+    photos: mediaIds(3),
   },
   photo: {
     entry: (v) => v === null || key(v),
@@ -59,6 +63,8 @@ const FIELDS: Record<EditTarget, Record<string, Rule>> = {
     highlighted: bool,
     /** Kept: no longer marked new in edit mode. */
     seen: bool,
+    /** A loose photo's block (its moment is attached by its photos). */
+    block: blockId,
   },
   day: { title: text(120), photosSeen: isoTime },
   trip: { title: text(200), subtitle: text(300), cover: key },
@@ -71,6 +77,8 @@ const FIELDS: Record<EditTarget, Record<string, Rule>> = {
     placeId,
     lat,
     lng,
+    /** An added stop's photos shown on the journey, as a planned entry's. */
+    photos: mediaIds(3),
   },
   place: {},
   /** A block (DESIGN.md, "Blocks"): its key is its ID; it exists while any of these is set. */
@@ -79,6 +87,10 @@ const FIELDS: Record<EditTarget, Record<string, Rule>> = {
     emoji: (v) => typeof v === 'string' && [...v].length <= 4,
     color: oneOf('teal', 'copper', 'olive', 'plum', 'blue', 'ochre'),
     note: text(2000),
+    /** Folded by default, for everyone (viewers can unfold it). */
+    collapsed: bool,
+    /** The photos on its contact sheet, in order. */
+    photos: mediaIds(6),
   },
 };
 

@@ -1,6 +1,6 @@
 // Blocks (DESIGN.md, "Blocks"): the owner groups entries into one larger event, a bike ride or a
 // trek. A block is the owner's edits (target "block": title, emoji, colour, note) and the entries
-// attached to it (an entry's "block" edit, or an added stop's). It runs from its first attached entry
+// attached to it (an entry's "block" edit, an added stop's, or a loose photo's for its moment). It runs from its first attached entry
 // to its last, across days if need be, and everything between belongs to it: loose photos, legs,
 // stops added from the Timeline, other entries. Applied after the trip is built, from the same edits.
 import type { Block, Trip } from './model.ts';
@@ -24,12 +24,26 @@ export function applyBlocks(trip: Trip, edits: Edit[], addedStops: Map<string, s
     if (e.target === 'block') defined.set(e.key, { ...defined.get(e.key), [e.field]: e.value });
   if (!defined.size) return;
 
-  // Attached entries, by their drawn ID: a planned entry's "i<n>", an added stop's "i-<n>".
+  // A loose photo's moment, by the photo: moments are regrouped as photos come and go.
+  const moment = new Map<string, string>();
+  for (const d of trip.days)
+    for (const e of d.entries)
+      if (e.type === 'photo' || e.type === 'cluster')
+        for (const p of e.photos) moment.set(p.id, e.id);
+
+  // Attached entries, by their drawn ID: a planned entry's "i<n>", an added stop's "i-<n>", a
+  // loose moment's "p<n>" or "c<n>".
   const members = new Map<string, string[]>();
   for (const e of edits) {
     if (e.field !== 'block' || typeof e.value !== 'string' || !defined.has(e.value)) continue;
     const id =
-      e.target === 'entry' ? `i${e.key}` : e.target === 'suggestion' ? addedStops.get(e.key) : null;
+      e.target === 'entry'
+        ? `i${e.key}`
+        : e.target === 'suggestion'
+          ? addedStops.get(e.key)
+          : e.target === 'photo'
+            ? moment.get(e.key)
+            : null;
     if (id) members.set(e.value, [...(members.get(e.value) ?? []), id]);
   }
 
@@ -81,7 +95,25 @@ export function applyBlocks(trip: Trip, edits: Edit[], addedStops: Map<string, s
         (x) => x.e.type === 'place' || (x.e.type === 'lodging' && x.e.stay?.role !== 'checkout'),
       ).length,
       photos: inside.reduce((n, x) => n + x.e.photos.length, 0),
+      ...(def.collapsed === true ? { collapsed: true as const } : {}),
+      ...(typeof def.photos === 'string' && def.photos ? { shown: def.photos.split(',') } : {}),
     });
   }
   if (blocks.length) trip.blocks = blocks;
+}
+
+/** A block's contact sheet: the owner's chosen photos first, in order, then highlights, then the
+ *  rest in time order; six at most. */
+export function sheetPhotos<P extends { id: string; highlighted?: true }>(
+  photos: P[],
+  shown: string[] = [],
+  n = 6,
+): P[] {
+  const rank = (p: P) =>
+    shown.includes(p.id) ? shown.indexOf(p.id) : shown.length + (p.highlighted ? 0 : 1);
+  return photos
+    .map((p, i) => ({ p, i }))
+    .sort((a, b) => rank(a.p) - rank(b.p) || a.i - b.i)
+    .slice(0, n)
+    .map((x) => x.p);
 }

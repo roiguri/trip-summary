@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import type { Day, Entry } from '../../../lib/data';
 import type { BlockDef, EditData } from '../../../lib/edit-view';
-import { BLOCK_COLORS } from '../../../lib/blocks';
+import { BLOCK_COLORS, sheetPhotos } from '../../../lib/blocks';
 import { useSave, type EditChange } from './useSave';
 
 /** A few emoji to start from; any other can be typed. */
@@ -132,16 +132,41 @@ export function BlockEditor({
 }) {
   const { save, busy, error } = useSave(edit.tripId);
   const [ungrouping, setUngrouping] = useState(false);
-  const entries = days.flatMap((d) => d.entries);
-  const nameOf = (m: BlockDef['members'][number]) => {
-    const e =
-      m.target === 'entry'
-        ? entries.find((x) => x.id === `i${m.key}`)
-        : entries.find((x) => edit.added[x.id.slice(1)] === m.key);
-    return e
-      ? `${e.title || 'An entry'} · ${e.day.slice(5)}${e.time ? ` ${e.time}` : ''}`
-      : 'An entry no longer in the plan';
+  const [picked, setPicked] = useState<string[]>([]);
+  const field = (f: string, value?: string | boolean): EditChange => ({
+    target: 'block',
+    key: block.id,
+    field: f,
+    value,
+  });
+  // Its photos, and the six on its contact sheet (chosen, then highlights, then time order).
+  const photos = days
+    .flatMap((d) => d.entries)
+    .filter((e) => e.block === block.id)
+    .flatMap((e) => e.photos);
+  const chosen = block.photos ? block.photos.split(',') : [];
+  const sheet = sheetPhotos(photos, chosen).map((p) => p.id);
+  const showOnBlock = () => {
+    const order = [...picked, ...sheet.filter((m) => !picked.includes(m))].slice(0, 6);
+    return save([field('photos', order.join(','))]).then(() => setPicked([]));
   };
+  const entries = days.flatMap((d) => d.entries);
+  const entryOf = (m: BlockDef['members'][number]) =>
+    m.target === 'entry'
+      ? entries.find((x) => x.id === `i${m.key}`)
+      : m.target === 'photo'
+        ? entries.find((x) => x.photos.some((p) => p.id === m.key))
+        : entries.find((x) => edit.added[x.id.slice(1)] === m.key);
+  // What's attached, by the entry it shows as (a loose moment's photos are one line).
+  const attached = new Map<string, { label: string; members: BlockDef['members'] }>();
+  for (const m of block.members) {
+    const e = entryOf(m);
+    const id = e?.id ?? `gone-${m.target}-${m.key}`;
+    const label = e
+      ? `${e.title || (e.type === 'photo' ? 'A photo' : 'Photos')} · ${e.day.slice(5)}${e.time ? ` ${e.time}` : ''}`
+      : 'No longer on the journey';
+    attached.set(id, { label, members: [...(attached.get(id)?.members ?? []), m] });
+  }
   const detach = (m: BlockDef['members'][number]): EditChange => ({
     target: m.target,
     key: m.key,
@@ -162,16 +187,92 @@ export function BlockEditor({
         busy={busy}
         onSubmit={(f) => save(blockFields(block.id, f))}
       />
+      <div className="ed-foot">
+        <button
+          className={`toggle ${block.collapsed ? 'on' : ''}`}
+          aria-pressed={block.collapsed}
+          disabled={busy}
+          onClick={() => save([field('collapsed', block.collapsed ? undefined : true)])}
+        >
+          Show collapsed
+        </button>
+        <small>Folded to its photos and stops; anyone can unfold it.</small>
+      </div>
+      {photos.length > 0 && (
+        <div className="ed-photos">
+          <div className="ed-photos-head">
+            <b>Photos · {photos.length}</b>
+          </div>
+          <div className="ed-grid">
+            {photos.map((p) => (
+              <button
+                key={p.id}
+                className={`ed-photo ${picked.includes(p.id) ? 'on' : ''}`}
+                aria-pressed={picked.includes(p.id)}
+                onClick={() =>
+                  setPicked(
+                    picked.includes(p.id) ? picked.filter((x) => x !== p.id) : [...picked, p.id],
+                  )
+                }
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element -- stored media, served as is */}
+                <img src={p.thumb ?? p.url} alt="" loading="lazy" />
+                {sheet.includes(p.id) && (
+                  <span className="num" aria-label={`On the block, ${sheet.indexOf(p.id) + 1}`}>
+                    {sheet.indexOf(p.id) + 1}
+                  </span>
+                )}
+                {p.highlighted && (
+                  <b className="pstar" aria-label="A highlight">
+                    ★
+                  </b>
+                )}
+              </button>
+            ))}
+          </div>
+          {picked.length > 0 ? (
+            <div className="ed-selbar">
+              <b>{picked.length} selected</b>
+              <button className="pill-button small primary" disabled={busy} onClick={showOnBlock}>
+                Show on the block
+              </button>
+              <button className="pill-button small" onClick={() => setPicked([])}>
+                Clear
+              </button>
+            </div>
+          ) : (
+            <small>
+              1–6: the photos on the block’s contact sheet. Select photos to put them first.
+              {chosen.length > 0 && (
+                <>
+                  {' '}
+                  <button
+                    className="link-button"
+                    disabled={busy}
+                    onClick={() => save([field('photos', undefined)])}
+                  >
+                    Back to time order
+                  </button>
+                </>
+              )}
+            </small>
+          )}
+        </div>
+      )}
       <div className="ed-visit">
-        <b>Attached · {block.members.length}</b>
+        <b>Attached · {attached.size}</b>
         <small>
           The block runs from its first attached entry to its last; everything between belongs to
           it. Attach more with “Add to block” in an entry’s editor.
         </small>
-        {block.members.map((m) => (
-          <span key={`${m.target}-${m.key}`} className="bk-member">
-            {nameOf(m)}
-            <button className="link-button" disabled={busy} onClick={() => save([detach(m)])}>
+        {[...attached].map(([id, a]) => (
+          <span key={id} className="bk-member">
+            {a.label}
+            <button
+              className="link-button"
+              disabled={busy}
+              onClick={() => save(a.members.map(detach))}
+            >
               Remove
             </button>
           </span>
@@ -187,6 +288,8 @@ export function BlockEditor({
               save([
                 ...block.members.map(detach),
                 ...blockFields(block.id, { title: '', emoji: '', color: '', note: '' }),
+                field('collapsed', undefined),
+                field('photos', undefined),
               ]).then((ok) => ok && onClose())
             }
           >
@@ -218,14 +321,15 @@ export function EntryBlock({
   entry,
   days,
   edit,
-  set,
+  attach,
   save,
   busy,
 }: {
   entry: Entry;
   days: Day[];
   edit: EditData;
-  set: (field: string, value?: string) => EditChange;
+  /** The edits that put this entry in a block (or, with none, take it out). */
+  attach: (block?: string) => EditChange[];
   save: (changes: EditChange[]) => Promise<boolean>;
   busy: boolean;
 }) {
@@ -240,11 +344,7 @@ export function EntryBlock({
           In {block.emoji} {block.title}
         </b>
         {end ? (
-          <button
-            className="link-button"
-            disabled={busy}
-            onClick={() => save([set('block', undefined)])}
-          >
+          <button className="link-button" disabled={busy} onClick={() => save(attach(undefined))}>
             Remove from the block
           </button>
         ) : (
@@ -263,7 +363,7 @@ export function EntryBlock({
           busy={busy}
           onSubmit={(f) => {
             const id = newBlockId();
-            save([...blockFields(id, f), set('block', id)]).then((ok) => ok && setMode(''));
+            save([...blockFields(id, f), ...attach(id)]).then((ok) => ok && setMode(''));
           }}
           onCancel={() => setMode('')}
         />
@@ -290,7 +390,7 @@ export function EntryBlock({
               key={b.id}
               role="menuitem"
               disabled={busy}
-              onClick={() => save([set('block', b.id)]).then((ok) => ok && setMode(''))}
+              onClick={() => save(attach(b.id)).then((ok) => ok && setMode(''))}
             >
               <b>
                 {b.emoji} {b.title}

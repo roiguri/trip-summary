@@ -86,8 +86,53 @@ await p.waitForFunction(
 );
 ok('renaming shows on the ticket', true);
 
-// For a viewer, the ticket opens the block's album.
+// Folded by default, and its contact sheet's first photo chosen.
+await p.getByRole('button', { name: 'Show collapsed' }).click();
+await p.waitForSelector('button.toggle.on:has-text("Show collapsed")', { timeout: 15_000 });
+const blockGrid = p.locator('.editor[aria-label^="Edit block"] .ed-photo');
+const third = await blockGrid.nth(2).locator('img').getAttribute('src');
+await blockGrid.nth(2).click();
+await p.getByRole('button', { name: 'Show on the block' }).click();
+await p.waitForFunction(
+  () =>
+    document
+      .querySelectorAll('.editor[aria-label^="Edit block"] .ed-photo')[2]
+      ?.querySelector('.num')?.textContent === '1',
+  null,
+  { timeout: 15_000 },
+);
+ok('a chosen photo leads the contact sheet', true);
+ok(
+  'in edit mode the block stays unfolded',
+  (await p.locator('.left .block-sheet.folded').count()) === 0,
+);
+
+// For a viewer it shows folded: the contact sheet and its stops.
 await p.goto(TRIP, { waitUntil: 'networkidle' });
+const folded = p.locator('.left .block-sheet.folded').first();
+ok('a collapsed block shows folded to viewers', (await folded.count()) === 1);
+ok(
+  'folded: six photos, the chosen one first, and its stops',
+  (await folded.locator('.bk-contact img').count()) === 6 &&
+    (await folded.locator('.bk-contact img').first().getAttribute('src')) === third &&
+    (await folded.locator('.bk-stops li').count()) === 3,
+);
+if (SHOTS) {
+  await folded.scrollIntoViewIfNeeded();
+  await p.waitForTimeout(800);
+  const fb = await folded.boundingBox();
+  await p.screenshot({
+    path: `${SHOTS}/desk-folded.png`,
+    clip: { x: fb.x - 400, y: fb.y - 20, width: 820, height: fb.height + 40 },
+  });
+}
+await folded.getByRole('button', { name: /Show 3 stops/ }).click();
+ok(
+  'Show unfolds it',
+  (await p.locator('.left .block-sheet.folded').count()) === 0 && (await inSheet('i7')) === 1,
+);
+
+// For a viewer, the ticket opens the block's album.
 await p.locator('.left .block-ticket').first().click();
 await p.waitForTimeout(400);
 ok(
@@ -109,6 +154,15 @@ await signIn(phone, BASE);
 const q = await phone.newPage();
 q.on('pageerror', (e) => errors.push(String(e)));
 await q.goto(TRIP, { waitUntil: 'networkidle' });
+if (SHOTS) {
+  await q.locator('.left .block-sheet').first().scrollIntoViewIfNeeded();
+  await q.waitForTimeout(800);
+  await q
+    .locator('.left .block-sheet')
+    .first()
+    .screenshot({ path: `${SHOTS}/phone-folded.png` });
+}
+await q.getByRole('button', { name: /Show 3 stops/ }).click();
 const qs = await q.locator('.left .block-sheet').first().boundingBox();
 const qt = await q.locator('.left .block-ticket').first().boundingBox();
 ok(
