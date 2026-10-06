@@ -90,7 +90,7 @@ export type TripPhoto = {
   addedAt?: string;
 };
 
-export type EditTarget = 'trip' | 'day' | 'entry' | 'place' | 'photo' | 'suggestion';
+export type EditTarget = 'trip' | 'day' | 'entry' | 'place' | 'photo' | 'suggestion' | 'block';
 
 /** `trips/{tripId}/edits/{target~key~field}`: the owner's decision about one field. */
 export type Edit = {

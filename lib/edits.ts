@@ -15,6 +15,7 @@ const oneOf =
   (v) =>
     typeof v === 'string' && values.includes(v);
 const key: Rule = (v) => typeof v === 'string' && v.length > 0 && v.length <= 300;
+const blockId: Rule = (v) => typeof v === 'string' && /^b[a-z0-9]{4,24}$/.test(v);
 const lat: Rule = (v) => typeof v === 'number' && Number.isFinite(v) && v >= -90 && v <= 90;
 const lng: Rule = (v) => typeof v === 'number' && Number.isFinite(v) && v >= -180 && v <= 180;
 /** A Google place ID, or empty for a pin placed by hand (no Google place). */
@@ -43,6 +44,8 @@ const FIELDS: Record<EditTarget, Record<string, Rule>> = {
     lng,
     /** When the owner last kept this entry's new photos (edit mode stops marking them new). */
     photosSeen: isoTime,
+    /** The block it's attached to (a block's key). */
+    block: blockId,
     /** The photos shown on the journey, in order: up to three media IDs, comma-separated. */
     photos: (v) =>
       typeof v === 'string' &&
@@ -64,11 +67,19 @@ const FIELDS: Record<EditTarget, Record<string, Rule>> = {
     dismissed: bool,
     title: text(200),
     times: (v) => v === 'none' || (typeof v === 'string' && /^\d\d:\d\d-\d\d:\d\d$/.test(v)),
+    block: blockId,
     placeId,
     lat,
     lng,
   },
   place: {},
+  /** A block (DESIGN.md, "Blocks"): its key is its ID; it exists while any of these is set. */
+  block: {
+    title: text(120),
+    emoji: (v) => typeof v === 'string' && [...v].length <= 4,
+    color: oneOf('teal', 'copper', 'olive', 'plum', 'blue', 'ochre'),
+    note: text(2000),
+  },
 };
 
 export type EditRequest = {

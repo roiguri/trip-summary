@@ -1,6 +1,7 @@
 // The merge (docs/DATA-DESIGN.md, "2. Merge rules"): the plan is the skeleton, the Timeline adds
 // actual times and transit modes, photos attach to what those produce, and the owner's edits win
 // over all of it. Pure and free of Firebase, so it is tested on its own (docs/ARCHITECTURE.md).
+import { applyBlocks } from '../blocks.ts';
 import {
   buildTrip,
   legMode,
@@ -677,6 +678,8 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
     place: (k) => plan.places.some((p) => String(p.place_id) === k),
     photo: (k) => photos.some((p) => p.mediaId === k),
     suggestion: (k) => segments.some((s) => s.key === k),
+    // A block is the owner's own: it exists by its edits.
+    block: () => true,
   };
   const orphanEdits = edits.filter((e) => !exists[e.target](e.key));
   const matchedTo = new Map(Object.entries(matches).map(([id, m]) => [m.segment, Number(id)]));
@@ -709,6 +712,8 @@ export function merge({ plan, segments, photos, edits }: MergeInput): MergeResul
       const rank = (id: string) => (order.includes(id) ? order.indexOf(id) : order.length);
       e.photos = [...e.photos].sort((a, b) => rank(a.id) - rank(b.id));
     }
+  // Blocks: the owner's groups of entries (DESIGN.md, "Blocks").
+  applyBlocks(trip, edits, new Map(approved.map((s, n) => [s.key, `i${-(n + 1)}`])));
   // Shown only as small tiles in edit mode: the thumbnail where there is one.
   const hidden = hiddenPhotos.map((p) => ({
     id: p.id!,

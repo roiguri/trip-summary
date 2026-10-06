@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import type { Day, Entry } from '../../lib/data';
+import type { Block, Day, Entry } from '../../lib/data';
 import { formatDay, noteDir, transitTimes } from '../lib/format';
 import { EntryCaption } from './EntryCaption';
 import { TransitIcon } from './icons';
@@ -58,6 +58,91 @@ function withSides(items: TimelineItem[]) {
   });
 }
 
+type Sided = ReturnType<typeof withSides>[number];
+
+/** A day's items split into runs: a block's run (its entries, and what sits between two of them) or
+ *  the rest. */
+function groupByBlock(items: Sided[]) {
+  const entryBlock = (x: Sided) =>
+    x.item.kind === 'entry' ? (x.item.entry.block ?? null) : undefined;
+  const blockOf = items.map((x, n) => {
+    const own = entryBlock(x);
+    if (own !== undefined) return own;
+    // Not an entry (a dashed card, an end marker): inside a block only between two of its entries.
+    const prev = items
+      .slice(0, n)
+      .reverse()
+      .map(entryBlock)
+      .find((b) => b !== undefined);
+    const next = items
+      .slice(n + 1)
+      .map(entryBlock)
+      .find((b) => b !== undefined);
+    return prev && prev === next ? prev : null;
+  });
+  const groups: { block: string | null; items: Sided[] }[] = [];
+  items.forEach((x, n) => {
+    const last = groups[groups.length - 1];
+    if (last && last.block === blockOf[n]) last.items.push(x);
+    else groups.push({ block: blockOf[n], items: [x] });
+  });
+  return groups;
+}
+
+const shortDay = (date: string) =>
+  new Date(`${date}T12:00:00Z`).toLocaleDateString('en-US', {
+    weekday: 'short',
+    day: 'numeric',
+    timeZone: 'UTC',
+  });
+
+/** A block's sheet on one day (DESIGN.md, "Blocks"): dot-grid paper behind its entries, its ticket
+ *  at the top right; a block spanning days has a sheet on each, its joining edges open. */
+function BlockSheet({
+  block,
+  day,
+  onOpen,
+  children,
+}: {
+  block: Block;
+  day: string;
+  onOpen?: (id: string) => void;
+  children: React.ReactNode;
+}) {
+  const at = block.days.indexOf(day);
+  const many = block.days.length > 1;
+  const span = many
+    ? `${shortDay(block.start.date)} – ${shortDay(block.end.date)}`
+    : [block.start.time, block.end.time].filter(Boolean).join(' – ');
+  return (
+    <div
+      className={`block-sheet ${at > 0 ? 'cont-prev' : ''} ${many && at < block.days.length - 1 ? 'cont-next' : ''}`}
+      style={{ '--bc': block.color } as React.CSSProperties}
+      data-block={block.id}
+    >
+      <button className="block-ticket" onClick={() => onOpen?.(block.id)}>
+        {block.emoji && <span className="stub">{block.emoji}</span>}
+        <span className="txt">
+          <b>
+            {block.title}
+            {many ? ` · day ${at + 1} of ${block.days.length}` : ''}
+          </b>
+          <small>
+            {[
+              span,
+              `${block.stops} ${block.stops === 1 ? 'stop' : 'stops'}`,
+              block.photos ? `${block.photos} ${block.photos === 1 ? 'photo' : 'photos'}` : '',
+            ]
+              .filter(Boolean)
+              .join(' · ')}
+          </small>
+        </span>
+      </button>
+      {children}
+    </div>
+  );
+}
+
 /** Multi-day lanes drawn beside the rail on this day (on phones the text column clears them). */
 function dayLanes(d: Day) {
   const lanes = [
@@ -93,6 +178,8 @@ export function Timeline({
   onChoose,
   onShowAlbum,
   edit,
+  blocks,
+  onOpenBlock,
 }: {
   days: Day[];
   railRef: React.RefObject<HTMLElement | null>;
@@ -102,6 +189,9 @@ export function Timeline({
   onChoose: (e: Entry, from?: string) => void;
   onShowAlbum: (date: string) => void;
   edit?: TimelineEdit;
+  /** The trip's blocks (DESIGN.md, "Blocks"), and what opening one does. */
+  blocks?: Block[];
+  onOpenBlock?: (id: string) => void;
 }) {
   // Multi-day focus: the hovered span, else the selected one; its lane, labels and end marker
   // are emphasised and other lanes fade (only when more than one lane is drawn).
@@ -198,48 +288,62 @@ export function Timeline({
                 {s.title} · {s.final ? 'final day' : `day ${s.dayNumber}`}
               </button>
             ))}
-            {withSides(timelineItems(d, edit)).map(({ item, side }) =>
-              item.kind === 'ghost' ? (
-                <div
-                  key={`ghost-${item.key}`}
-                  className={`entry ghost-entry entry-${side}`}
-                  data-finding={item.key}
+            {groupByBlock(withSides(timelineItems(d, edit))).map((g) => {
+              const render = ({ item, side }: Sided) =>
+                item.kind === 'ghost' ? (
+                  <div
+                    key={`ghost-${item.key}`}
+                    className={`entry ghost-entry entry-${side}`}
+                    data-finding={item.key}
+                  >
+                    <span className="entry-node" />
+                    <span className="entry-content">{item.node}</span>
+                  </div>
+                ) : item.kind === 'end' ? (
+                  <div
+                    key={`end-${item.id}`}
+                    className={`multiday-end ${laneClass(item.lane)} ${spanFocus(item.id)}`}
+                    {...hoverProps(item.id)}
+                    data-span-id={item.id}
+                    data-lane={item.lane}
+                    style={{ '--lane': Math.max(0, item.outer) } as React.CSSProperties}
+                  >
+                    <span className="diamond" />
+                    <small>{[item.time, 'END'].filter(Boolean).join(' · ')}</small>
+                  </div>
+                ) : (
+                  <TimelineEntry
+                    key={item.entry.id}
+                    entry={item.entry}
+                    side={side}
+                    edit={edit}
+                    active={
+                      !!selected &&
+                      !album &&
+                      selected.id === (item.entry.stay?.stayId ?? item.entry.id)
+                    }
+                    onClick={() =>
+                      item.entry.stay?.role === 'checkout'
+                        ? onChoose(resolveStay(item.entry), item.entry.day)
+                        : onChoose(item.entry)
+                    }
+                    hover={item.entry.span_end ? hoverProps(item.entry.id) : {}}
+                  />
+                );
+              const block = g.block ? blocks?.find((b) => b.id === g.block) : undefined;
+              return block ? (
+                <BlockSheet
+                  key={`block-${block.id}`}
+                  block={block}
+                  day={d.date}
+                  onOpen={onOpenBlock}
                 >
-                  <span className="entry-node" />
-                  <span className="entry-content">{item.node}</span>
-                </div>
-              ) : item.kind === 'end' ? (
-                <div
-                  key={`end-${item.id}`}
-                  className={`multiday-end ${laneClass(item.lane)} ${spanFocus(item.id)}`}
-                  {...hoverProps(item.id)}
-                  data-span-id={item.id}
-                  data-lane={item.lane}
-                  style={{ '--lane': Math.max(0, item.outer) } as React.CSSProperties}
-                >
-                  <span className="diamond" />
-                  <small>{[item.time, 'END'].filter(Boolean).join(' · ')}</small>
-                </div>
+                  {g.items.map(render)}
+                </BlockSheet>
               ) : (
-                <TimelineEntry
-                  key={item.entry.id}
-                  entry={item.entry}
-                  side={side}
-                  edit={edit}
-                  active={
-                    !!selected &&
-                    !album &&
-                    selected.id === (item.entry.stay?.stayId ?? item.entry.id)
-                  }
-                  onClick={() =>
-                    item.entry.stay?.role === 'checkout'
-                      ? onChoose(resolveStay(item.entry), item.entry.day)
-                      : onChoose(item.entry)
-                  }
-                  hover={item.entry.span_end ? hoverProps(item.entry.id) : {}}
-                />
-              ),
-            )}
+                g.items.map(render)
+              );
+            })}
             {d.nights.map((n) => (
               <button
                 key={`night-${n.stayId}`}

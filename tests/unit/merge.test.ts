@@ -565,3 +565,72 @@ test('undoing a chosen place brings back the plan’s', () => {
   assert.deepEqual(entry('carmel-beach-visit', undone), entry('carmel-beach-visit'));
   assert.deepEqual(undone.placeOverrides.entries, {});
 });
+
+test('a block covers everything from its first attached entry to its last', () => {
+  const block = (key: string, field: string, value: string) =>
+    edit({ target: 'block', key, field, value });
+  const attach = (entryKey: string, b: string) =>
+    edit({ target: 'entry', key: String(ids[entryKey]), field: 'block', value: b });
+  const r = merge(
+    input([
+      block('bcoast1', 'title', 'Coast walk'),
+      block('bcoast1', 'emoji', '🥾'),
+      block('bcoast1', 'color', 'copper'),
+      attach('carmel-beach-visit', 'bcoast1'),
+      attach('lunch', 'bcoast1'),
+    ]),
+  );
+  const day = r.trip.days[0].entries;
+  const first = day.findIndex((e) => e.id === `i${ids['carmel-beach-visit']}`);
+  const last = day.findIndex((e) => e.id === `i${ids['lunch']}`);
+  assert.ok(first >= 0 && last > first);
+  // Everything between, attached or not (Point Lobos, loose photos), is in the block.
+  assert.ok(day.slice(first, last + 1).every((e) => e.block === 'bcoast1'));
+  assert.ok(day.slice(last + 1).every((e) => e.block === undefined));
+  const b = r.trip.blocks![0];
+  assert.deepEqual(
+    [b.title, b.emoji, b.color, b.days],
+    ['Coast walk', '🥾', '#b0734f', [r.trip.days[0].date]],
+  );
+  assert.equal(b.stops, day.slice(first, last + 1).filter((e) => e.type === 'place').length);
+  assert.equal(
+    b.photos,
+    day.slice(first, last + 1).reduce((n, e) => n + e.photos.length, 0),
+  );
+  assert.equal(plain.trip.blocks, undefined, 'no blocks, no change');
+});
+
+test('a block can span days; blocks never overlap; undoing removes it', () => {
+  const two = merge(
+    input([
+      edit({ target: 'block', key: 'btrek1', field: 'title', value: 'Trek' }),
+      edit({ target: 'entry', key: String(ids['lunch']), field: 'block', value: 'btrek1' }),
+      edit({ target: 'entry', key: String(ids['bixby-visit']), field: 'block', value: 'btrek1' }),
+      // A second block inside the first's range keeps out of it.
+      edit({ target: 'block', key: 'bother1', field: 'title', value: 'Other' }),
+      edit({ target: 'entry', key: String(ids['inn']), field: 'block', value: 'bother1' }),
+    ]),
+  );
+  const trek = two.trip.blocks!.find((b) => b.id === 'btrek1')!;
+  assert.deepEqual(trek.days, [two.trip.days[0].date, two.trip.days[1].date]);
+  assert.equal(
+    two.trip.blocks!.some((b) => b.id === 'bother1'),
+    false,
+    'inside another block: not drawn',
+  );
+  assert.equal(merge(input([])).trip.blocks, undefined);
+});
+
+test('a stop added from the Timeline can be attached to a block', () => {
+  const [a] = expected.suggestions;
+  const r = merge(
+    input([
+      edit({ target: 'suggestion', key: a, field: 'approved', value: true }),
+      edit({ target: 'suggestion', key: a, field: 'title', value: 'Sunset spot' }),
+      edit({ target: 'block', key: 'bsun1', field: 'title', value: 'Evening' }),
+      edit({ target: 'suggestion', key: a, field: 'block', value: 'bsun1' }),
+    ]),
+  );
+  const stop = entries(r).find((e) => e.title === 'Sunset spot')!;
+  assert.equal(stop.block, 'bsun1');
+});
